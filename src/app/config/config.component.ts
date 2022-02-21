@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ConfigService} from "./service/config.service";
 import {Router} from "@angular/router";
-import {AppType, ConfigState, DidDetails} from '../../server-old/system'
+import {ConfigState, AppType} from '../../server/config'
 
 @Component({
   selector: 'app-config',
@@ -31,17 +31,18 @@ export class ConfigComponent implements OnInit {
     return this._ariesTerminalCommand
   }
 
-  private did_details: DidDetails|undefined
-  get publicDID() {
-    return this.did_details?.did || ''
+  private _did: string|undefined
+  get did() {
+    return this._did
   }
-  get publicDIDVerkey() {
-    return this.did_details?.verkey || ''
+
+  private _verkey: string|undefined
+  get verkey() {
+    return this._verkey
   }
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly router: Router
+    private readonly configService: ConfigService
   ) { }
 
   ngOnInit(): void {
@@ -51,39 +52,36 @@ export class ConfigComponent implements OnInit {
   refresh() {
     this.configService.getConfigState().subscribe(state => {
       this._state = state
-      switch (state) {
-        case ConfigState.ARIES_NOT_CONNECTED:
-          this.getAriesTerminalCommand()
-          break
-        case ConfigState.PUBLIC_DID_NOT_REGISTERED:
-          this.generatePublicDID()
-          break
-        case ConfigState.COMPLETE:
-          this.router.navigateByUrl('/').then()
-      }
     })
   }
 
   submitInitialConfig() {
-    this.configService.uploadInitialConfig(this.appType, this.tailsServerUrl, this.index, this.appPort, this.masterServerDID, this.label)
-      .subscribe(() => this.refresh())
+    this.configService.uploadInitialConfig(
+      {tailsServerUrl: this.tailsServerUrl, index: this.index, appPort: this.appPort}
+    ).subscribe(value => {this._state = value.state})
   }
 
-  private getAriesTerminalCommand() {
+  getAriesTerminalCommand() {
     this.configService.getAriesTerminalCommand().subscribe(command => this._ariesTerminalCommand = command)
   }
 
   ariesIsRunning() {
-    this.configService.ariesIsRunning().subscribe(() => this.refresh())
+    this.configService.connectToAries('http://0.0.0.0:1000'+this.index.toString()).subscribe(() => this.refresh())
   }
 
-  private generatePublicDID() {
-    this.configService.generatePublicDID().subscribe(details => {
-      this.did_details = details
+  generateDID() {
+    this.configService.createPublicDID().subscribe(value => {
+      this._did = value.did
+      this._verkey = value.verkey
     })
   }
 
   submitPublicDID() {
-    this.configService.submitPublicDID(this.publicDID).subscribe(() => this.refresh())
+    this.configService.submitPublicDID(this.did as string).subscribe(() => this.refresh())
+  }
+
+  initialise() {
+    this.configService.initialise({appType: this.appType, label: this.label, masterDID: this.masterServerDID})
+      .subscribe()
   }
 }

@@ -19,7 +19,8 @@ export enum ConfigState {
   InitialConfigMissing,
   WaitingForAries,
   WaitingForPublicDID,
-  WaitingForInitialisation
+  WaitingForInitialisation,
+  Initialised
 }
 
 export interface InitialisationData {
@@ -104,5 +105,6 @@ export class Config {
     } else {
       //
     }
+    this.configState = ConfigState.Initialised
   }
 }

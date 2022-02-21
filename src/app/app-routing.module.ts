@@ -9,8 +9,8 @@ const routes: Routes = [
     component: ConfigComponent
   },
   {
-    path: '',
-    component: CredComponent
+    path: '**',
+    redirectTo: 'config'
   }
 ];
 

@@ -1,9 +1,5 @@
 <ng-container [ngSwitch]="state">
-  <ng-container *ngSwitchCase="states.NOT_CONFIGURED">
-    <mat-button-toggle-group [(ngModel)]="appType" >
-      <mat-button-toggle [value]="appTypes.USER">user</mat-button-toggle>
-      <mat-button-toggle [value]="appTypes.MASTER">master server</mat-button-toggle>
-    </mat-button-toggle-group>
+  <ng-container *ngSwitchCase="states.InitialConfigMissing">
     <mat-form-field>
       <mat-label>tails server url</mat-label>
       <input matInput [(ngModel)]="tailsServerUrl">
@@ -16,25 +12,37 @@
       <mat-label>app port</mat-label>
       <input matInput type="number" [(ngModel)]="appPort">
     </mat-form-field>
-    <mat-form-field *ngIf="appType === appTypes.USER">
-      <mat-label>master server DID</mat-label>
-      <input matInput [(ngModel)]="masterServerDID">
-    </mat-form-field>
-    <mat-form-field *ngIf="appType === appTypes.USER">
-      <mat-label>label</mat-label>
-      <input matInput [(ngModel)]="label">
-    </mat-form-field>
     <button mat-button (click)="submitInitialConfig()" >Submit</button>
   </ng-container>
 
-  <ng-container *ngSwitchCase="states.ARIES_NOT_CONNECTED">
+  <ng-container *ngSwitchCase="states.WaitingForAries">
     <p [innerText]="ariesTerminalCommand"></p>
+    <button mat-button (click)="getAriesTerminalCommand()">Get aries command</button>
     <button mat-button (click)="ariesIsRunning()">Done</button>
   </ng-container>
 
-  <ng-container *ngSwitchCase="states.PUBLIC_DID_NOT_REGISTERED">
-    <p [innerText]="publicDID"></p>
-    <p [innerText]="publicDIDVerkey"></p>
+  <ng-container *ngSwitchCase="states.WaitingForPublicDID">
+    <p [innerText]="did"></p>
+    <p [innerText]="verkey"></p>
+    <button mat-button (click)="generateDID()">Create DID</button>
     <button mat-button (click)="submitPublicDID()">Done</button>
   </ng-container>
+
+  <ng-container *ngSwitchCase="states.WaitingForInitialisation">
+        <mat-button-toggle-group [(ngModel)]="appType" >
+          <mat-button-toggle [value]="appTypes.USER">user</mat-button-toggle>
+          <mat-button-toggle [value]="appTypes.MASTER">master server</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-form-field *ngIf="appType === appTypes.USER">
+          <mat-label>master server DID</mat-label>
+          <input matInput [(ngModel)]="masterServerDID">
+        </mat-form-field>
+        <mat-form-field *ngIf="appType === appTypes.USER">
+          <mat-label>label</mat-label>
+          <input matInput [(ngModel)]="label">
+        </mat-form-field>
+    <button mat-button (click)="initialise()">Submit</button>
+  </ng-container>
+
 </ng-container>
