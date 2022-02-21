@@ -16,6 +16,8 @@ import {router as apiRouter} from './src/server/api'
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
+  server.use(bodyParser.json(), bodyParser.urlencoded({extended: true}))
+
   const distFolder = join(process.cwd(), 'dist/e-ijaza/browser');
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
@@ -27,11 +29,9 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', distFolder);
 
-  const jsonBodyParser = bodyParser.json()
-
   // Express Rest API endpoints
-  server.use('/api', jsonBodyParser, apiRouter);
-  server.use('/webhook', jsonBodyParser, webhookRouter)
+  server.use('/api', apiRouter);
+  server.use('/webhook', webhookRouter)
 
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {

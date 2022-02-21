@@ -1,0 +1,12 @@
+<p>Public DID: {{publicDid}}</p>
+<div></div>
+<mat-form-field>
+  <input matInput [(ngModel)]="issueDID">
+</mat-form-field>
+<button mat-button (click)="issueCredential()">Submit</button>
+<div></div>
+<button mat-button (click)="fetchCredentials()" >Fetch credentials</button>
+<div *ngFor="let x of credentials">
+  <p>{{x}}</p>
+  <button mat-button (click)="verifyCred(x)">verify</button>
+</div>

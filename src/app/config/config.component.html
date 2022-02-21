@@ -1,0 +1,40 @@
+<ng-container [ngSwitch]="state">
+  <ng-container *ngSwitchCase="states.NOT_CONFIGURED">
+    <mat-button-toggle-group [(ngModel)]="appType" >
+      <mat-button-toggle [value]="appTypes.USER">user</mat-button-toggle>
+      <mat-button-toggle [value]="appTypes.MASTER">master server</mat-button-toggle>
+    </mat-button-toggle-group>
+    <mat-form-field>
+      <mat-label>tails server url</mat-label>
+      <input matInput [(ngModel)]="tailsServerUrl">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>index</mat-label>
+      <input matInput type="number" [(ngModel)]="index">
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>app port</mat-label>
+      <input matInput type="number" [(ngModel)]="appPort">
+    </mat-form-field>
+    <mat-form-field *ngIf="appType === appTypes.USER">
+      <mat-label>master server DID</mat-label>
+      <input matInput [(ngModel)]="masterServerDID">
+    </mat-form-field>
+    <mat-form-field *ngIf="appType === appTypes.USER">
+      <mat-label>label</mat-label>
+      <input matInput [(ngModel)]="label">
+    </mat-form-field>
+    <button mat-button (click)="submitInitialConfig()" >Submit</button>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="states.ARIES_NOT_CONNECTED">
+    <p [innerText]="ariesTerminalCommand"></p>
+    <button mat-button (click)="ariesIsRunning()">Done</button>
+  </ng-container>
+
+  <ng-container *ngSwitchCase="states.PUBLIC_DID_NOT_REGISTERED">
+    <p [innerText]="publicDID"></p>
+    <p [innerText]="publicDIDVerkey"></p>
+    <button mat-button (click)="submitPublicDID()">Done</button>
+  </ng-container>
+</ng-container>

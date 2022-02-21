@@ -1,7 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import {ConfigComponent} from "./config/config.component";
+import {CredComponent} from "./cred/cred.component";
 
-const routes: Routes = [];
+const routes: Routes = [
+  {
+    path: 'config',
+    component: ConfigComponent
+  },
+  {
+    path: '',
+    component: CredComponent
+  }
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
