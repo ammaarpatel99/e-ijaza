@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import {ConfigState} from '../../../server/system'
+import {ConfigState} from '../../../server-old/system'
 
 @Injectable({
   providedIn: 'root'

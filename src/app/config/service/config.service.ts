@@ -5,7 +5,7 @@ import {
   InitialConfig,
   ConfigState,
   DidDetails
-} from '../../../server/system'
+} from '../../../server-old/system'
 import {map} from "rxjs/operators";
 
 @Injectable({
