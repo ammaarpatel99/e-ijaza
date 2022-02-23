@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ConfigService} from "./service/config.service";
-import {Router} from "@angular/router";
-import {ConfigState, AppType} from '../../server/config'
+import {ConfigState, AppType} from '@types'
 
 @Component({
   selector: 'app-config',

@@ -10,8 +10,8 @@ import { existsSync } from 'fs';
 
 import * as bodyParser from 'body-parser'
 
-import {router as apiRouter} from './src/server/api'
-// import {router as webhookRouter} from './src/server-old/webhook'
+import {router as apiRouter} from '@server/api'
+import {router as webhookRouter} from '@server/webhook'
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -31,7 +31,7 @@ export function app(): express.Express {
 
   // Express Rest API endpoints
   server.use('/api', apiRouter);
-  // server.use('/webhook', webhookRouter)
+  server.use('/webhook', webhookRouter)
 
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {

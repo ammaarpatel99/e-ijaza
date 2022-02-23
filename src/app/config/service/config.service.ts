@@ -2,11 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {map} from "rxjs/operators";
 import {
-  AppType,
   ConfigState,
   InitialisationData,
   AriesCommandData
-} from '../../../server/config'
+} from '@types'
 
 @Injectable({
   providedIn: 'root'

@@ -2,7 +2,7 @@ import {
   getSchemaID,
   createSchema,
   getCredDefID, createCredDef
-} from '../aries-wrapper'
+} from '@server/aries-wrapper'
 
 export class Schema {
   private createSchemaFlag = true

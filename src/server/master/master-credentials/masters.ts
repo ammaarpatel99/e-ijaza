@@ -1,38 +1,11 @@
-import {Schema} from "../../schemas/schema";
-import {HeldCredential, getHeldCredentials} from '../../aries-wrapper'
 import {Master} from "./master";
-import {deleteCredential} from "../../aries-wrapper/delete-credential";
+import {deleteCredential, getHeldCredentials} from "@server/aries-wrapper";
+import {
+  HeldCredential,
+  MastersInternalSchema
+} from "@types";
+import {internalSchema} from "@server/schemas";
 
-type DID = string
-type Subject = string
-type CredRef = string
-
-enum Action {
-  ADD = 'add',
-  REMOVE = 'remove'
-}
-
-interface InternalSchema {
-  credentials: [DID, [Subject, CredRef][]][]
-}
-
-interface PublicSchema {
-  credentials: [DID, Subject[]][]
-}
-
-interface ProposalSchema {
-  did: DID
-  subject: Subject
-  action: Action
-  votes: [DID, boolean | CredRef][]
-}
-
-interface VoteSchema {
-  did: DID
-  subject: Subject
-  action: Action
-  voterDID: DID
-}
 
 export class Masters {
   private static _instance: Masters|undefined
@@ -42,16 +15,16 @@ export class Masters {
   }
   private constructor() { }
 
-  readonly internalSchema = new Schema('InternalMasterCredentials', ['credentials'], true)
-  readonly publicSchema = new Schema('MasterCredentials', ['credentials'], true)
-  readonly proposalSchema = new Schema('MasterCredentialProposal', ['credentials'], true)
-  readonly voteSchema = new Schema('MasterCredentialVote', ['credentials'], true)
   private masters = new Map<string, Master>()
   private internalCredID: string|undefined
 
+  getMaster(did: string) {
+    return this.masters.get(did)
+  }
+
   async loadCredentials() {
     const creds = (await getHeldCredentials())
-      .filter(cred => cred.schema_id === this.internalSchema.getSchemaID()) as HeldCredential<InternalSchema>[]
+      .filter(cred => cred.schema_id === internalSchema.getSchemaID()) as HeldCredential<MastersInternalSchema>[]
     if (creds.length === 0) {
       await this.updateInternalCredential()
     }
@@ -62,6 +35,6 @@ export class Masters {
     if (this.internalCredID !== undefined) {
       await deleteCredential(this.internalCredID)
     }
-    // TODO: issue credentia
+    // TODO: issue credential
   }
 }

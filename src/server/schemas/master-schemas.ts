@@ -1,11 +1,18 @@
 import {Schema} from "./schema";
-import {Masters} from '../master/master-credentials/masters'
+import {
+  teachingSchema,
+  internalSchema,
+  proposalSchema,
+  publicSchema,
+  voteSchema
+} from './index'
 
 const schemas: Schema[] = [
-  Masters.instance.proposalSchema,
-  Masters.instance.internalSchema,
-  Masters.instance.voteSchema,
-  Masters.instance.publicSchema
+  proposalSchema,
+  internalSchema,
+  voteSchema,
+  publicSchema,
+  teachingSchema
 ]
 
 export async function initialiseMasterSchemas() {

@@ -1,6 +1,5 @@
 import {
-  AriesCommand,
-  AriesCommandData
+  AriesCommand
 } from './aries-command'
 import {
   setAriesAgentUrl,
@@ -8,26 +7,18 @@ import {
   generatedDID,
   getPublicDID,
   setPublicDID
-} from '../aries-wrapper'
-import {initialiseMasterSchemas} from "../schemas/master-schemas";
+} from '@server/aries-wrapper'
+import {
+  initialiseMasterSchemas
+} from "@server/schemas";
+import {
+  AppType,
+  ConfigState,
+  InitialisationData,
+  AriesCommandData
+} from "@types";
 
-export enum AppType {
-  USER = 'user',
-  MASTER = 'master'
-}
-export enum ConfigState {
-  InitialConfigMissing,
-  WaitingForAries,
-  WaitingForPublicDID,
-  WaitingForInitialisation,
-  Initialised
-}
 
-export interface InitialisationData {
-  appType: AppType
-  masterDID?: string
-  label?: string
-}
 
 export class Config {
   private static _instance: Config|undefined

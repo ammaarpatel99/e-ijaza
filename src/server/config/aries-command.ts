@@ -1,13 +1,4 @@
-export interface AriesCommandData {
-  inboundPort: number
-  adminPort: number
-  advertisedEndpoint: string
-  genesisUrl: string
-  walletName: string
-  walletKey: string
-  tailsServerUrl: string
-  webhookURL: string
-}
+import {AriesCommandData} from '@types'
 
 export class AriesCommand {
   constructor(private readonly data: Readonly<AriesCommandData>) { }
@@ -30,7 +21,7 @@ export class AriesCommand {
       `--auto-respond-messages ` +
       `--auto-respond-credential-offer ` +
       `--auto-respond-credential-request ` +
-      `--auto-respond-presentation-proposal ` +
+      `--auto-verify-presentation ` +
       `--auto-store-credential ` +
       `--tails-server-base-url ${this.data.tailsServerUrl} ` +
       `--notify-revocation ` +
@@ -38,6 +29,7 @@ export class AriesCommand {
       `--public-invites ` +
       `--auto-provision ` +
       `--auto-accept-intro-invitation-requests ` +
-      `--webhook-url ${this.data.webhookURL}`
+      `--webhook-url ${this.data.webhookURL} ` +
+      `--auto-ping-connection`
   }
 }
