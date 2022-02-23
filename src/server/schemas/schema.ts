@@ -1,7 +1,8 @@
 import {
   getSchemaID,
   createSchema,
-  getCredDefID, createCredDef
+  getCredDefID,
+  createCredDef
 } from '@server/aries-wrapper'
 
 export class Schema {

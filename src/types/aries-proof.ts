@@ -95,6 +95,24 @@ export interface GetProofRes {
   state: 'proposal_sent'|'proposal_received'|'request_sent'|'request_received'|'presentation_sent'|'presentation_received'|'verified'|'presentation_acked'
   thread_id: string
   verified: 'true'|'false'
+  presentation_exchange_id: string
+  presentation: {
+    identifier: [{
+      cred_def_id: string
+      rev_reg_id: string
+      schema_id: string
+    }],
+    requested_proof: {
+      self_attested_attrs: {
+        [key: string]: string
+      }
+      revealed_attrs: {
+        [key: string]: {
+          raw: string
+        }
+      }
+    }
+  }
   presentation_proposal_dict: {
     comment: string
     presentation_proposal: {

@@ -9,7 +9,8 @@ import {
   setPublicDID
 } from '@server/aries-wrapper'
 import {
-  initialiseMasterSchemas
+  initialiseMasterSchemas,
+  initialiseUserSchemas
 } from "@server/schemas";
 import {
   AppType,
@@ -94,7 +95,7 @@ export class Config {
     if (this.getAppType() === AppType.MASTER) {
       await initialiseMasterSchemas()
     } else {
-      //
+      await initialiseUserSchemas()
     }
     this.configState = ConfigState.Initialised
   }

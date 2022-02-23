@@ -9,6 +9,7 @@ export async function createSchema(name: string, attributes: string[]) {
     attributes,
     schema_version: '1.0'
   }
-  const {data} = await axios.post<CreateSchemaRes>(`${ariesURL}/schemas`, input)
-  return data.sent.schema_id
+  const {data} = await axios.post(`${ariesURL}/schemas`, input)
+  console.log(data)
+  return data.schema_id
 }

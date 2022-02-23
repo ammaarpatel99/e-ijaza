@@ -8,6 +8,6 @@ export async function createCredDef(schemaID: string, tag: string): Promise<stri
     tag,
     schema_id: schemaID
   }
-  const {data} = await axios.post<CreateCredDefRes>(`${ariesURL}/credential-definitions`, input)
-  return data.sent.credential_definition_id
+  const {data} = await axios.post(`${ariesURL}/credential-definitions`, input)
+  return data.credential_definition_id
 }

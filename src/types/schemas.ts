@@ -8,12 +8,25 @@ export enum ProposalAction {
   REMOVE = 'remove'
 }
 
+export type SchemaToJSON<Schema> = {
+  [key in keyof Schema]: string
+}
+
 export interface MastersInternalSchema {
-  credentials: [DID, [Subject, CredRef][]][]
+  credentials: {
+    [key: DID]: {
+      subject: string,
+      cred_ex_id: string
+    }[]
+  }
 }
 
 export interface PublicSchema {
-  credentials: [DID, Subject[]][]
+  credentials: {
+    [key: DID]: {
+      subject: string
+    }[]
+  }
 }
 
 export interface ProposalSchema {
