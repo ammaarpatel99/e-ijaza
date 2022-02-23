@@ -30,6 +30,7 @@ export class AriesCommand {
       `--auto-provision ` +
       `--auto-accept-intro-invitation-requests ` +
       `--webhook-url ${this.data.webhookURL} ` +
-      `--auto-ping-connection`
+      `--auto-ping-connection ` +
+      `--preserve-exchange-records`
   }
 }
