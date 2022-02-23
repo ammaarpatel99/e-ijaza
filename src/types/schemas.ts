@@ -16,7 +16,8 @@ export interface MastersInternalSchema {
   credentials: {
     [key: DID]: {
       subject: string,
-      cred_ex_id: string
+      cred_ex_id: string,
+      connection_id: string
     }[]
   }
 }
