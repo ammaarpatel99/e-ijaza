@@ -38,3 +38,26 @@ export interface IssuedCredential<Schema> {
 export interface IssuedCredentials<Schema> {
   results: IssuedCredential<Schema>[]
 }
+
+export interface RequestCredentialData<Schema> {
+  auto_remove?: boolean
+  comment?: string
+  connection_id: string
+  cred_def_id?: string
+  issuer_did?: string
+  schema_id?: string
+  schema_issuer_did?: string
+  schema_name?: string
+  schema_version?: string
+  trace?: boolean
+  credential_proposal: {
+    attributes: Attribute<Schema>[]
+  }
+}
+
+export interface RequestCredentialRes {
+  credential_exchange_id: string
+  credential_id: string
+}
+
+export type OfferCredentialData<Schema> = Exclude<RequestCredentialData<Schema>, 'auto_remove'|'connection_id'|'trace'>
