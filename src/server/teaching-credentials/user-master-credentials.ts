@@ -6,7 +6,7 @@ import {
   requestCredentialFromOffer, requestProof, rejectProof, presentProof, issueCredential
 } from "@server/aries-wrapper";
 import {MastersPublicSchema} from "@project-types";
-import {mastersInternalSchema, mastersPublicSchema, teachingSchema} from "@server/schemas";
+import {mastersPublicSchema, teachingSchema} from "@server/schemas";
 import {getCredentialBySchema, getCredentialsBySchema} from "@server/aries-wrapper/utils";
 import {Config} from "@server/config";
 import {WebhookMonitor} from "@server/webhook/webhook-monitor";
@@ -82,13 +82,13 @@ export class UserMasterCredentials {
       })
 
     this.masters.clear()
-    Object.entries(JSON.parse(cred.credential!.attrs!['masters']) as MastersPublicSchema['credentials'])
+    Object.entries(JSON.parse(cred.credential!.attrs!['credentials']) as MastersPublicSchema['credentials'])
       .forEach(data => this.masters.set(...data))
   }
 
   private async deleteHeldDataCredentials() {
     await Promise.all((await getHeldCredentials({})).results!
-      .filter(cred => cred.schema_id === mastersInternalSchema.schemaID)
+      .filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
       .map(cred => deleteCredential({credential_id: cred.referent!})))
   }
 

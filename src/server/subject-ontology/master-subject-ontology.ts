@@ -172,8 +172,10 @@ export class MasterSubjectOntology {
   }
 
   async issueSubjectDataCredential(data: V10CredentialExchange) {
-    const subjectName = data.credential!.attrs!['subject']
-    if (this.subjectOntology.hasSubject(subjectName)) {
+    const subjectName = data.credential_proposal_dict?.credential_proposal?.attributes
+      .filter(attr => attr.name === 'subject')
+      .map(attr => attr.value).shift()
+    if (!subjectName || !this.subjectOntology.hasSubject(subjectName)) {
       throw new Error(`can't issue credential for non-existent subject`)
     }
     const subjectData: SubjectSchema['subject'] = this.subjectOntology.getSubjectData(subjectName)!

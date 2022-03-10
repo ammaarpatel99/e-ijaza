@@ -67,7 +67,7 @@ async function respondToVoteOnCredentialProposal(data: V10PresentationExchange) 
 }
 
 async function issueCredForSubjects(data: V10CredentialExchange) {
-  if (data.schema_id === subjectsSchema.schemaID && data.state === 'proposal_received') {
+  if (data.credential_proposal_dict?.schema_id === subjectsSchema.schemaID && data.state === 'proposal_received') {
     await MasterSubjectOntology.instance.issueSubjectCredential(data.credential_exchange_id!)
     return true
   }
@@ -75,7 +75,7 @@ async function issueCredForSubjects(data: V10CredentialExchange) {
 }
 
 async function issueCredForSubjectData(data: V10CredentialExchange) {
-  if (data.schema_id === subjectSchema.schemaID && data.state === 'proposal_received') {
+  if (data.credential_proposal_dict?.schema_id === subjectSchema.schemaID && data.state === 'proposal_received') {
     await MasterSubjectOntology.instance.issueSubjectDataCredential(data)
     return true
   }
@@ -83,7 +83,7 @@ async function issueCredForSubjectData(data: V10CredentialExchange) {
 }
 
 async function issueCredForMasterCreds(data: V10CredentialExchange) {
-  if (data.schema_id === mastersPublicSchema.schemaID && data.state === 'proposal_received') {
+  if (data.credential_proposal_dict?.schema_id === mastersPublicSchema.schemaID && data.state === 'proposal_received') {
     await MasterCredentials.instance.issueDataCredential(data.credential_exchange_id!)
     return true
   }
@@ -91,7 +91,7 @@ async function issueCredForMasterCreds(data: V10CredentialExchange) {
 }
 
 async function issueOfferedCred(data: V10CredentialExchange) {
-  if (data.state === 'request_received' && !!data.credential_offer) {
+  if (data.state === 'request_received' && !!data.credential_offer && data.auto_issue === false) {
     await issueCredentialInExchange({cred_ex_id: data.credential_exchange_id!}, {})
     return true
   }
