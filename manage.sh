@@ -14,7 +14,7 @@ then
   ~/indy-tails-server/docker/manage "stop"
 fi
 
-if [ "$1" = "rm" ] || [ "$1" = "restart" ]
+if [ "$1" = "remove" ] || [ "$1" = "restart" ]
 then
   echo "Removing VON Network"
   ~/von-network/manage "rm"
@@ -30,7 +30,7 @@ then
   ~/indy-tails-server/docker/manage "start" "--logs"
 fi
 
-if [ "$1" != "build" ] && [ "$1" != "stop" ] && [ "$1" != "start" ] && [ "$1" != "restart" ] && [ "$1" != "rm" ]
+if [ "$1" != "build" ] && [ "$1" != "stop" ] && [ "$1" != "start" ] && [ "$1" != "restart" ] && [ "$1" != "remove" ]
 then
-  echo "Usage: $0 build|start|stop|rm|restart"
+  echo "Usage: $0 build|start|stop|remove|restart"
 fi
