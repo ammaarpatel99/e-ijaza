@@ -56,7 +56,7 @@ export class Schema {
     if (credID) {
       this.credID = credID
     } else {
-      this.credID = await createCredentialDefinition({}, {schema_id: this.schemaID, tag: this.name})
+      this.credID = await createCredentialDefinition({}, {schema_id: this.schemaID, tag: this.name, support_revocation: true})
     }
   }
 }

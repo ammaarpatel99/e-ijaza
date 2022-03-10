@@ -4,6 +4,7 @@ import {SubjectProposalType, SubjectVoteSchema} from "@project-types";
 import {Config} from "@server/config";
 import {proposeProof} from "@server/aries-wrapper";
 import {UserMasterCredentials} from "@server/teaching-credentials";
+import {V10CredentialExchange} from "@project-types/aries-types";
 
 interface VoteData {
   cred_id: string

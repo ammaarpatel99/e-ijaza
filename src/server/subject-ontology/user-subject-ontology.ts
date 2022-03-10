@@ -40,11 +40,12 @@ export class UserSubjectOntology {
     } else {
       await this.getSubjects()
     }
-    this.subjectOntology.getSubjects().map(subject => this.loadSubject(subject))
+    await Promise.all(this.subjectOntology.getSubjects().map(subject => this.loadSubject(subject)))
     this.subjectOntology.flushSearches()
   }
 
   async getSubjects() {
+    this.subjectOntology.flushSearches()
     await this.deleteHeldSubjectsCredentials()
     const connectionID = await connectViaPublicDID({their_public_did: Config.instance.getMasterDID()})
 
@@ -71,6 +72,7 @@ export class UserSubjectOntology {
 
     const subjects: SubjectsSchema['subjects'] = JSON.parse(cred.credential!.attrs!['subjects'])
     this.subjectOntology.setSubjects(...subjects)
+    this.subjectOntology.flushSearches()
   }
 
   private async deleteHeldSubjectsCredentials() {
@@ -132,6 +134,13 @@ export class UserSubjectOntology {
       .map(cred => deleteCredential({credential_id: cred.referent!}))
     if (promises) await Promise.all(promises)
   }
+
+  async getAllSubjectsData() {
+    this.subjectOntology.flushSearches()
+    await Promise.all(this.subjectOntology.getSubjects().map(subject => this.getSubjectData(subject)))
+    this.subjectOntology.flushSearches()
+  }
+
 
   async reachFromCredentials(subject: string) {
     if (!(this.credentialsSearchKey && this.subjectOntology.hasSearchKey(this.credentialsSearchKey))) {

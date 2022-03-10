@@ -233,4 +233,11 @@ export class UserMasterCredentials {
       }
     })
   }
+
+  receiveCredential(cred: V10CredentialExchange) {
+    const masterCred = cred.credential?.cred_def_id === this.masterTeachingCredID
+    const subject = cred.credential?.attrs!['subject']
+    if (masterCred) this._masterCredentials.set(subject!, cred.credential_id!)
+    this._credentials.set(subject!, cred.credential_id!)
+  }
 }

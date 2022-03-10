@@ -74,10 +74,11 @@ export class MasterSubjectOntology {
       .filter(cred => cred.schema_id === subjectsSchema.schemaID)
       .map(async cred => {
         await revokeCredential({
-          cred_ex_id: cred.credential_exchange_id!,
           connection_id: cred.connection_id!,
           publish: true,
-          notify: true
+          notify: true,
+          cred_rev_id: cred.revocation_id,
+          rev_reg_id: cred.revoc_reg_id
         })
         await deleteIssuedCredential({cred_ex_id: cred.credential_exchange_id!})
       })
@@ -138,10 +139,11 @@ export class MasterSubjectOntology {
       .filter(cred => JSON.parse(cred.credential!.attrs!['subject']).name === subject)
       .map(async cred => {
         await revokeCredential({
-          cred_ex_id: cred.credential_exchange_id!,
           connection_id: cred.connection_id!,
           publish: true,
-          notify: true
+          notify: true,
+          cred_rev_id: cred.revocation_id,
+          rev_reg_id: cred.revoc_reg_id
         })
         await deleteIssuedCredential({cred_ex_id: cred.credential_exchange_id!})
       })

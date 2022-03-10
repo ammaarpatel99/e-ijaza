@@ -1,5 +1,5 @@
 import {MasterProposal} from "./master-proposal";
-import {MastersInternalSchema, TeachingSchema} from "@project-types";
+import {MastersInternalSchema} from "@project-types";
 import {issueCredential} from "@server/aries-wrapper/issue-credentials/issue-credential";
 import {teachingSchema} from "@server/schemas";
 import {connectViaPublicDID} from "@server/aries-wrapper";
@@ -43,8 +43,8 @@ export class Master {
     })
     this.subjectsToCredExID.set(subject, {
       subject,
-      cred_ex_id: res.credential_exchange_id,
-      connection_id
+      connection_id,
+      cred_ex_id
     })
     await Masters.instance.updateInternalCredential()
   }

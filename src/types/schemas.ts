@@ -26,7 +26,8 @@ export interface SubjectProposalSchema {
     action: ProposalAction
     votes: {
       [DID: string]: {
-        cred_ex_id: string
+        cred_rev_id: string
+        rev_reg_id: string
         connection_id: string
       } | boolean
     }
@@ -59,7 +60,8 @@ export interface MastersInternalSchema {
   credentials: {
     [DID: string]: {
       subject: string,
-      cred_ex_id: string,
+      cred_rev_id: string
+      rev_reg_id: string
       connection_id: string
     }[]
   }
@@ -78,7 +80,8 @@ export interface MastersProposalSchema {
     action: ProposalAction
     votes: {
       [DID: string]: {
-        cred_ex_id: string
+        cred_rev_id: string
+        rev_reg_id: string
         connection_id: string
       } | boolean
     }

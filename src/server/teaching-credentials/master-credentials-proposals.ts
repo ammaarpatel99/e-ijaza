@@ -10,7 +10,7 @@ import {
   issueCredential, rejectProof, requestProofFromProposal,
   revokeCredential
 } from "@server/aries-wrapper";
-import {masterProposalSchema, masterVoteSchema, subjectVoteSchema, teachingSchema} from "@server/schemas";
+import {masterProposalSchema, masterVoteSchema, teachingSchema} from "@server/schemas";
 import {connectToSelf} from "@server/utils";
 import {MasterCredentials} from "@server/teaching-credentials/master-credentials";
 import {MasterSubjectOntology, MasterSubjectProposals} from "@server/subject-ontology";
@@ -149,7 +149,7 @@ export class MasterCredentialsProposals {
         }]
       }
     })
-    proposal.votes[did] = {cred_ex_id: res.credential_exchange_id!, connection_id: connectionID}
+    proposal.votes[did] = {connection_id: connectionID, cred_rev_id: res.revocation_id!, rev_reg_id: res.revoc_reg_id!}
     this.proposals.set(MasterCredentialsProposals.proposalToID(proposal), proposal)
   }
 
@@ -158,10 +158,11 @@ export class MasterCredentialsProposals {
     if (data === undefined) throw new Error(`Revoking non-existent vote credential`)
     if (typeof data !== 'boolean') {
       await revokeCredential({
-        cred_ex_id: data.cred_ex_id,
         connection_id: data.connection_id,
         notify: true,
-        publish: true
+        publish: true,
+        rev_reg_id: data.rev_reg_id,
+        cred_rev_id: data.cred_rev_id
       })
     }
     delete proposal.votes[did]
@@ -289,7 +290,8 @@ export class MasterCredentialsProposals {
     await revokeCredential({
       publish: true, notify: true,
       connection_id: currentVote.connection_id,
-      cred_ex_id: currentVote.cred_ex_id
+      cred_rev_id: currentVote.cred_rev_id,
+      rev_reg_id: currentVote.rev_reg_id
     })
     await this.saveProposal(proposalData)
     await this.completeProposalIfReady(proposalData)

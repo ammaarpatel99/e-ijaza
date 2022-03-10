@@ -151,7 +151,7 @@ export class MasterSubjectProposals {
         }]
       }
     })
-    proposal.votes[did] = {cred_ex_id: res.credential_exchange_id!, connection_id: connectionID}
+    proposal.votes[did] = {connection_id: connectionID, cred_rev_id: res.revocation_id!, rev_reg_id: res.revoc_reg_id!}
     this.proposals.set(MasterSubjectProposals.proposalToID(proposal), proposal)
   }
 
@@ -160,10 +160,11 @@ export class MasterSubjectProposals {
     if (data === undefined) throw new Error(`Revoking non-existent vote credential`)
     if (typeof data !== 'boolean') {
       await revokeCredential({
-        cred_ex_id: data.cred_ex_id,
         connection_id: data.connection_id,
         notify: true,
-        publish: true
+        publish: true,
+        cred_rev_id: data.cred_rev_id,
+        rev_reg_id: data.rev_reg_id
       })
     }
     delete proposal.votes[did]
@@ -313,7 +314,8 @@ export class MasterSubjectProposals {
     await revokeCredential({
       publish: true, notify: true,
       connection_id: currentVote.connection_id,
-      cred_ex_id: currentVote.cred_ex_id
+      cred_rev_id: currentVote.cred_rev_id,
+      rev_reg_id: currentVote.rev_reg_id
     })
     await this.saveProposal(proposalData)
     await this.completeProposalIfReady(proposalData)

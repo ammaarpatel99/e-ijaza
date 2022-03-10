@@ -74,10 +74,11 @@ export class MasterCredentials {
       .filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
       .map(async cred => {
         await revokeCredential({
-          cred_ex_id: cred.credential_exchange_id!,
           connection_id: cred.connection_id!,
           publish: true,
-          notify: true
+          notify: true,
+          cred_rev_id: cred.revocation_id,
+          rev_reg_id: cred.revoc_reg_id
         })
         await deleteIssuedCredential({cred_ex_id: cred.credential_exchange_id!})
       })
@@ -124,7 +125,8 @@ export class MasterCredentials {
       publish: true,
       notify: true,
       connection_id: credData.connection_id,
-      cred_ex_id: credData.cred_ex_id
+      cred_rev_id: credData.cred_rev_id,
+      rev_reg_id: credData.rev_reg_id
     })
   }
 
@@ -151,8 +153,9 @@ export class MasterCredentials {
     }
     if (data.map(x => x.subject).includes(subject)) throw new Error(``)
     const res = await this.issueCredential(did, subject)
-    data.push({subject, cred_ex_id: res.credential_exchange_id!, connection_id: res.connection_id!})
+    data.push({subject, connection_id: res.connection_id!, rev_reg_id: res.revoc_reg_id!, cred_rev_id: res.revocation_id!})
     this._credentials.set(did, data)
+    await this.saveDataCredentials()
     await MasterSubjectProposals.instance.updateVoters([{did, subjects: data.map(x => x.subject)}])
   }
 
@@ -166,13 +169,13 @@ export class MasterCredentials {
     if (!toRemove) throw new Error(``)
     await this.revokeCredential(toRemove)
     const remaining = data.filter(x => x !== toRemove)
-    await MasterSubjectProposals.instance.updateVoters([{did, subjects: remaining.map(x => x.subject)}])
     if (remaining.length > 0) {
       this._credentials.set(did, remaining)
-      return false
     } else {
       this._credentials.delete(did)
-      return true
     }
+    await this.saveDataCredentials()
+    await MasterSubjectProposals.instance.updateVoters([{did, subjects: remaining.map(x => x.subject)}])
+    return remaining.length > 0
   }
 }

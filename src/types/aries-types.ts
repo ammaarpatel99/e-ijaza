@@ -90,6 +90,8 @@ export interface V10CredentialExchange {
   auto_remove?: boolean
   connection_id?: string
   created_at?: string
+  revoc_reg_id?: string
+  revocation_id?: string
   credential?: {
     cred_def_id?: string
     cred_rev_id?: string

@@ -6,5 +6,5 @@ export async function deleteIssuedCredential(
   pathParams: paths['/issue-credential/records/{cred_ex_id}']['delete']['parameters']['path']
 ) {
   const ariesURL = getAriesAgentUrl()
-  await axios.delete(`${ariesURL}/issue-credential/records${pathParams.cred_ex_id}`)
+  await axios.delete(`${ariesURL}/issue-credential/records/${pathParams.cred_ex_id}`)
 }
