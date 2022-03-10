@@ -16,6 +16,7 @@ import {
 } from "@project-types";
 import {V10CredentialExchange} from "@project-types/aries-types";
 import {getCredentialBySchema} from "@server/aries-wrapper/utils";
+import {WebhookMonitor} from "@server/webhook";
 
 
 export class MasterSubjectOntology {
@@ -47,7 +48,7 @@ export class MasterSubjectOntology {
     await Promise.all([this.revokeSubjectsCredentials(), this.deleteHeldSubjectsCredentials()])
     const selfConnectControls = await connectToSelf()
     const data: SubjectsSchema['subjects'] = this.subjectOntology.getSubjects()
-    await issueCredential({
+    const {credential_exchange_id} = await issueCredential({
       cred_def_id: subjectsSchema.credID,
       connection_id: selfConnectControls.connectionID,
       auto_remove: true,
@@ -58,7 +59,14 @@ export class MasterSubjectOntology {
         }]
       }
     })
-    await selfConnectControls.close()
+    await WebhookMonitor.instance.monitorCredentialExchange<void, any>(
+      credential_exchange_id!,
+      async (result, resolve, reject) => {
+        if (result.state === 'credential_acked') {
+          await selfConnectControls.close()
+          resolve()
+        }
+      })
   }
 
   private async revokeSubjectsCredentials() {
@@ -103,7 +111,7 @@ export class MasterSubjectOntology {
     if (!subjectData) throw new Error(`Trying to save non-existent subject`)
     await Promise.all([this.revokeSubjectDataCredentials(subject), this.deleteHeldSubjectDataCredentials(subject)])
     const selfConnectControls = await connectToSelf()
-    await issueCredential({
+    const {credential_exchange_id} = await issueCredential({
       connection_id: selfConnectControls.connectionID,
       cred_def_id: subjectSchema.credID,
       auto_remove: true,
@@ -114,7 +122,14 @@ export class MasterSubjectOntology {
         }]
       }
     })
-    await selfConnectControls.close()
+    await WebhookMonitor.instance.monitorCredentialExchange<void, any>(
+      credential_exchange_id!,
+      async (result, resolve, reject) => {
+        if (result.state === 'credential_acked') {
+          await selfConnectControls.close()
+          resolve()
+        }
+      })
   }
 
   private async revokeSubjectDataCredentials(subject: string) {
@@ -135,7 +150,7 @@ export class MasterSubjectOntology {
 
   private async deleteHeldSubjectDataCredentials(subject: string) {
     const promises = (await getHeldCredentials({})).results!
-      .filter(cred => cred.schema_id === subjectsSchema.schemaID)
+      .filter(cred => cred.schema_id === subjectSchema.schemaID)
       .filter(cred => JSON.parse(cred.attrs!['subject']).name === subject)
       .map(cred => deleteCredential({credential_id: cred.referent!}))
     await Promise.all(promises)

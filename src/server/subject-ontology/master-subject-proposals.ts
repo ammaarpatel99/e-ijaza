@@ -59,7 +59,7 @@ export class MasterSubjectProposals {
   private async saveProposal(proposal: SubjectProposalSchema['proposal']) {
     await this.deleteHeldProposalCredentials(proposal)
     const connectionControls = await connectToSelf()
-    await issueCredential({
+    const {credential_exchange_id} = await issueCredential({
       connection_id: connectionControls.connectionID,
       cred_def_id: subjectProposalSchema.credID,
       auto_remove: true,
@@ -71,7 +71,14 @@ export class MasterSubjectProposals {
       }
     })
     this.proposals.set(MasterSubjectProposals.proposalToID(proposal), proposal)
-    await connectionControls.close()
+    await WebhookMonitor.instance.monitorCredentialExchange<void, any>(
+      credential_exchange_id!,
+      async (result, resolve, reject) => {
+        if (result.state === 'credential_acked') {
+          await connectionControls.close()
+          resolve()
+        }
+      })
   }
 
   private async deleteHeldProposalCredentials(proposal: SubjectProposalSchema['proposal']) {

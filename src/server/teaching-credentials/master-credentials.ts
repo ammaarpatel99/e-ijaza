@@ -12,6 +12,7 @@ import {mastersInternalSchema, mastersPublicSchema, teachingSchema} from "@serve
 import {connectToSelf} from "@server/utils";
 import {getCredentialBySchema} from "@server/aries-wrapper/utils";
 import {MasterSubjectProposals} from "@server/subject-ontology";
+import {WebhookMonitor} from "@server/webhook";
 
 
 export class MasterCredentials {
@@ -41,7 +42,7 @@ export class MasterCredentials {
     await Promise.all([this.deleteHeldDataCredentials(), this.revokeIssuedDataCredentials()])
     const connectionControls = await connectToSelf()
     const internalData = Object.fromEntries(this._credentials.entries())
-    await issueCredential({
+    const {credential_exchange_id} = await issueCredential({
       connection_id: connectionControls.connectionID,
       auto_remove: true,
       cred_def_id: mastersInternalSchema.credID,
@@ -52,7 +53,14 @@ export class MasterCredentials {
         }]
       }
     })
-    await connectionControls.close()
+    await WebhookMonitor.instance.monitorCredentialExchange<void, any>(
+      credential_exchange_id!,
+      async (result, resolve, reject) => {
+        if (result.state === 'credential_acked') {
+          await connectionControls.close()
+          resolve()
+        }
+      })
   }
 
   private async deleteHeldDataCredentials() {
