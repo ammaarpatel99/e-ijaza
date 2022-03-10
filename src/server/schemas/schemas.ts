@@ -1,7 +1,15 @@
-import {Schema} from "@server/schemas/schema";
+import {Schema} from "./schema";
 
-export const internalSchema = new Schema('InternalMasterCredentials', ['credentials'], true)
-export const publicSchema = new Schema('MasterCredentials', ['credentials'], true)
-export const proposalSchema = new Schema('MasterCredentialProposal', ['did', 'subject', 'action', 'votes'], true)
-export const voteSchema = new Schema('MasterCredentialVote', ['did', 'subject', 'action', 'voterDID'], true)
-export const teachingSchema = new Schema('TeachingCredential', ['subject'], true)
+export const subjectsSchema = new Schema('Subjects', ['subjects'])
+export const subjectSchema = new Schema('Subject', ['subject'])
+
+export const subjectProposalSchema = new Schema(`SubjectProposal`, ['proposal'])
+export const subjectVoteSchema = new Schema('SubjectVote', ['voteDetails'])
+
+export const mastersInternalSchema = new Schema('MastersInternalCredentials', ['credentials'])
+export const mastersPublicSchema = new Schema('MasterPublicCredentials', ['credentials'])
+
+export const masterProposalSchema = new Schema('MasterProposal', ['proposal'])
+export const masterVoteSchema = new Schema('MasterVote', ['voteDetails'])
+
+export const teachingSchema = new Schema('TeachingCredential', ['subject'])

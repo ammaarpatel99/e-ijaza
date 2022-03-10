@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {
   Config
-} from '../config'
+} from '@server/config'
 
 export const router = Router()
 
@@ -32,9 +32,6 @@ router.post('/publicDID/generate', async (req, res, next) => {
 router.post('/publicDID/set', async (req, res, next) => {
   await Config.instance.setPublicDID(req.body.did)
   res.sendStatus(201)
-})
-router.post('/publicDID/check', async (req, res, next) => {
-  res.send({active: await Config.instance.hasPublicDID()})
 })
 
 router.post('/initialise', async (req, res, next) => {

@@ -23,7 +23,8 @@
       "dom"
     ],
     "paths": {
-      "@types": ["src/types"],
+      "@project-types": ["src/types"],
+      "@project-types/*": ["src/types/*"],
       "@server/*": ["src/server/*"]
     }
   },

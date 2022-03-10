@@ -1,12 +1,21 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {ConfigComponent} from "./config/config.component";
-import {CredComponent} from "./cred/cred.component";
+import {MastersComponent} from "./masters/masters.component";
+import {UserComponent} from "./user/user.component";
 
 const routes: Routes = [
   {
     path: 'config',
     component: ConfigComponent
+  },
+  {
+    path: 'master',
+    component: MastersComponent
+  },
+  {
+    path: 'user',
+    component: UserComponent
   },
   {
     path: '**',

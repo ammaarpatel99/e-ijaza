@@ -2,28 +2,41 @@ function asyncTimout(timout: number) {
   return new Promise(resolve => setTimeout(resolve, timout))
 }
 
+interface successCallbackRes<T> {
+  success: true
+  value?: T
+}
+interface failCallbackRes {
+  success: false
+  value?: any
+}
+type callbackRes<T> = successCallbackRes<T> | failCallbackRes | boolean
+
 export async function repeatWithBackoff<Result>(
   {
-    initialTimeout = 200,
+    initialTimeout = 0,
     maxRepeats = 5,
-    backoff = null,
+    backoff = 200,
     callback,
-    failCallback = () => {throw new Error(`Timed out`)}
+    failCallback = () => {throw new Error(`Timed out`)},
+    exponential = true
   }: {
     initialTimeout?: number,
-    backoff?: number | null,
+    backoff?: number,
     maxRepeats?: number,
     failCallback?: () => Result | Promise<Result>,
-    callback: () => [true, Result] | [false, any] | false | Promise<[true, Result] | [false, any] | false>
+    callback: () => callbackRes<Result> | Promise<callbackRes<Result>>,
+    exponential?: boolean
   })
 {
   let timeout = initialTimeout
-  for (let i = 1; i < maxRepeats; i++) {
-    if (i > 0) await asyncTimout(timeout)
+  for (let i = 1; i <= maxRepeats; i++) {
+    await asyncTimout(timeout)
     const res = await callback()
-    if (res !== false && res[0] === true) return res[1]
-    if (backoff !== null) timeout += backoff
-    else timeout *= 2
+    if (res === true) return
+    if (res && res.success) return res.value
+    if (exponential) timeout = initialTimeout + (backoff * (2**i))
+    else timeout = initialTimeout + (backoff * i)
   }
   return failCallback()
 }

@@ -5,7 +5,7 @@ import {
   ConfigState,
   InitialisationData,
   AriesCommandData
-} from '@types'
+} from '@project-types'
 
 @Injectable({
   providedIn: 'root'

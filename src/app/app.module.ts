@@ -17,13 +17,17 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {FormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import { CredComponent } from './cred/cred.component';
+import { MastersComponent } from './masters/masters.component';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     NavContainerComponent,
     ConfigComponent,
-    CredComponent
+    CredComponent,
+    MastersComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),

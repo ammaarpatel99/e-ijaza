@@ -1,20 +1,63 @@
-type DID = string
-type Subject = string
-type CredRef = string
-
-
 export enum ProposalAction {
-  Add = 'add',
+  ADD = 'add',
   REMOVE = 'remove'
 }
 
-export type SchemaToJSON<Schema> = {
-  [key in keyof Schema]: string
+export enum SubjectProposalType {
+  CHILD = 'child',
+  COMPONENT_SET = 'component_set'
+}
+
+export interface SubjectsSchema {
+  subjects: string[]
+}
+
+export interface SubjectSchema {
+  subject: {
+    name: string
+    children: string[]
+    componentSets: string[][]
+  }
+}
+
+export interface SubjectProposalSchema {
+  proposal: {
+    subject: string
+    action: ProposalAction
+    votes: {
+      [DID: string]: {
+        cred_ex_id: string
+        connection_id: string
+      } | boolean
+    }
+    change: {
+      type: SubjectProposalType.CHILD
+      child: string
+    } | {
+      type: SubjectProposalType.COMPONENT_SET
+      component_set: string[]
+    }
+  }
+}
+
+export interface SubjectVoteSchema {
+  voteDetails: {
+    subject: string
+    action: ProposalAction
+    voterDID: string
+    change: {
+      type: SubjectProposalType.CHILD
+      child: string
+    } | {
+      type: SubjectProposalType.COMPONENT_SET
+      component_set: string[]
+    }
+  }
 }
 
 export interface MastersInternalSchema {
   credentials: {
-    [key: DID]: {
+    [DID: string]: {
       subject: string,
       cred_ex_id: string,
       connection_id: string
@@ -22,28 +65,37 @@ export interface MastersInternalSchema {
   }
 }
 
-export interface PublicSchema {
+export interface MastersPublicSchema {
   credentials: {
-    [key: DID]: {
-      subject: string
-    }[]
+    [DID: string]: string[]
   }
 }
 
-export interface ProposalSchema {
-  did: DID
-  subject: Subject
-  action: ProposalAction
-  votes: [DID, boolean | CredRef][]
+export interface MastersProposalSchema {
+  proposal: {
+    did: string,
+    subject: string
+    action: ProposalAction
+    votes: {
+      [DID: string]: {
+        cred_ex_id: string
+        connection_id: string
+      } | boolean
+    }
+  }
 }
 
-export interface VoteSchema {
-  did: DID
-  subject: Subject
-  action: ProposalAction
-  voterDID: DID
+export interface MastersVoteSchema {
+  voteDetails: {
+    did: string
+    subject: string
+    action: ProposalAction
+    voterDID: string
+  }
 }
 
 export interface TeachingSchema {
   subject: string
 }
+
+

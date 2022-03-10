@@ -1,4 +1,4 @@
-import {AriesCommandData} from '@types'
+import {AriesCommandData} from '@project-types'
 
 export class AriesCommand {
   constructor(private readonly data: Readonly<AriesCommandData>) { }
@@ -21,6 +21,7 @@ export class AriesCommand {
       `--auto-respond-messages ` +
       `--auto-respond-credential-offer ` +
       `--auto-respond-credential-request ` +
+      `--auto-respond-presentation-proposal ` +
       `--auto-verify-presentation ` +
       `--auto-store-credential ` +
       `--tails-server-base-url ${this.data.tailsServerUrl} ` +

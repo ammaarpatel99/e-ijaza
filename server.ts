@@ -11,7 +11,7 @@ import { existsSync } from 'fs';
 import * as bodyParser from 'body-parser'
 
 import {router as apiRouter} from '@server/api'
-import {router as webhookRouter} from '@server/webhook'
+import {router as webhookRouter} from '@server/webhook/router'
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {

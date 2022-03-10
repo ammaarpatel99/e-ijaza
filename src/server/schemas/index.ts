@@ -1,4 +1,4 @@
 export * from './schemas'
-export {Schema} from './schema'
-export {initialiseMasterSchemas} from './master-schemas'
-export {initialiseUserSchemas} from './user-schemas'
+export * from './schema'
+export * from './master-schemas'
+export * from './user-schemas'
