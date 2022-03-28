@@ -35,10 +35,6 @@ export class UserSubjectProposals {
       .forEach(cred => {
         const vote = JSON.parse(cred.attrs!['voteDetails'])
         this.votes.set(UserSubjectProposals.voteToID(vote), {vote, cred_id: cred.referent!})
-        isCredentialRevoked({credential_id: cred.referent!}, {}).then(x => {
-          console.log('revoked: ' + x.revoked)
-          console.log(vote)
-        })
       })
   }
 

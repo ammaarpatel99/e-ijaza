@@ -14,6 +14,7 @@ export class Reachability {
       if (!_reachability) return undefined
       reachability.concat(_reachability)
     }
+    reachability.setReached()
     return reachability
   }
 

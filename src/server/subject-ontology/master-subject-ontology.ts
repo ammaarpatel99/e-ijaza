@@ -108,9 +108,9 @@ export class MasterSubjectOntology {
   }
 
   async saveSubjectData(subject: string) {
-    const subjectData = this.subjectOntology.getSubjectData(subject)
-    if (!subjectData) throw new Error(`Trying to save non-existent subject`)
     await Promise.all([this.revokeSubjectDataCredentials(subject), this.deleteHeldSubjectDataCredentials(subject)])
+    const subjectData = this.subjectOntology.getSubjectData(subject)
+    if (!subjectData) return
     const selfConnectControls = await connectToSelf()
     const {credential_exchange_id} = await issueCredential({
       connection_id: selfConnectControls.connectionID,
