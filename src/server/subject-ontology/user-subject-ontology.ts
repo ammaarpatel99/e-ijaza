@@ -144,10 +144,16 @@ export class UserSubjectOntology {
 
   async reachFromCredentials(subject: string) {
     if (!(this.credentialsSearchKey && this.subjectOntology.hasSearchKey(this.credentialsSearchKey))) {
+      console.log('here')
       const credentials = [...UserMasterCredentials.instance.credentials.keys()]
+      console.log(credentials)
       this.credentialsSearchKey = await this.subjectOntology.fullSearch(credentials)
+      console.log(this.credentialsSearchKey)
     }
-    return this.subjectOntology.checkSubjectInSearch(this.credentialsSearchKey, subject)
+    const subjects = this.subjectOntology.checkSubjectInSearch(this.credentialsSearchKey, subject)
+    console.log(subjects)
+    if (subjects?.length === 0) return [subject]
+    return subjects
   }
 
   async reachFromMasterCredentials(subject: string) {
@@ -155,6 +161,8 @@ export class UserSubjectOntology {
       const credentials: string[] = [...UserMasterCredentials.instance.masterCredentials.keys()]
       this.masterCredentialsSearchKey = await this.subjectOntology.fullSearch(credentials)
     }
-    return this.subjectOntology.checkSubjectInSearch(this.masterCredentialsSearchKey, subject)
+    const subjects = this.subjectOntology.checkSubjectInSearch(this.masterCredentialsSearchKey, subject)
+    if (subjects?.length === 0) return [subject]
+    return subjects
   }
 }

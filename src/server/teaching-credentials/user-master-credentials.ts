@@ -112,7 +112,7 @@ export class UserMasterCredentials {
     let queue: {did: string, subject: string}[] = [{did, subject}]
     const checked = new Set<string>() // did-string
     const addToQueue = ({did, subject}: {did: string, subject: string}) => {
-      const id = `${did}=${subject}`
+      const id = `${did}-${subject}`
       if (checked.has(id)) return
       queue.push({did, subject})
       checked.add(id)
@@ -140,7 +140,9 @@ export class UserMasterCredentials {
       connection_id,
       proof_request: {
         name: 'Authorization - Subjects to Prove Subject',
-        requested_attributes: { subject: { name: subject } }
+        requested_attributes: { subject: { name: subject } },
+        requested_predicates: {},
+        version: '1.0'
       }
     })
    return await WebhookMonitor.instance.monitorProofPresentation<string[], string>(presentation_exchange_id!,
@@ -167,7 +169,7 @@ export class UserMasterCredentials {
         subject: JSON.stringify(subjects)
       },
       requested_attributes: {},
-      requested_predicates: {}
+      requested_predicates: {},
     })
   }
 
@@ -176,13 +178,15 @@ export class UserMasterCredentials {
       connection_id,
       proof_request: {
         name: `Authorization - Credentials to Prove Subjects`,
+        version: '1.0',
         requested_attributes: Object.fromEntries(subjects.map(subject => [subject, {
           name: 'subject',
           restrictions: [{
             schema_id: teachingSchema.schemaID,
             [`attr::${subject}::value`]: subject
           }]
-        }]))
+        }])),
+        requested_predicates: {}
       }
     })
     return await WebhookMonitor.instance.monitorProofPresentation<{subject: string, credDefID: string}[], any>(presentation_exchange_id!,
