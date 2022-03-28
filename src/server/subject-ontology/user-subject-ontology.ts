@@ -25,7 +25,7 @@ export class UserSubjectOntology {
   private readonly subjectOntology = InternalSubjectOntology.instance
   private credentialsSearchKey: string|undefined
   private masterCredentialsSearchKey: string|undefined
-  readonly testSearch = this.subjectOntology.testSearch
+  readonly testSearch = this.subjectOntology.testSearch.bind(this.subjectOntology)
 
   getSubjectOntology() {
     const subjects = this.subjectOntology.getSubjects()

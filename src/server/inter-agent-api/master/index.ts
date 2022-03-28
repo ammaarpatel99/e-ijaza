@@ -35,7 +35,7 @@ async function respondToSetupProofRequest(data: V10PresentationExchange) {
 }
 
 async function respondToCreateSubjectProposal(data: V10PresentationExchange) {
-  if (data.presentation_proposal_dict?.comment === 'Create Subject Proposal' && data.state === 'proposal_received') {
+  if (data.presentation_proposal_dict?.comment === 'Create Subject Proposal' && data.state === 'verified') {
     await MasterSubjectProposals.instance.createProposal(data)
     return true
   }
@@ -43,7 +43,7 @@ async function respondToCreateSubjectProposal(data: V10PresentationExchange) {
 }
 
 async function respondToVoteOnSubjectProposal(data: V10PresentationExchange) {
-  if (data.presentation_proposal_dict?.comment === 'Vote on Subject Proposal' && data.state === 'proposal_received') {
+  if (data.presentation_proposal_dict?.comment === 'Vote on Subject Proposal' && data.state === 'verified') {
     await MasterSubjectProposals.instance.receiveVote(data)
     return true
   }

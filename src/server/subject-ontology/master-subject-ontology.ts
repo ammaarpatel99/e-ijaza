@@ -24,7 +24,7 @@ export class MasterSubjectOntology {
   private constructor() { }
 
   private readonly subjectOntology = InternalSubjectOntology.instance
-  readonly testSearch = this.subjectOntology.testSearch
+  readonly testSearch = this.subjectOntology.testSearch.bind(this.subjectOntology)
 
   getSubjectOntology() {
     const subjects = this.subjectOntology.getSubjects()
@@ -136,7 +136,7 @@ export class MasterSubjectOntology {
   private async revokeSubjectDataCredentials(subject: string) {
     const promises = (await getIssuedCredentials({role: 'issuer', state: 'credential_acked'})).results!
       .filter(cred => cred.schema_id === subjectSchema.schemaID)
-      .filter(cred => JSON.parse(cred.credential!.attrs!['subject']).name === subject)
+      .filter(cred => JSON.parse(cred.credential_proposal_dict!.credential_proposal!.attributes![0].value).name === subject)
       .map(async cred => {
         await revokeCredential({
           connection_id: cred.connection_id!,

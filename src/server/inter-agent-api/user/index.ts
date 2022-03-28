@@ -49,9 +49,13 @@ async function handleProofForCredentialsInAuthorization(data: V10PresentationExc
 }
 
 async function receiveCredential(data: V10CredentialExchange) {
-  if (data.state === 'credential_acked' && data.schema_id === teachingSchema.schemaID) {
+  if (data.state !== 'credential_acked') return false
+  if (data.schema_id === teachingSchema.schemaID) {
     UserMasterCredentials.instance.receiveCredential(data)
-    return true
+  } else if (data.schema_id === subjectVoteSchema.schemaID) {
+    UserSubjectProposals.instance.receiveVote(data)
+  } else {
+    return false
   }
-  return false
+  return true
 }

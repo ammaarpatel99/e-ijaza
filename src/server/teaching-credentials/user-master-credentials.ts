@@ -46,12 +46,12 @@ export class UserMasterCredentials {
   }
 
   async loadDataCredentials() {
+    this.masters.clear()
     const cred = await getCredentialBySchema(mastersPublicSchema.schemaID)
     if (cred) {
       Object.entries(JSON.parse(cred.attrs!['credentials']) as MastersPublicSchema['credentials'])
         .forEach(data => this.masters.set(...data))
     } else {
-      this.masters.clear()
       await this.getDataCredentials()
     }
   }

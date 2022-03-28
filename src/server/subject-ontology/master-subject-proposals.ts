@@ -3,13 +3,14 @@ import {
   connectViaPublicDID,
   deleteCredential,
   getHeldCredentials,
-  issueCredential, rejectProof, requestProofFromProposal,
+  issueCredential,
+  rejectProof,
   revokeCredential
 } from "@server/aries-wrapper";
 import {subjectProposalSchema, subjectVoteSchema, teachingSchema} from "@server/schemas";
 import {connectToSelf} from "@server/utils";
 import {MasterCredentials, MasterCredentialsProposals} from "@server/teaching-credentials";
-import {V10PresentationExchange} from "@project-types/aries-types";
+import {V10CredentialExchange, V10PresentationExchange} from "@project-types/aries-types";
 import {InternalSubjectOntology} from "@server/subject-ontology/internal-subject-ontology";
 import {MasterSubjectOntology} from "@server/subject-ontology/master-subject-ontology";
 import {WebhookMonitor} from "@server/webhook";
@@ -45,6 +46,7 @@ export class MasterSubjectProposals {
   }
 
   async loadProposals() {
+    this.proposals.clear();
     (await getHeldCredentials({})).results!
       .filter(cred => cred.schema_id === subjectProposalSchema.schemaID)
       .forEach(cred => {
@@ -90,14 +92,15 @@ export class MasterSubjectProposals {
       })
       .map(cred => deleteCredential({credential_id: cred.referent!}))
     await Promise.all(promises)
-    this.proposals.delete(MasterSubjectProposals.proposalToID(proposal))
+    const id = MasterSubjectProposals.proposalToID(proposal)
+    this.proposals.delete(id)
   }
 
   private async getValidVoters(subject: string) {
     return (await Promise.all(
       [...MasterCredentials.instance.credentials.entries()]
         .map(async ([did, data]) => ({
-          did, canVote: await MasterSubjectOntology.instance.testSearch(data.map(x => x.subject), subject)
+          did, canVote: (await MasterSubjectOntology.instance.testSearch(data.map(x => x.subject), subject)).reached
         }))))
       .filter(data => data.canVote)
       .map(data => data.did)
@@ -117,7 +120,7 @@ export class MasterSubjectProposals {
       .map(async proposal => {
         let changed = false
         await Promise.all(voters.map(async voter => {
-          const canVote = await MasterSubjectOntology.instance.testSearch(voter.subjects, proposal.subject)
+          const canVote = (await MasterSubjectOntology.instance.testSearch(voter.subjects, proposal.subject)).reached
           if (canVote && proposal.votes[voter.did] === undefined) {
             await this.grantProposalVote(proposal, voter.did)
             changed = true
@@ -140,15 +143,20 @@ export class MasterSubjectProposals {
       voterDID: did
     }
     const connectionID = await connectViaPublicDID({their_public_did: did})
-    const res = await issueCredential({
+    const _res = await issueCredential({
       connection_id: connectionID,
       auto_remove: false,
       cred_def_id: subjectVoteSchema.credID,
       credential_proposal: {
         attributes: [{
-          name: 'proposal',
+          name: 'voteDetails',
           value: JSON.stringify(vote)
         }]
+      }
+    })
+    const res: V10CredentialExchange = await WebhookMonitor.instance.monitorCredentialExchange(_res.credential_exchange_id!, (result, resolve, reject) => {
+      if (result.state === 'credential_acked') {
+        resolve(result)
       }
     })
     proposal.votes[did] = {connection_id: connectionID, cred_rev_id: res.revocation_id!, rev_reg_id: res.revoc_reg_id!}
@@ -181,8 +189,7 @@ export class MasterSubjectProposals {
       else if (vote === false) against++
     })
     if (inFavour > voters / 2) return true
-    else if (against > voters / 2) return false
-    else if (inFavour + against === voters) return false
+    else if (against >= voters / 2) return false
     return null
   }
 
@@ -196,32 +203,31 @@ export class MasterSubjectProposals {
   }
 
   private async actionProposal(proposal: SubjectProposalSchema['proposal']) {
-    const promises: Promise<void>[] = []
     if (proposal.change.type === SubjectProposalType.CHILD) {
       if (proposal.action === ProposalAction.ADD) {
         if (InternalSubjectOntology.instance.addChild(proposal.subject, proposal.change.child)) {
-          promises.push(MasterSubjectOntology.instance.saveSubjects(),
-            MasterSubjectOntology.instance.saveSubjectData(proposal.change.child))
+          await Promise.all([
+            MasterSubjectOntology.instance.saveSubjects(),
+            MasterSubjectOntology.instance.saveSubjectData(proposal.change.child)])
         }
-        promises.push(MasterSubjectOntology.instance.saveSubjectData(proposal.subject))
+        await MasterSubjectOntology.instance.saveSubjectData(proposal.subject)
       } else {
         if (InternalSubjectOntology.instance.removeChild(proposal.subject, proposal.change.child)) {
-          promises.push(MasterSubjectOntology.instance.saveSubjects(),
-            MasterSubjectOntology.instance.saveSubjectData(proposal.change.child),
-            MasterCredentials.instance.onDeletedSubject(proposal.change.child))
+          await Promise.all([
+            MasterSubjectOntology.instance.saveSubjects(),
+            MasterSubjectOntology.instance.saveSubjectData(proposal.change.child)])
         }
-        promises.push(MasterSubjectOntology.instance.saveSubjectData(proposal.subject))
+        await MasterSubjectOntology.instance.saveSubjectData(proposal.subject)
       }
     } else {
       if (proposal.action === ProposalAction.ADD) {
         InternalSubjectOntology.instance.addComponentSet(proposal.subject, proposal.change.component_set)
-        promises.push(MasterSubjectOntology.instance.saveSubjectData(proposal.subject))
+        await MasterSubjectOntology.instance.saveSubjectData(proposal.subject)
       } else {
         InternalSubjectOntology.instance.removeComponentSet(proposal.subject, proposal.change.component_set)
-        promises.push(MasterSubjectOntology.instance.saveSubjectData(proposal.subject))
+        await MasterSubjectOntology.instance.saveSubjectData(proposal.subject)
       }
     }
-    await Promise.all(promises)
     await this.cancelProposal(proposal)
   }
 
@@ -252,7 +258,7 @@ export class MasterSubjectProposals {
       [ProposalAction.ADD, ProposalAction.REMOVE].includes(data.action) &&
       data.change &&
       (
-        (data.change.type === SubjectProposalType.CHILD && subjects.includes(data.change.child)) ||
+        (data.change.type === SubjectProposalType.CHILD) ||
         (
           data.change.type === SubjectProposalType.COMPONENT_SET && Array.isArray(data.change.component_set) &&
           data.change.component_set.every((subject: string) => subjects.includes(subject))
@@ -268,14 +274,8 @@ export class MasterSubjectProposals {
     const proposal = JSON.parse(proposalData?.value || '')
     if (!attributes?.filter(x => x.cred_def_id === teachingSchema.credID).shift() || !proposal || !(await this.isProposal(proposal))) {
       await rejectProof({pres_ex_id: proofPresentation.presentation_exchange_id!}, {description: 'lacking necessary data'})
-      return
+      throw new Error('lacking necessary data')
     }
-    const promise = WebhookMonitor.instance.monitorProofPresentation(proofPresentation.presentation_exchange_id!, (result, resolve, reject) => {
-      if (result.state === 'verified') resolve(null)
-      if (result.error_msg) reject(result.error_msg)
-    })
-    await requestProofFromProposal({pres_ex_id: proofPresentation.presentation_exchange_id!}, {})
-    await promise
     proposal.votes = {};
     await Promise.all((await this.getValidVoters(proposal.subject))
       .map(did => this.grantProposalVote(proposal, did)))
@@ -283,11 +283,16 @@ export class MasterSubjectProposals {
   }
 
   async receiveVote(data: V10PresentationExchange) {
+    if (!data.presentation_proposal_dict?.presentation_proposal.attributes
+      || !data.presentation_request?.requested_attributes
+      || !data.presentation?.requested_proof?.revealed_attrs)
+      throw new Error(``)
     const voteData = data.presentation_proposal_dict?.presentation_proposal.attributes
       .filter(x => x.cred_def_id === subjectVoteSchema.credID)
-      .map(x => x.value)
-      .filter(x => x)
-      .map(x => JSON.parse(x!))
+      .flatMap(x => Object.entries(data.presentation_request!.requested_attributes).filter(y => y[1].name === x.name))
+      .map(x => x[0])
+      .map(x => data.presentation!.requested_proof!.revealed_attrs![x])
+      .map(x => JSON.parse(x.raw!))
       .map(x => MasterSubjectProposals.isVote(x) ? x : undefined)
       .filter(x => x)
       .shift()
@@ -304,12 +309,6 @@ export class MasterSubjectProposals {
       await rejectProof({pres_ex_id: data.presentation_exchange_id!}, {description: 'invalid data'})
       return
     }
-    const promise = WebhookMonitor.instance.monitorProofPresentation(data.presentation_exchange_id!, (result, resolve, reject) => {
-      if (result.state === 'verified') resolve(null)
-      if (result.error_msg) reject(result.error_msg)
-    })
-    await requestProofFromProposal({pres_ex_id: data.presentation_exchange_id!}, {})
-    await promise
     proposalData.votes[voteData.voterDID] = voteChoice
     await revokeCredential({
       publish: true, notify: true,

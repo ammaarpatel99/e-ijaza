@@ -2,9 +2,10 @@ import {connectViaPublicDID, getCredentialsBySchema} from "@server/aries-wrapper
 import {subjectVoteSchema} from "@server/schemas";
 import {SubjectProposalType, SubjectVoteSchema} from "@project-types";
 import {Config} from "@server/config";
-import {proposeProof} from "@server/aries-wrapper";
+import {isCredentialRevoked, presentProof, proposeProof, rejectProof} from "@server/aries-wrapper";
 import {UserMasterCredentials} from "@server/teaching-credentials";
 import {V10CredentialExchange} from "@project-types/aries-types";
+import {WebhookMonitor} from "@server/webhook";
 
 interface VoteData {
   cred_id: string
@@ -29,18 +30,23 @@ export class UserSubjectProposals {
   }
 
   async loadProposalVotes() {
+    this.votes.clear();
     (await getCredentialsBySchema(subjectVoteSchema.schemaID))
       .forEach(cred => {
         const vote = JSON.parse(cred.attrs!['voteDetails'])
         this.votes.set(UserSubjectProposals.voteToID(vote), {vote, cred_id: cred.referent!})
+        isCredentialRevoked({credential_id: cred.referent!}, {}).then(x => {
+          console.log('revoked: ' + x.revoked)
+          console.log(vote)
+        })
       })
   }
 
   async vote(proposal: SubjectVoteSchema['voteDetails'], vote: boolean) {
     const proposalData = this.votes.get(UserSubjectProposals.voteToID(proposal))
-    if (!proposalData) throw new Error(``)
+    if (!proposalData) throw new Error(`No proposal data found to vote on`)
     const connectionID = await connectViaPublicDID({their_public_did: Config.instance.getMasterDID()})
-    await proposeProof({
+    const {presentation_exchange_id} = await proposeProof({
       connection_id: connectionID,
       comment: 'Vote on Subject Proposal',
       auto_present: true,
@@ -48,8 +54,7 @@ export class UserSubjectProposals {
         attributes: [
           {
             name: 'voteDetails',
-            cred_def_id: subjectVoteSchema.credID,
-            referent: proposalData.cred_id
+            cred_def_id: subjectVoteSchema.credID
           },
           {
             name: 'voteChoice',
@@ -59,6 +64,29 @@ export class UserSubjectProposals {
         predicates: []
       }
     })
+    await WebhookMonitor.instance.monitorProofPresentation<void, string>(presentation_exchange_id!, async (result, resolve, reject) => {
+      if (result.state !== 'request_received') return
+      const voteDetailsName = Object.entries(result.presentation_request?.requested_attributes!).filter(x => x[1].name === 'voteDetails').map(x => x[0]).shift()
+      const voteChoiceName = Object.entries(result.presentation_request?.requested_attributes!).filter(x => x[1].name === 'voteChoice').map(x => x[0]).shift()
+      if (!voteDetailsName || !voteChoiceName) {
+        await rejectProof({pres_ex_id: presentation_exchange_id!}, {description: 'Invalid format'})
+        reject('Invalid format')
+        return
+      }
+      await presentProof({pres_ex_id: presentation_exchange_id!}, {
+        requested_predicates: {},
+        requested_attributes: {
+          [voteDetailsName]: {
+            cred_id: proposalData.cred_id,
+            revealed: true
+          }
+        },
+        self_attested_attributes: {
+          [voteChoiceName]: JSON.stringify(vote)
+        }
+      })
+      resolve()
+    })
   }
 
   async createProposal(proposal: Omit<SubjectVoteSchema["voteDetails"], 'voterDID'>) {
@@ -66,7 +94,7 @@ export class UserSubjectProposals {
     const masterCredID = [...UserMasterCredentials.instance.masterCredentials.entries()].map(x => x[1]).shift()
     if (!masterCredID) throw new Error(`Can't create proposals as not holding any master credentials`)
     const masterTeachingCredDef = UserMasterCredentials.instance.masterTeachingCredID
-    await proposeProof({
+    const {presentation_exchange_id} = await proposeProof({
       auto_present: true,
       comment: 'Create Subject Proposal',
       connection_id: connectionID,
@@ -74,7 +102,6 @@ export class UserSubjectProposals {
         attributes: [
           {
             name: 'subject',
-            referent: masterCredID,
             cred_def_id: masterTeachingCredDef
           },
           {
@@ -85,5 +112,33 @@ export class UserSubjectProposals {
         predicates: []
       }
     })
+    await WebhookMonitor.instance.monitorProofPresentation<void, string>(presentation_exchange_id!, async (result, resolve, reject) => {
+      if (result.state !== 'request_received') return
+      const subjectName = Object.entries(result.presentation_request?.requested_attributes!).filter(x => x[1].name === 'subject').map(x => x[0]).shift()
+      const proposalName = Object.entries(result.presentation_request?.requested_attributes!).filter(x => x[1].name === 'proposal').map(x => x[0]).shift()
+      if (!subjectName || !proposalName) {
+        await rejectProof({pres_ex_id: presentation_exchange_id!}, {description: 'Invalid format'})
+        reject('Invalid format')
+        return
+      }
+      await presentProof({pres_ex_id: presentation_exchange_id!}, {
+        requested_predicates: {},
+        requested_attributes: {
+          [subjectName]: {
+            cred_id: masterCredID,
+            revealed: true
+          }
+        },
+        self_attested_attributes: {
+          [proposalName]: JSON.stringify(proposal)
+        }
+      })
+      resolve()
+    })
+  }
+
+  receiveVote(cred: V10CredentialExchange) {
+    const vote = JSON.parse(cred.credential?.attrs!['voteDetails']!) as SubjectVoteSchema['voteDetails']
+    this.votes.set(UserSubjectProposals.voteToID(vote), {vote, cred_id: cred.credential_id!})
   }
 }

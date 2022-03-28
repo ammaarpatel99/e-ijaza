@@ -27,7 +27,7 @@ router.get('/subjects', (req, res, next) => {
 router.route('/subject/proposals')
   .get((req, res, next) => {
     res.send({
-      data: [...UserSubjectProposals.instance._votes.entries()]
+      data: [...UserSubjectProposals.instance._votes.entries()].map(x => [x[0], x[1].vote])
     })
   })
   .patch(async (req, res, next) => {

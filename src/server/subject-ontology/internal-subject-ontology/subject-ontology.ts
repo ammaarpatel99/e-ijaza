@@ -186,12 +186,12 @@ export class SubjectOntology {
         queue.addFromComponents(...searchRes.unreachedComponentParents)
       }
 
-      let reached = !!goal?.getReachability(key)
-
       if (!this.searchKeys.has(key)) {
         this.deleteSearchKey(key)
         continue
       }
+
+      let reached = !!goal?.getReachability(key)
 
       if (!keepKey) this.deleteSearchKey(key)
       return {reached, key: keepKey ? key : null}

@@ -10,7 +10,7 @@ import {HttpClient} from "@angular/common/http";
 export class UserComponent {
   masters: [string, string[]][] = []
   subjects: {name: string, children: string[], componentSets: string[][]}[] = []
-  subjectProposals: [string, { cred_id: string, vote: SubjectVoteSchema['voteDetails'] }][] = []
+  subjectProposals: [string, SubjectVoteSchema['voteDetails']][] = []
   credentials: string[] = []
   issueDetails = ''
   testDetails = ''
@@ -52,6 +52,7 @@ export class UserComponent {
 
   makeSubjectProposal(add: boolean) {
     const children = this.subjectProposalChild.split(' ')
+    if (children.length === 0) throw new Error(`Can't make proposal with no children or component set`)
     const body: Omit<SubjectVoteSchema["voteDetails"], 'voterDID'> = {
       subject: this.subjectProposalParent,
       action: add ? ProposalAction.ADD : ProposalAction.REMOVE,
