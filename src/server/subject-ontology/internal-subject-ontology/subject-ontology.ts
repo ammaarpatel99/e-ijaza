@@ -117,12 +117,11 @@ export class SubjectOntology {
     }
     const startingSet = new SetOfSubjects()
     startingSet.add(...subjects as Subject[])
-    const key = this.generateSearchKey()
 
-    await this.search({
-      startingSet, key, keepKey: true, setting: SubjectSearchSetting.CLOSEST_FIRST
+    const {key} = await this.search({
+      startingSet, keepKey: true, setting: SubjectSearchSetting.CLOSEST_FIRST
     })
-    return key
+    return key as string
   }
 
   testSearch(startingSubjects: string[], goal: string, childrenOnly: boolean = false) {
@@ -158,13 +157,12 @@ export class SubjectOntology {
   private async search(
     {
       startingSet,
-      setting = SubjectSearchSetting.FOUND_FIRST,
       goal = null,
+      setting = SubjectSearchSetting.FOUND_FIRST,
       keepKey = false
     }: {
       startingSet: SetOfSubjects,
       goal?: Subject | null,
-      key?: string,
       setting?: SubjectSearchSetting,
       keepKey?: boolean
     }
@@ -178,7 +176,7 @@ export class SubjectOntology {
       while (!queue.isEmpty() && !goal?.getReachability(key)) {
         if (!this.searchKeys.has(key)) {
           this.deleteSearchKey(key)
-          continue
+          break
         }
         const subject = queue.remove()
         const searchRes = subject.search(key, setting === SubjectSearchSetting.CHILDREN_ONLY)
