@@ -24,18 +24,17 @@ elif [ "$1" = "start" ]; then
   elif [ "$5" = "--dev" ] && [ -n "$6" ]; then
     docker run -it --rm \
     --name "$2" \
-    -p "${3}:4200" -p "${4}:4001" -p "${6}:4002" \
+    -p "${3}:4000" -p "${4}:4001" -p "${6}:4002" \
     -e WEBHOOK_URL="localhost:4000/webhook" \
     -v "$(pwd):/home/indy/app" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$(pwd)/logs/${2}-$(date +%s):/home/indy/logs" \
     e_ijaza_app_dev
   else
-    docker run -itd --rm \
+    docker run -itd \
     --name "$2" \
     -p "${3}:4000" -p "${4}:4001" \
     -e WEBHOOK_URL="localhost:4000/webhook" \
     -v "$(pwd)/logs/${2}-$(date +%s):/home/indy/logs" \
-    -v /var/run/docker.sock:/var/run/docker.sock \
     e_ijaza_app
   fi
 

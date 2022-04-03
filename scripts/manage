@@ -63,11 +63,11 @@ elif [ "$1" = "indy-tails-server" ] || [ "$1" = "tails" ]; then
   if [ "$2" = "build" ]; then
     build_indy_tails_server
   elif [ "$2" = "start" ]; then
-    ./temp/von-network/manage start
+    ./temp/indy-tails-server/docker/manage start
   elif [ "$2" = "stop" ]; then
-    ./temp/von-network/manage stop
+    ./temp/indy-tails-server/docker/manage stop
   elif [ "$2" = "remove" ]; then
-    ./temp/von-network/manage rm
+    ./temp/indy-tails-server/docker/manage rm
   else
     echo "Usage: $0 $1 build|start|stop|remove|restart"
     exit 1
