@@ -1,0 +1,11 @@
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  mat-form-field, mat-button-toggle-group, mat-checkbox {
+    margin-right: 2em;
+  }
+}
+
+h1 {
+  margin-top: 1em;
+}

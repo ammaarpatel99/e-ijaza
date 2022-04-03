@@ -1,0 +1,96 @@
+<mat-progress-bar mode="indeterminate" color="accent" *ngIf="loading" ></mat-progress-bar>
+<mat-stepper linear #stepper >
+
+  <mat-step [editable]="false" [completed]="state >= STATES.ARIES_READY" >
+    <ng-template matStepLabel>Setup</ng-template>
+    <ng-container [ngTemplateOutlet]="aries_form"></ng-container>
+    <ng-container [ngTemplateOutlet]="initialisation_form"></ng-container>
+    <ng-container [ngTemplateOutlet]="public_did_form"></ng-container>
+    <button mat-button [disabled]="ariesForm.invalid || initialisationForm.invalid || loading" (click)="submitFullInitialisation()" >
+      Submit
+    </button>
+  </mat-step>
+
+  <mat-step [editable]="false" [completed]="state >= STATES.PUBLIC_DID_REGISTERED" >
+    <ng-template matStepLabel>Public DID</ng-template>
+    <h1>Manual Registration</h1>
+    <ng-container *ngIf="did">
+      <p>DID: {{did.did}}</p>
+      <p>Verkey: {{did.verkey}}</p>
+    </ng-container>
+    <button mat-button [disabled]="loading" (click)="generateDID()" >Generate DID</button>
+    <button mat-button *ngIf="did" [disabled]="loading" (click)="registeredDID()" >Registered</button>
+    <h1>Automatic Registration (only with Von Network)</h1>
+    <div class="form">
+      <mat-form-field>
+        <mat-label>Von Network URL</mat-label>
+        <input matInput [formControl]="vonNetworkURL" required >
+      </mat-form-field>
+    </div>
+    <button mat-button [disabled]="vonNetworkURL.invalid || loading" (click)="autoRegisterDID()">Submit</button>
+  </mat-step>
+
+  <mat-step [editable]="false" [completed]="state >= STATES.COMPLETE" >
+    <ng-template matStepLabel>Initialisation Data</ng-template>
+    <ng-container [ngTemplateOutlet]="initialisation_form"></ng-container>
+    <button mat-button [disabled]="initialisationForm.invalid || loading" (click)="submitAppInitialisation()">Submit</button>
+  </mat-step>
+
+  <mat-step [editable]="false" [completed]="false" >
+    <ng-template matStepLabel>Done</ng-template>
+    <p>Application is ready to use.</p>
+  </mat-step>
+</mat-stepper>
+
+<ng-template #aries_form >
+  <h1>Aries Initialisation Settings</h1>
+  <div class="form">
+    <mat-form-field>
+      <mat-label>Advertised Endpoint</mat-label>
+      <input matInput [formControl]="advertisedEndpoint" required >
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Indy Ledger Genesis URL</mat-label>
+      <input matInput [formControl]="genesisURL" required >
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Indy Tails Server URL</mat-label>
+      <input matInput [formControl]="tailsServerURL" required >
+    </mat-form-field>
+    <mat-checkbox [formControl]="autoRegisterPublicDID" >Auto Register Public DID (only on Von Network)</mat-checkbox>
+    <mat-form-field *ngIf="autoRegisterPublicDID.value">
+      <mat-label>Von Network URL</mat-label>
+      <input matInput [formControl]="initVonNetworkURL" required >
+    </mat-form-field>
+  </div>
+</ng-template>
+
+<ng-template #initialisation_form >
+  <h1>Application Initialisation Settings</h1>
+  <div class="form">
+    <mat-button-toggle-group [formControl]="appType" required >
+      <mat-button-toggle [value]="APP_TYPES.USER">user</mat-button-toggle>
+      <mat-button-toggle [value]="APP_TYPES.MASTER">master server</mat-button-toggle>
+    </mat-button-toggle-group>
+    <ng-container *ngIf="appType.value === APP_TYPES.USER">
+      <mat-form-field>
+        <mat-label>Master DID</mat-label>
+        <input matInput [formControl]="masterDID" required >
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Name</mat-label>
+        <input matInput [formControl]="name" required >
+      </mat-form-field>
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template #public_did_form >
+  <h1>Auto Register Public DID (only on Von Network)</h1>
+  <div class="form">
+    <mat-form-field>
+      <mat-label>Von Network URL</mat-label>
+      <input matInput [formControl]="vonNetworkURL" required >
+    </mat-form-field>
+  </div>
+</ng-template>

@@ -14,11 +14,15 @@ import { MatListModule } from '@angular/material/list';
 import { ConfigComponent } from './config/config.component';
 import {HttpClientModule} from "@angular/common/http";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import { CredComponent } from './cred/cred.component';
 import { MastersComponent } from './masters/masters.component';
 import { UserComponent } from './user/user.component';
+import { InitialisationComponent } from './initialisation/initialisation.component';
+import {MatStepperModule} from "@angular/material/stepper";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
   declarations: [
@@ -27,7 +31,8 @@ import { UserComponent } from './user/user.component';
     ConfigComponent,
     CredComponent,
     MastersComponent,
-    UserComponent
+    UserComponent,
+    InitialisationComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),
@@ -42,7 +47,11 @@ import { UserComponent } from './user/user.component';
     MatListModule,
     MatButtonToggleModule,
     FormsModule,
-    MatInputModule
+    MatInputModule,
+    MatStepperModule,
+    MatProgressBarModule,
+    ReactiveFormsModule,
+    MatCheckboxModule
   ],
   providers: [],
   bootstrap: [AppComponent]
