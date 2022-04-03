@@ -12,13 +12,15 @@ import * as bodyParser from 'body-parser'
 
 import {router as apiRouter} from '@server/api'
 import {router as webhookRouter} from '@server/webhook/router'
+import * as path from "path";
+
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
   const server = express();
   server.use(bodyParser.json(), bodyParser.urlencoded({extended: true}))
 
-  const distFolder = join(process.cwd(), 'dist/e-ijaza/browser');
+  const distFolder = path.normalize(join(path.dirname(__filename), '../browser'))
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';
 
   // Our Universal express-engine (found @ https://github.com/angular/universal/tree/master/modules/express-engine)
@@ -50,10 +52,18 @@ function run(): void {
   const port = process.env['PORT'] || 4000;
 
   // Start up the Node server
-  const server = app();
-  server.listen(port, () => {
+  const _app = app()
+  const server = _app.listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
+
+
+  process.on('SIGTERM', () => {
+    console.log('closing server')
+    server.close(err => {
+      console.log('server closed')
+    })
+  })
 }
 
 // Webpack will replace 'require' with '__webpack_require__'

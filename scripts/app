@@ -1,0 +1,62 @@
+#!/bin/bash
+
+cd "$(dirname "$0")" || exit 1
+cd ..
+
+if [ "$1" = "build" ]; then
+  cd ./temp/aries-agent || exit 1
+  docker build -t aries-cloudagent-run -f ./docker/Dockerfile.run . || exit 1
+  cd ../.. || exit 1
+  docker build -t aries_with_node -f ./scripts/aries.Dockerfile .
+  docker build -t e_ijaza_app -f ./scripts/Dockerfile .
+  docker build -t e_ijaza_app_dev -f ./scripts/dev.Dockerfile .
+
+
+elif [ "$1" = "rebuild" ]; then
+  docker rmi e_ijaza_app
+  docker build -t e_ijaza_app -f ./scripts/Dockerfile .
+
+
+elif [ "$1" = "start" ]; then
+  if [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
+    echo "Usage: $0 $1 [container-name] [app-port] [aries-port] [--dev aries-admin-port]"
+    exit 1
+  elif [ "$5" = "--dev" ] && [ -n "$6" ]; then
+    docker run -it --rm \
+    --name "$2" \
+    -p "${3}:4200" -p "${4}:4001" -p "${6}:4002" \
+    -e WEBHOOK_URL="localhost:4000/webhook" \
+    -v "$(pwd):/home/indy/app" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    e_ijaza_app_dev
+  else
+    docker run -itd --rm \
+    --name "$2" \
+    -p "${3}:4000" -p "${4}:4001" \
+    -e WEBHOOK_URL="localhost:4000/webhook" \
+    -v "$(pwd)/logs/${2}-$(date +%s):/home/indy/logs" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    e_ijaza_app
+  fi
+
+elif [ "$1" = "stop" ]; then
+  if [ -z "$2" ]; then
+    echo "Usage: $0 $1 [container-name]"
+    exit 1
+  else
+    docker stop "$2"
+  fi
+
+elif [ "$1" = "remove" ]; then
+  if [ -z "$2" ]; then
+      echo "Usage: $0 $1 [container-name]"
+      exit 1
+    else
+      docker rm "$2"
+    fi
+
+
+else
+  echo "Usage: $0 build|rebuild|start|stop"
+  exit 1
+fi

@@ -1,0 +1,126 @@
+#!/bin/bash
+
+function check_or_create_dir {
+  if [ ! -d "./$1" ]; then
+    mkdir "$1"
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+function build_von_network {
+  check_or_create_dir temp
+  cd temp || exit 1
+  if [ "$(check_or_create_dir von-network)" = 1 ]; then
+    git clone --depth 1 --branch v1.7.2 https://github.com/bcgov/von-network.git ./von-network
+  fi
+  ./von-network/manage build
+  cd ..
+}
+
+function build_indy_tails_server {
+  check_or_create_dir temp
+  cd temp || exit 1
+  if [ "$(check_or_create_dir indy-tails-server)" = 1 ]; then
+    git clone --depth 1 --branch v1.0.0 https://github.com/bcgov/indy-tails-server.git ./indy-tails-server
+  fi
+  ./indy-tails-server/docker/manage build
+  cd ..
+}
+
+function build_application {
+  check_or_create_dir temp
+  cd temp || exit 1
+  if [ "$(check_or_create_dir aries-agent)" = 1 ]; then
+    git clone --depth 1 --branch 0.7.3 https://github.com/hyperledger/aries-cloudagent-python.git ./aries-agent
+  fi
+  cd ..
+  ./scripts/app build
+}
+
+
+cd "$(dirname "$0")" || exit 1
+cd ..
+
+
+if [ "$1" = "von-network" ] || [ "$1" = "net" ]; then
+  if [ "$2" = "build" ]; then
+    build_von_network
+  elif [ "$2" = "start" ]; then
+    ./temp/von-network/manage start
+  elif [ "$2" = "stop" ]; then
+    ./temp/von-network/manage stop
+  elif [ "$2" = "remove" ]; then
+    ./temp/von-network/manage rm
+  else
+    echo "Usage: $0 $1 build|start|stop|remove|restart"
+    exit 1
+  fi
+
+
+elif [ "$1" = "indy-tails-server" ] || [ "$1" = "tails" ]; then
+  if [ "$2" = "build" ]; then
+    build_indy_tails_server
+  elif [ "$2" = "start" ]; then
+    ./temp/von-network/manage start
+  elif [ "$2" = "stop" ]; then
+    ./temp/von-network/manage stop
+  elif [ "$2" = "remove" ]; then
+    ./temp/von-network/manage rm
+  else
+    echo "Usage: $0 $1 build|start|stop|remove|restart"
+    exit 1
+  fi
+
+
+elif [ "$1" = "application" ] || [ "$1" = "app" ]; then
+  if [ "$2" = "build" ]; then
+    build_application
+  elif [ "$2" = "rebuild" ]; then
+    ./scripts/app rebuild
+  elif [ "$2" = "start" ]; then
+    if [ -z "$3" ] || [ -z "$4" ]; then
+      echo "Usage: $0 $1 $2 [app-port] [aries-port] [container-name] [--dev aries-admin-port]"
+      exit 1
+    fi
+    CONTAINER_NAME=$5
+    if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = "--dev" ]; then
+      CONTAINER_NAME=$(env LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 16 | head -n 1)
+      CONTAINER_NAME="e_ijaza_app_${CONTAINER_NAME}"
+      if  [ "$CONTAINER_NAME" = "--dev" ]; then
+        DEV_PORT=$6
+      fi
+    elif [ "$6" = "--dev" ]; then
+      DEV_PORT=$7
+    fi
+    if [ -z "$DEV_PORT" ]; then
+      ./scripts/app start "$CONTAINER_NAME" "$3" "$4"
+    else
+      ./scripts/app start "$CONTAINER_NAME" "$3" "$4" --dev "$DEV_PORT"
+    fi
+  elif [ "$2" = "stop" ]; then
+    if [ -z "$3" ]; then
+      echo "Usage: $0 $1 $2 [container-name]"
+      exit 1
+    else
+      ./scripts/app stop "$3"
+    fi
+
+  elif [ "$2" = "remove" ]; then
+    if [ -z "$3" ]; then
+      echo "Usage: $0 $1 $2 [container-name]"
+      exit 1
+    else
+      ./scripts/app remove "$3"
+    fi
+  else
+    echo "Usage: $0 $1 build|rebuild|start|stop|remove"
+    exit 1
+  fi
+
+
+else
+  echo "Usage: $0 von-network|net|indy-tails-server|tails|application|app"
+  exit 1
+fi
