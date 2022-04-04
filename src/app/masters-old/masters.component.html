@@ -1,0 +1,22 @@
+<button (click)="reload()" >Reload</button>
+<br>
+<input [(ngModel)]="issueDetails" >
+<button (click)="issue()" >Issue</button>
+<br>
+<p>Masters:</p>
+<p [innerText]="displayJSON(masters)" ></p>
+<br>
+<br>
+<p>Master Proposals:</p>
+<p [innerText]="displayJSON(proposals)" ></p>
+<br>
+<br>
+<p>Subjects:</p>
+<p [innerText]="displayJSON(subjects)" ></p>
+<br>
+<br>
+<p>Subject Proposals:</p>
+<p [innerText]="displayJSON(subjectProposals)" ></p>
+<br>
+<br>
+

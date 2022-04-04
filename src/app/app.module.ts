@@ -23,6 +23,10 @@ import { InitialisationComponent } from './initialisation/initialisation.compone
 import {MatStepperModule} from "@angular/material/stepper";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import {MatSelectModule} from "@angular/material/select";
 
 @NgModule({
   declarations: [
@@ -51,7 +55,11 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     MatStepperModule,
     MatProgressBarModule,
     ReactiveFormsModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatSelectModule
   ],
   providers: [],
   bootstrap: [AppComponent]

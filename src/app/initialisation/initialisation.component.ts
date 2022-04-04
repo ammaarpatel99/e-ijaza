@@ -1,8 +1,18 @@
 import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {AppType, DIDDetails, InitialisationState} from '@project-types/interface-api'
+import {
+  AppType,
+  AriesInitialisationData,
+  DIDDetails,
+  InitialisationData,
+  InitialisationState
+} from '@project-types/interface-api'
 import {FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {AsyncSubject} from "rxjs";
+import {AsyncSubject, filter, first, switchMap, takeUntil} from "rxjs";
 import {MatStepper} from "@angular/material/stepper";
+import {StateService} from "../services/state/state.service";
+import {map} from "rxjs/operators";
+import {LoadingService} from "../services/loading/loading.service";
+import {InitialisationService} from "../services/initialisation/initialisation.service";
 
 const isAppTypeValidator: ValidatorFn = control => {
   if ([AppType.MASTER, AppType.USER].includes(control.value)) return null
@@ -23,8 +33,7 @@ export class InitialisationComponent implements OnInit, OnDestroy {
   private _state: InitialisationState = InitialisationState.START_STATE
   get state() { return this._state }
 
-  private _loading = false
-  get loading() { return this._loading }
+  readonly loading$ = this.loadingService.loading$
 
   readonly APP_TYPES = AppType
 
@@ -55,12 +64,17 @@ export class InitialisationComponent implements OnInit, OnDestroy {
   private _did: DIDDetails | undefined
   get did() { return this._did }
 
-  constructor() {
-    this.setLoading(true)
-  }
+  constructor(
+    private readonly stateService: StateService,
+    private readonly loadingService: LoadingService,
+    private readonly initializer: InitialisationService
+  ) { }
 
   ngOnInit() {
     this.manageValidators()
+    this.watchState()
+    this.watchLoading()
+    this.loadingService.startLoading() // wait for initial data
   }
 
   ngOnDestroy() {
@@ -91,27 +105,28 @@ export class InitialisationComponent implements OnInit, OnDestroy {
     })
   }
 
-  private setState(state: InitialisationState) { // TODO: delete?
-    this._state = state
+  private watchState() {
+    let loadingFromState = true // starts with loading to wait for initial state
     const nonLoadingStates = [
       InitialisationState.START_STATE,
       InitialisationState.ARIES_READY,
-      InitialisationState.INITIALISATION_DATA_REQUIRED
+      InitialisationState.PUBLIC_DID_REGISTERED,
+      InitialisationState.COMPLETE
     ]
-    this.setLoading(nonLoadingStates.includes(state))
-  }
-
-  private setLoading(loading: boolean) {
-    this._loading = loading
-    if (loading) {
-      this.ariesForm.disable()
-      this.initialisationForm.disable()
-      this.vonNetworkURL.disable()
-    } else {
-      this.ariesForm.enable()
-      this.initialisationForm.enable()
-      this.vonNetworkURL.enable()
-    }
+    this.stateService.initialisationState$.pipe(
+      map(state => {
+        this._state = state
+        this.updateStepper()
+        if (!nonLoadingStates.includes(state) && !loadingFromState) {
+          loadingFromState = true
+          this.loadingService.startLoading()
+        } else if (nonLoadingStates.includes(state) && loadingFromState) {
+          loadingFromState = false
+          this.loadingService.startLoading()
+        }
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe()
   }
 
   private updateStepper() {
@@ -120,24 +135,112 @@ export class InitialisationComponent implements OnInit, OnDestroy {
     while (currentStepCompleted()) this.stepper?.next()
   }
 
+  private watchLoading() {
+    this.loading$.pipe(
+      map(loading => {
+        if (loading) {
+          this.ariesForm.disable()
+          this.initialisationForm.disable()
+          this.vonNetworkURL.disable()
+        } else {
+          this.ariesForm.enable()
+          this.initialisationForm.enable()
+          this.vonNetworkURL.enable()
+        }
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe()
+  }
+
   submitFullInitialisation() {
-    // TODO:
+    this.loading$.pipe(
+      filter(loading =>
+        !loading && this.ariesForm.valid && this.initialisationForm.valid
+      ),
+      first(),
+      map(() => {
+        this.loadingService.startLoading()
+        const ariesData: AriesInitialisationData = {
+          genesisURL: this.genesisURL.value,
+          tailsServerURL: this.tailsServerURL.value,
+          advertisedEndpoint: this.advertisedEndpoint.value
+        }
+        if (this.autoRegisterPublicDID.value) ariesData.vonNetworkURL = this.initVonNetworkURL.value
+        const initData: InitialisationData = {
+          appType: this.appType.value,
+          name: this.appType.value === AppType.USER ? this.name.value : undefined,
+          masterDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+        }
+        return {...ariesData, ...initData}
+      }),
+      switchMap(data => this.initializer.submitFullInitialisation$(data)),
+      map(() => this.loadingService.stopLoading())
+    ).subscribe()
   }
 
   generateDID() {
-    // TODO:
+    this.loading$.pipe(
+      filter(loading => !loading),
+      first(),
+      map(() => {
+        this.loadingService.startLoading()
+      }),
+      switchMap(() => this.initializer.generateDID$()),
+      map(did => {
+        this._did = did
+        this.loadingService.stopLoading()
+      })
+    ).subscribe()
   }
 
   registeredDID() {
-    // TODO:
+    this.loading$.pipe(
+      filter(loading =>
+        !loading && !!this.did
+      ),
+      first(),
+      map(() => {
+        this.loadingService.startLoading()
+        return this.did!
+      }),
+      switchMap(data => this.initializer.registerDID$(data)),
+      map(() => this.loadingService.stopLoading())
+    ).subscribe()
   }
 
   autoRegisterDID() {
-    // TODO:
+    this.loading$.pipe(
+      filter(loading =>
+        !loading && this.vonNetworkURL.valid
+      ),
+      first(),
+      map(() => {
+        this.loadingService.startLoading()
+        return this.vonNetworkURL.value
+      }),
+      switchMap(data => this.initializer.autoRegisterDID$(data)),
+      map(() => this.loadingService.stopLoading())
+    ).subscribe()
   }
 
   submitAppInitialisation() {
-    // TODO:
+    this.loading$.pipe(
+      filter(loading =>
+        !loading && this.initialisationForm.valid
+      ),
+      first(),
+      map(() => {
+        this.loadingService.startLoading()
+        const initData: InitialisationData = {
+          appType: this.appType.value,
+          name: this.appType.value === AppType.USER ? this.name.value : undefined,
+          masterDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+        }
+        return initData
+      }),
+      switchMap(data => this.initializer.submitAppInitialisation$(data)),
+      map(() => this.loadingService.stopLoading())
+    ).subscribe()
   }
 
 }

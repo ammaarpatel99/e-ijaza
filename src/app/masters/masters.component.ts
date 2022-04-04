@@ -1,39 +1,101 @@
-import { Component } from '@angular/core';
-import {ProposalAction, SubjectProposalType} from "@project-types";
-import {HttpClient} from "@angular/common/http";
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatTable} from '@angular/material/table';
+import {MastersDataSource} from './masters-datasource';
+import {animate, state, style, transition, trigger} from "@angular/animations";
+import {StateService} from "../services/state/state.service";
+import {AppType, Master, MasterProposal} from "@project-types/interface-api";
+import {MasterProposalsDatasource} from "./master-proposals-datasource";
+import {AsyncSubject, combineLatest, first, forkJoin, switchMap, takeUntil} from "rxjs";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'app-masters',
   templateUrl: './masters.component.html',
-  styleUrls: ['./masters.component.scss']
+  styleUrls: ['./masters.component.scss'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
 })
-export class MastersComponent {
-  masters: [string, {subject: string, cred_ex_id: string, connection_id: string}[]][] = []
-  proposals: [string, {did: string, subject: string, action: ProposalAction, votes: {[p: string]: boolean | {cred_ex_id: string, connection_id: string}}}][] = []
-  subjects: {name: string, children: string[], componentSets: string[][]}[] = []
-  subjectProposals: [string, {subject: string, action: ProposalAction, votes: {[p: string]: boolean | {cred_ex_id: string, connection_id: string}}, change: {type: SubjectProposalType.CHILD, child: string} | {}}][] = []
-  issueDetails = ''
+export class MastersComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('paginator') paginator!: MatPaginator;
+  @ViewChild('table') table!: MatTable<Master>;
+  @ViewChild('proposals_paginator') proposalsPaginator!: MatPaginator;
+  @ViewChild('proposals_table') proposalsTable!: MatTable<MasterProposal>;
+  dataSource: MastersDataSource;
+  proposalsDatasource: MasterProposalsDatasource;
+  expandedElement: Master | undefined
 
-  constructor(
-    private readonly httpClient: HttpClient
-  ) { }
+  private readonly destroy$ = new AsyncSubject<void>()
 
-  reload() {
-    this.httpClient.get<{data: any}>('/api/master/masters').subscribe(({data}) => this.masters = data)
-    this.httpClient.get<{data: any}>('/api/master/proposals').subscribe(({data}) => this.proposals = data)
-    this.httpClient.get<{data: any}>('/api/master/subjects').subscribe(({data}) => this.subjects = data)
-    this.httpClient.get<{data: any}>('/api/master/subject/proposals').subscribe(({data}) => this.subjectProposals = data)
+  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
+  displayedColumns = ['did', 'subjects'];
+  proposalDisplayedColumns = ['type', 'did', 'subject'];
+
+  constructor(private readonly stateService: StateService) {
+    this.dataSource = new MastersDataSource(stateService.masters$);
+    this.proposalsDatasource = new MasterProposalsDatasource(stateService.masterProposals$);
   }
 
-  issue() {
-    const data = this.issueDetails.split(' ')
-    if (data.length < 2) throw new Error(`Issue details lacking info`)
-    const did = data[0]
-    const subject = data[1]
-    this.httpClient.post(`/api/master/masters`, {did, subject}, {responseType: 'text'}).subscribe(() => this.issueDetails = '')
+  ngOnInit() {
+    this.watchAppType()
   }
 
-  displayJSON(json: any) {
-    return JSON.stringify(json, null, 4)
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.table.dataSource = this.dataSource;
+    this.proposalsDatasource.paginator = this.proposalsPaginator;
+    this.proposalsTable.dataSource = this.proposalsDatasource
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next()
+    this.destroy$.complete()
+  }
+
+  private watchAppType() {
+    this.stateService.appType$.pipe(
+      map(appType => {
+        if (appType === AppType.MASTER) {
+          this.proposalDisplayedColumns = ['type', 'did', 'subject', 'votes_for', 'votes_against', 'votes_total']
+        } else {
+          this.proposalDisplayedColumns = ['type', 'did', 'subject', 'vote']
+        }
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe()
+  }
+
+  proposeRemoval(did: string, subject: string) {
+    console.log('proposal removal of master')
+    console.log(did)
+    console.log(subject)
+  }
+
+  vote(inFavour: boolean, proposal: MasterProposal) {
+    console.log('voting')
+    console.log(inFavour)
+    console.log(proposal)
+  }
+
+  createProposalData() {
+    this.stateService.appType$.pipe(
+      switchMap(appType => {
+        if (appType === AppType.MASTER) {
+          return this.stateService.masters$.pipe(
+            map(arr => arr.length === 0)
+          )
+        } else {
+          return forkJoin([this.stateService.did$.pipe(first()), this.stateService.masters$.pipe(first())])
+            .pipe(
+              map(data => data[1].map(x => x.did).includes(data[0]))
+            )
+        }
+      })
+    )
   }
 }

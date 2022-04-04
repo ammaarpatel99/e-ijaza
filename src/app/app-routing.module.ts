@@ -15,7 +15,7 @@ const routes: Routes = [
     component: InitialisationComponent
   },
   {
-    path: 'master',
+    path: 'masters',
     component: MastersComponent
   },
   {
@@ -24,7 +24,7 @@ const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'initialisation'
+    redirectTo: 'masters'
   }
 ];
 
