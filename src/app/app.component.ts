@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import {StateService} from "./services/state/state.service";
 
 @Component({
   selector: 'app-root',
@@ -7,7 +6,5 @@ import {StateService} from "./services/state/state.service";
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  constructor(stateService: StateService) {
-    stateService.update()
-  }
+  constructor() { }
 }

@@ -1,101 +1,75 @@
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatTable} from '@angular/material/table';
-import {MastersDataSource} from './masters-datasource';
-import {animate, state, style, transition, trigger} from "@angular/animations";
+import {Component} from '@angular/core';
 import {StateService} from "../services/state/state.service";
-import {AppType, Master, MasterProposal} from "@project-types/interface-api";
-import {MasterProposalsDatasource} from "./master-proposals-datasource";
-import {AsyncSubject, combineLatest, first, forkJoin, switchMap, takeUntil} from "rxjs";
-import {map} from "rxjs/operators";
+import {of, OperatorFunction, switchMap, withLatestFrom} from "rxjs";
+import {AppType, ProposalType} from "@project-types/interface-api";
+import {map, startWith} from "rxjs/operators";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {ApiService} from "../services/api/api.service";
+import {LoadingService} from "../services/loading/loading.service";
+import {Immutable} from "@project-utils";
 
 @Component({
   selector: 'app-masters',
   templateUrl: './masters.component.html',
-  styleUrls: ['./masters.component.scss'],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed', style({height: '0px', minHeight: '0'})),
-      state('expanded', style({height: '*'})),
-      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-    ]),
-  ],
+  styleUrls: ['./masters.component.scss']
 })
-export class MastersComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('paginator') paginator!: MatPaginator;
-  @ViewChild('table') table!: MatTable<Master>;
-  @ViewChild('proposals_paginator') proposalsPaginator!: MatPaginator;
-  @ViewChild('proposals_table') proposalsTable!: MatTable<MasterProposal>;
-  dataSource: MastersDataSource;
-  proposalsDatasource: MasterProposalsDatasource;
-  expandedElement: Master | undefined
+export class MastersComponent {
+  readonly canMakeProposal$ = this.stateService.appType$.pipe(
+    switchMap(type => {
+      if (type === AppType.USER) return of(true)
+      else return this.stateService.masters$.pipe(
+        map(data => data.length === 0)
+      )
+    })
+  )
 
-  private readonly destroy$ = new AsyncSubject<void>()
+  readonly loading$ = this.loadingService.loading$
 
-  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns = ['did', 'subjects'];
-  proposalDisplayedColumns = ['type', 'did', 'subject'];
+  private readonly reduceToProposableSubjects: OperatorFunction<Immutable<string[]>, Immutable<string[]>> =
+    source => source.pipe(
+      withLatestFrom(
+        this.did.valueChanges.pipe(startWith('')),
+        this.stateService.masters$,
+        this.stateService.masterProposals$
+      ),
+      map(([reachableSubjects, did, masters, proposals]) => {
+        const masterSubjects = masters.filter(master => master.did === did).flatMap(master => master.subjects)
+        const proposedSubjects = proposals.filter(proposal => proposal.did === did).map(proposal => proposal.subject)
+        const usedSubjects = masterSubjects.concat(proposedSubjects)
+        return reachableSubjects.filter(subject => !usedSubjects.includes(subject))
+      })
+    )
 
-  constructor(private readonly stateService: StateService) {
-    this.dataSource = new MastersDataSource(stateService.masters$);
-    this.proposalsDatasource = new MasterProposalsDatasource(stateService.masterProposals$);
-  }
+  readonly subjectsCanProposeIn$ = this.stateService.appType$.pipe(
+    switchMap(type => {
+      if (type === AppType.MASTER) return this.stateService.subjectNames$
+      else return this.stateService.reachableFromMasterCreds$
+    }),
+    this.reduceToProposableSubjects
+  )
 
-  ngOnInit() {
-    this.watchAppType()
-  }
+  get did() { return this.proposalForm.get('did') as FormControl }
+  get subject() { return this.proposalForm.get('subject') as FormControl }
+  readonly proposalForm = new FormGroup({
+    did: new FormControl('', Validators.required),
+    subject: new FormControl('', Validators.required)
+  })
 
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.table.dataSource = this.dataSource;
-    this.proposalsDatasource.paginator = this.proposalsPaginator;
-    this.proposalsTable.dataSource = this.proposalsDatasource
-  }
+  constructor(
+    private readonly stateService: StateService,
+    private readonly api: ApiService,
+    private readonly loadingService: LoadingService
+  ) { }
 
-  ngOnDestroy() {
-    this.destroy$.next()
-    this.destroy$.complete()
-  }
-
-  private watchAppType() {
-    this.stateService.appType$.pipe(
-      map(appType => {
-        if (appType === AppType.MASTER) {
-          this.proposalDisplayedColumns = ['type', 'did', 'subject', 'votes_for', 'votes_against', 'votes_total']
-        } else {
-          this.proposalDisplayedColumns = ['type', 'did', 'subject', 'vote']
-        }
-      }),
-      takeUntil(this.destroy$)
+  submitProposal() {
+    of({
+      did: this.did.value,
+      subject: this.subject.value,
+      proposalType: ProposalType.ADD
+    }).pipe(
+      this.api.proposeMaster,
+      this.loadingService.rxjsOperator()
     ).subscribe()
   }
 
-  proposeRemoval(did: string, subject: string) {
-    console.log('proposal removal of master')
-    console.log(did)
-    console.log(subject)
-  }
-
-  vote(inFavour: boolean, proposal: MasterProposal) {
-    console.log('voting')
-    console.log(inFavour)
-    console.log(proposal)
-  }
-
-  createProposalData() {
-    this.stateService.appType$.pipe(
-      switchMap(appType => {
-        if (appType === AppType.MASTER) {
-          return this.stateService.masters$.pipe(
-            map(arr => arr.length === 0)
-          )
-        } else {
-          return forkJoin([this.stateService.did$.pipe(first()), this.stateService.masters$.pipe(first())])
-            .pipe(
-              map(data => data[1].map(x => x.did).includes(data[0]))
-            )
-        }
-      })
-    )
-  }
 }

@@ -1,21 +1,26 @@
 import { DataSource } from '@angular/cdk/collections';
-import {MatPaginator} from '@angular/material/paginator';
-import {map, tap} from 'rxjs/operators';
-import { Observable, merge } from 'rxjs';
+import { MatPaginator } from '@angular/material/paginator';
+import {map, startWith, switchMapTo} from 'rxjs/operators';
+import { Observable} from 'rxjs';
 import {MasterProposal} from "@project-types/interface-api";
+import {Immutable} from "@project-utils";
+import {StateService} from "../../services/state/state.service";
+
 
 /**
- * Data source for the Masters view. This class should
+ * Data source for the MasterProposalsTable view. This class should
  * encapsulate all logic for fetching and manipulating the displayed data
  * (including sorting, pagination, and filtering).
  */
-export class MasterProposalsDatasource extends DataSource<MasterProposal> {
+export class MasterProposalsTableDataSource extends DataSource<Immutable<MasterProposal>> {
   paginator: MatPaginator | undefined;
-  readonly length$ = this.data$.pipe(
-    map(arr => arr.length)
+  readonly length$ = this.stateService.masterProposals$.pipe(
+    map(data => data.length)
   )
 
-  constructor(private readonly data$: Observable<MasterProposal[]>) {
+  constructor(
+    private readonly stateService: StateService
+  ) {
     super();
   }
 
@@ -24,14 +29,15 @@ export class MasterProposalsDatasource extends DataSource<MasterProposal> {
    * the returned stream emits new items.
    * @returns A stream of the items to be rendered.
    */
-  connect(): Observable<MasterProposal[]> {
+  connect(): Observable<Immutable<MasterProposal[]>> {
     if (this.paginator) {
-      let data: MasterProposal[] = []
-      const obs$ = this.data$.pipe(tap(x => data = x))
-      return merge(obs$, this.paginator.page)
-        .pipe(map(() => this.getPagedData([...data ])));
+      return this.paginator.page.pipe(
+        startWith(null),
+        switchMapTo(this.stateService.masterProposals$),
+        map(data => this.getPagedData(data))
+      )
     } else {
-      throw Error('Please set the paginator and sort on the data source before connecting.');
+      throw Error('Please set the paginator on the data source before connecting.');
     }
   }
 
@@ -45,10 +51,10 @@ export class MasterProposalsDatasource extends DataSource<MasterProposal> {
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: MasterProposal[]): MasterProposal[] {
+  private getPagedData(data: Immutable<MasterProposal[]>): Immutable<MasterProposal[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
-      return data.splice(startIndex, this.paginator.pageSize);
+      return data.slice(startIndex, this.paginator.pageSize);
     } else {
       return data;
     }

@@ -72,6 +72,7 @@ interface UpdateRes_4 {
   outgoingProofRequests: boolean
   incomingProofRequests: boolean
   incomingProofRequestHandlers: boolean
+  reachableSubjects: boolean
 }
 
 export type UpdateRes = UpdateRes_1 | UpdateRes_2 | UpdateRes_3 | UpdateRes_4
@@ -86,21 +87,23 @@ export enum ProposalType {
   REMOVE = 'REMOVE'
 }
 
-interface MasterProposal_base {
+export interface MasterProposalData {
   did: string
   subject: string
   proposalType: ProposalType
 }
 
-interface MasterProposal_count extends MasterProposal_base {
-  votes: {
+export interface MasterProposal extends MasterProposalData {
+  votes?: {
     for: number
     against: number
     total: number
   }
 }
 
-export type MasterProposal = MasterProposal_base | MasterProposal_count
+export interface MasterProposalVote extends MasterProposalData {
+  vote: boolean
+}
 
 export interface Subject {
   name: string
@@ -113,7 +116,7 @@ export enum SubjectProposalType {
   COMPONENT_SET = 'COMPONENT_SET'
 }
 
-interface SubjectProposal_base {
+export interface SubjectProposalData {
   subject: string
   proposalType: ProposalType
   change: {
@@ -125,15 +128,13 @@ interface SubjectProposal_base {
   }
 }
 
-interface SubjectProposal_count extends SubjectProposal_base{
-  votes: {
+export interface SubjectProposal extends SubjectProposalData {
+  votes?: {
     for: number
     against: number
     total: number
   }
 }
-
-export type SubjectProposal = SubjectProposal_base | SubjectProposal_count
 
 export interface HeldCredential {
   issuerDID: string
@@ -159,5 +160,10 @@ export interface IncomingProofRequest {
 
 export interface IncomingProofRequestHandler {
   credential: HeldCredential
-  revealTo?: string[]
+  revealTo: string[] | null
+}
+
+export interface ReachableSubject {
+  name: string
+  reachableByMasterCredentials: boolean
 }

@@ -27,6 +27,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import {MatSelectModule} from "@angular/material/select";
+import { MastersTableComponent } from './masters/masters-table/masters-table.component';
+import { MasterProposalsTableComponent } from './masters/master-proposals-table/master-proposals-table.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +38,9 @@ import {MatSelectModule} from "@angular/material/select";
     CredComponent,
     MastersComponent,
     UserComponent,
-    InitialisationComponent
+    InitialisationComponent,
+    MastersTableComponent,
+    MasterProposalsTableComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),

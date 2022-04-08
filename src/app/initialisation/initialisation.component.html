@@ -1,6 +1,6 @@
 <mat-stepper linear #stepper >
 
-  <mat-step [editable]="false" [completed]="state >= STATES.ARIES_READY" >
+  <mat-step [editable]="false" [completed]="false" >
     <ng-template matStepLabel>Setup</ng-template>
     <ng-container [ngTemplateOutlet]="aries_form"></ng-container>
     <ng-container [ngTemplateOutlet]="initialisation_form"></ng-container>
@@ -9,15 +9,15 @@
     </button>
   </mat-step>
 
-  <mat-step [editable]="false" [completed]="state >= STATES.PUBLIC_DID_REGISTERED" >
+  <mat-step [editable]="false" [completed]="false" >
     <ng-template matStepLabel>Public DID</ng-template>
     <h1>Manual Registration</h1>
     <ng-container *ngIf="did">
       <p>DID: {{did.did}}</p>
       <p>Verkey: {{did.verkey}}</p>
     </ng-container>
-    <button mat-button [disabled]="(loading$ | async)" (click)="generateDID()" >Generate DID</button>
-    <button mat-button *ngIf="did" [disabled]="(loading$ | async)" (click)="registeredDID()" >Registered</button>
+    <button mat-button [disabled]="!!(loading$ | async)" (click)="generateDID()" >Generate DID</button>
+    <button mat-button *ngIf="did" [disabled]="!!(loading$ | async)" (click)="registeredDID()" >Registered</button>
     <h1>Automatic Registration (only with Von Network)</h1>
     <div class="form">
       <mat-form-field>
@@ -25,13 +25,13 @@
         <input matInput [formControl]="vonNetworkURL" required >
       </mat-form-field>
     </div>
-    <button mat-button [disabled]="vonNetworkURL.invalid || (loading$ | async)" (click)="autoRegisterDID()">Submit</button>
+    <button mat-button [disabled]="vonNetworkURL.invalid || !!(loading$ | async)" (click)="autoRegisterDID()">Submit</button>
   </mat-step>
 
-  <mat-step [editable]="false" [completed]="state >= STATES.COMPLETE" >
+  <mat-step [editable]="false" [completed]="false" >
     <ng-template matStepLabel>Initialisation Data</ng-template>
     <ng-container [ngTemplateOutlet]="initialisation_form"></ng-container>
-    <button mat-button [disabled]="initialisationForm.invalid || (loading$ | async)" (click)="submitAppInitialisation()">Submit</button>
+    <button mat-button [disabled]="initialisationForm.invalid || !!(loading$ | async)" (click)="submitAppInitialisation()">Submit</button>
   </mat-step>
 
   <mat-step [editable]="false" [completed]="false" >

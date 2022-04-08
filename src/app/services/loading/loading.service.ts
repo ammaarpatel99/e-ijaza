@@ -30,8 +30,6 @@ export class LoadingService {
       : { waitForLoading?: boolean, wrapAsLoading?: boolean }
       = {waitForLoading: true, wrapAsLoading: true}
   ): OperatorFunction<any, any> {
-    const startLoading = () => this.startLoading()
-    const stopLoading = () => this.stopLoading()
     const obs$ = waitForLoading
       ? this.loading$
         .pipe(
@@ -40,9 +38,9 @@ export class LoadingService {
       : of(true)
     return source =>
       obs$.pipe(
-        tap(() => wrapAsLoading ? startLoading() : undefined),
+        tap(() => wrapAsLoading ? this.startLoading() : undefined),
         switchMapTo(source),
-        tap(() => wrapAsLoading ? stopLoading() : undefined)
+        tap(() => wrapAsLoading ? this.stopLoading() : undefined)
       )
   }
 }
