@@ -35,6 +35,11 @@ import { SubjectProposalsTableComponent } from './subjects/subject-proposals-tab
 import { CredentialsComponent } from './credentials/credentials.component';
 import { HeldCredentialsTableComponent } from './credentials/held-credentials-table/held-credentials-table.component';
 import { IssuedCredentialsTableComponent } from './credentials/issued-credentials-table/issued-credentials-table.component';
+import { ProofsComponent } from './proofs/proofs.component';
+import { IncomingProofsComponent } from './proofs/incoming-proofs/incoming-proofs.component';
+import { OutgoingProofsComponent } from './proofs/outgoing-proofs/outgoing-proofs.component';
+import { OutgoingProofStateTreeComponent } from './proofs/outgoing-proof-state-tree/outgoing-proof-state-tree.component';
+import { MatTreeModule } from '@angular/material/tree';
 
 @NgModule({
   declarations: [
@@ -52,7 +57,11 @@ import { IssuedCredentialsTableComponent } from './credentials/issued-credential
     SubjectProposalsTableComponent,
     CredentialsComponent,
     HeldCredentialsTableComponent,
-    IssuedCredentialsTableComponent
+    IssuedCredentialsTableComponent,
+    ProofsComponent,
+    IncomingProofsComponent,
+    OutgoingProofsComponent,
+    OutgoingProofStateTreeComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),
@@ -75,7 +84,8 @@ import { IssuedCredentialsTableComponent } from './credentials/issued-credential
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
-    MatSelectModule
+    MatSelectModule,
+    MatTreeModule
   ],
   providers: [],
   bootstrap: [AppComponent]

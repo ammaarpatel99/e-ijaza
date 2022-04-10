@@ -1,0 +1,15 @@
+<h1>Make Proof Request</h1>
+<h1>Make Proposal</h1>
+<mat-form-field>
+  <mat-label>DID</mat-label>
+  <input matInput [formControl]="did" required>
+</mat-form-field>
+<mat-form-field>
+  <mat-label>Subject</mat-label>
+  <mat-select [disabled]="!!(loading$ | async)" [formControl]="subject">
+    <mat-option *ngFor="let _subject of subjects$ | async" [value]="_subject" >{{_subject}}</mat-option>
+  </mat-select>
+</mat-form-field>
+<button mat-button [disabled]="!!(loading$ | async)" (click)="submitProof()" >Submit Proof Request</button>
+<app-incoming-proofs></app-incoming-proofs>
+<app-outgoing-proofs></app-outgoing-proofs>

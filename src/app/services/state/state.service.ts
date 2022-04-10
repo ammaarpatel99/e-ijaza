@@ -23,6 +23,7 @@ import {
 } from "rxjs";
 import {map} from "rxjs/operators";
 import {ApiService} from "../api/api.service";
+import {LoadingService} from "../loading/loading.service";
 
 @Injectable({
   providedIn: 'root'
@@ -70,11 +71,11 @@ export class StateService implements OnDestroy {
   private readonly _issuedCredentials$ = new ReplaySubject<Immutable<IssuedCredential[]>>(1)
   readonly issuedCredentials$ = this._issuedCredentials$.asObservable()
 
-  private readonly _outgoingProofRequest$ = new ReplaySubject<Immutable<OutgoingProofRequest[]>>(1)
-  readonly outgoingProofRequest$ = this._outgoingProofRequest$.asObservable()
+  private readonly _outgoingProofRequests$ = new ReplaySubject<Immutable<OutgoingProofRequest[]>>(1)
+  readonly outgoingProofRequests$ = this._outgoingProofRequests$.asObservable()
 
-  private readonly _incomingProofRequest$ = new ReplaySubject<Immutable<IncomingProofRequest[]>>(1)
-  readonly incomingProofRequest$ = this._incomingProofRequest$.asObservable()
+  private readonly _incomingProofRequests$ = new ReplaySubject<Immutable<IncomingProofRequest[]>>(1)
+  readonly incomingProofRequests$ = this._incomingProofRequests$.asObservable()
 
   private readonly _reachableSubjects$ = new ReplaySubject<Immutable<ReachableSubject[]>>(1)
   readonly reachableSubjects$ = this._reachableSubjects$.asObservable()
@@ -95,7 +96,8 @@ export class StateService implements OnDestroy {
           first(),
           map(() => undefined)
         )
-      })
+      }),
+      this.loadingService.rxjsOperator()
     )
 
   private readonly _fetchState$: Observable<void> =
@@ -139,7 +141,8 @@ export class StateService implements OnDestroy {
       first(),
       tap(() => this.fetching$.next(true)),
       switchMapTo(this._fetchState$),
-      tap(() => this.fetching$.next(false))
+      tap(() => this.fetching$.next(false)),
+      this.loadingService.rxjsOperator()
     )
 
   private readonly fetchMasters$ =
@@ -253,7 +256,7 @@ export class StateService implements OnDestroy {
           else if (b.subject < a.subject) return -1
           else return 0
         })
-        this._outgoingProofRequest$.next(data)
+        this._outgoingProofRequests$.next(data)
       })
     )
 
@@ -267,7 +270,7 @@ export class StateService implements OnDestroy {
           else if (b.subject < a.subject) return -1
           else return 0
         })
-        this._incomingProofRequest$.next(data)
+        this._incomingProofRequests$.next(data)
       })
     )
 
@@ -283,7 +286,10 @@ export class StateService implements OnDestroy {
       })
     )
 
-  constructor(private readonly api: ApiService) {
+  constructor(
+    private readonly api: ApiService,
+    private readonly loadingService: LoadingService
+  ) {
     this.update$.subscribe()
     this.regularlyUpdate()
   }

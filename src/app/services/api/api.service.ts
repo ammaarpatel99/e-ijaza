@@ -1,11 +1,25 @@
 import { Injectable } from '@angular/core';
 import {EMPTY, Observable, OperatorFunction, switchMap} from "rxjs";
 import {
-  AriesInitialisationData, DIDDetails,
-  HeldCredential, HeldCredentialData, IncomingProofRequest, InitialisationData, IssuedCredential,
-  Master, MasterProposal,
-  MasterProposalData, MasterProposalVote, OutgoingProofRequest, PublicDIDInitialisationData, ReachableSubject,
-  Subject, SubjectProposal, SubjectProposalData, SubjectProposalVote,
+  AriesInitialisationData,
+  DIDDetails,
+  HeldCredential,
+  HeldCredentialData,
+  IncomingProofRequest,
+  InitialisationData,
+  IssuedCredential,
+  Master,
+  MasterProposal,
+  MasterProposalData,
+  MasterProposalVote,
+  NewProofRequest,
+  OutgoingProofRequest,
+  PublicDIDInitialisationData,
+  ReachableSubject,
+  Subject,
+  SubjectProposal,
+  SubjectProposalData,
+  SubjectProposalVote,
   UpdateReq,
   UpdateRes
 } from "@project-types/interface-api";
@@ -103,6 +117,21 @@ export class ApiService {
     )
 
   readonly issueCredential: OperatorFunction<IssuedCredential, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly respondToIncomingProofRequest: OperatorFunction<IncomingProofRequest, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly deleteOutgoingProofRequest: OperatorFunction<OutgoingProofRequest, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly createOutgoingProofRequest: OperatorFunction<NewProofRequest, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )

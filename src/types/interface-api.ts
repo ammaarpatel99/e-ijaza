@@ -156,13 +156,23 @@ export interface IssuedCredential {
 export interface OutgoingProofRequest {
   did: string
   subject: string
-  proof: OutgoingProofRequest[] | null | boolean // list of people | pending | result (true if master credential)
+  result: boolean | null
+  proof: OutgoingProofRequest[] | null | boolean // list of required credentials to prove | result (true if master credential)
+}
+
+export interface NewProofRequest {
+  did: string
+  subject: string
 }
 
 export interface IncomingProofRequest {
   did: string
   subject: string
-  proof: HeldCredential[] | false
+  proof: HeldCredentialData[] | false
+}
+
+export interface ResponseToIncomingProofRequest extends IncomingProofRequest{
+  reveal: boolean
 }
 
 export interface ReachableSubject {
