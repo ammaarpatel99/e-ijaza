@@ -5,14 +5,14 @@ import {
   getHeldCredentials,
   getIssuedCredentials,
   deleteConnection
-} from "@server/aries-wrapper";
+} from "../../../server-old2/aries-wrapper";
 import {
   HeldCredential, IssuedCredentials,
   MastersInternalSchema, MastersPublicSchema
 } from "@types";
-import {mastersInternalSchema, mastersPublicSchema} from "@server/schemas";
-import {issueCredential} from "@server/aries-wrapper/issue-credentials/issue-credential";
-import {revokeCredential} from "@server/aries-wrapper/issue-credentials/revoke-credential";
+import {mastersInternalSchema, mastersPublicSchema} from "../../../server-old2/schemas";
+import {issueCredential} from "../../../server-old2/aries-wrapper/issue-credentials/issue-credential";
+import {revokeCredential} from "../../../server-old2/aries-wrapper/issue-credentials/revoke-credential";
 
 
 export class Masters {

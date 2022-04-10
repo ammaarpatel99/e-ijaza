@@ -10,8 +10,7 @@ import { existsSync } from 'fs';
 
 import * as bodyParser from 'body-parser'
 
-import {router as apiRouter} from '@server/api'
-import {router as webhookRouter} from '@server/webhook/router'
+import {apiRouter, webhookRouter} from './src/server'
 import * as path from "path";
 
 import {spawn} from 'child_process'

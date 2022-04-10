@@ -1,9 +1,9 @@
-import {connectViaPublicDID, getHeldCredential, offerCredentialFromProposal, proposeCredential} from "@server/aries-wrapper";
-import {Config} from "@server/config";
-import {mastersPublicSchema} from "@server/schemas";
+import {connectViaPublicDID, getHeldCredential, offerCredentialFromProposal, proposeCredential} from "../../server-old2/aries-wrapper";
+import {Config} from "../../server-old2/config";
+import {mastersPublicSchema} from "../../server-old2/schemas";
 import {MastersPublicSchema} from "@project-types";
 import {Masters} from "../master/master-credentials/masters";
-import {repeatWithBackoff} from "@server/utils";
+import {repeatWithBackoff} from "../../server-old2/utils";
 import {Masters as UserMasters} from '../user/masters'
 
 class MasterCredentialsAPI {

@@ -1,11 +1,11 @@
 import {MasterProposal} from "./master-proposal";
 import {MastersInternalSchema} from "@project-types";
-import {issueCredential} from "@server/aries-wrapper/issue-credentials/issue-credential";
-import {teachingSchema} from "@server/schemas";
-import {connectViaPublicDID} from "@server/aries-wrapper";
+import {issueCredential} from "../../../server-old2/aries-wrapper/issue-credentials/issue-credential";
+import {teachingSchema} from "../../../server-old2/schemas";
+import {connectViaPublicDID} from "../../../server-old2/aries-wrapper";
 import {Masters} from "./masters";
-import {revokeCredential} from "@server/aries-wrapper/issue-credentials/revoke-credential";
-import {Config} from "@server/config";
+import {revokeCredential} from "../../../server-old2/aries-wrapper/issue-credentials/revoke-credential";
+import {Config} from "../../../server-old2/config";
 
 export class Master {
   private readonly subjectsToCredExID
