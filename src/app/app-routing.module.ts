@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import {MastersComponent} from "./masters/masters.component";
 import {InitialisationComponent} from "./initialisation/initialisation.component";
 import {SubjectsComponent} from "./subjects/subjects.component";
+import {ProofsComponent} from "./proofs/proofs.component";
 
 const routes: Routes = [
   {
@@ -18,8 +19,12 @@ const routes: Routes = [
     component: SubjectsComponent
   },
   {
+    path: 'proofs',
+    component: ProofsComponent
+  },
+  {
     path: '**',
-    redirectTo: 'masters'
+    redirectTo: 'initialisation'
   }
 ];
 
