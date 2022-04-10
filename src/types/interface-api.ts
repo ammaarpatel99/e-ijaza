@@ -71,7 +71,6 @@ interface UpdateRes_4 {
   issuedCredentials: boolean
   outgoingProofRequests: boolean
   incomingProofRequests: boolean
-  incomingProofRequestHandlers: boolean
   reachableSubjects: boolean
 }
 
@@ -136,9 +135,14 @@ export interface SubjectProposal extends SubjectProposalData {
   }
 }
 
+export interface SubjectProposalVote extends SubjectProposalData {
+  vote: boolean
+}
+
 export interface HeldCredential {
   issuerDID: string
   subject: string
+  autoReveal: boolean
 }
 
 export interface IssuedCredential {
@@ -156,11 +160,6 @@ export interface IncomingProofRequest {
   did: string
   subject: string
   proof: HeldCredential[] | false
-}
-
-export interface IncomingProofRequestHandler {
-  credential: HeldCredential
-  revealTo: string[] | null
 }
 
 export interface ReachableSubject {

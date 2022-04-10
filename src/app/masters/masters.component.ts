@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {StateService} from "../services/state/state.service";
-import {of, OperatorFunction, switchMap, withLatestFrom} from "rxjs";
+import {of, OperatorFunction, switchMap, combineLatest} from "rxjs";
 import {AppType, ProposalType} from "@project-types/interface-api";
 import {map, startWith} from "rxjs/operators";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -26,12 +26,12 @@ export class MastersComponent {
   readonly loading$ = this.loadingService.loading$
 
   private readonly reduceToProposableSubjects: OperatorFunction<Immutable<string[]>, Immutable<string[]>> =
-    source => source.pipe(
-      withLatestFrom(
-        this.did.valueChanges.pipe(startWith('')),
-        this.stateService.masters$,
-        this.stateService.masterProposals$
-      ),
+    source => combineLatest([
+      source,
+      this.did.valueChanges.pipe(startWith('')),
+      this.stateService.masters$,
+      this.stateService.masterProposals$
+    ]).pipe(
       map(([reachableSubjects, did, masters, proposals]) => {
         const masterSubjects = masters.filter(master => master.did === did).flatMap(master => master.subjects)
         const proposedSubjects = proposals.filter(proposal => proposal.did === did).map(proposal => proposal.subject)

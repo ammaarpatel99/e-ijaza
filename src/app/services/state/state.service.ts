@@ -1,11 +1,11 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {
-  AppType, HeldCredential, IncomingProofRequest, IncomingProofRequestHandler,
+  AppType, HeldCredential, IncomingProofRequest,
   InitialisationState, IssuedCredential,
   Master, MasterProposal,
-  MasterProposalData, OutgoingProofRequest, ReachableSubject,
+  OutgoingProofRequest, ReachableSubject,
   Subject, SubjectProposal,
-  SubjectProposalData, SubjectProposalType, UpdateReq
+  SubjectProposalType, UpdateReq
 } from '@project-types/interface-api'
 import {Immutable} from '@project-utils'
 import {
@@ -76,19 +76,11 @@ export class StateService implements OnDestroy {
   private readonly _incomingProofRequest$ = new ReplaySubject<Immutable<IncomingProofRequest[]>>(1)
   readonly incomingProofRequest$ = this._incomingProofRequest$.asObservable()
 
-  private readonly _incomingProofRequestHandler$ = new ReplaySubject<Immutable<IncomingProofRequestHandler[]>>(1)
-  readonly incomingProofRequestHandler$ = this._incomingProofRequestHandler$.asObservable()
-
   private readonly _reachableSubjects$ = new ReplaySubject<Immutable<ReachableSubject[]>>(1)
   readonly reachableSubjects$ = this._reachableSubjects$.asObservable()
 
   readonly reachableFromMasterCreds$ = this.reachableSubjects$.pipe(
     map(data => data.filter(subject => subject.reachableByMasterCredentials)),
-    map(data => data.map(subject => subject.name) as Immutable<string[]>)
-  )
-
-  readonly reachableWithoutMasterCreds$ = this.reachableSubjects$.pipe(
-    map(data => data.filter(subject => !subject.reachableByMasterCredentials)),
     map(data => data.map(subject => subject.name) as Immutable<string[]>)
   )
 
@@ -128,7 +120,6 @@ export class StateService implements OnDestroy {
           !data.issuedCredentials ? of(undefined) : this.fetchIssuedCredentials$,
           !data.outgoingProofRequests ? of(undefined) : this.fetchOutgoingProofRequests$,
           !data.incomingProofRequests ? of(undefined) : this.fetchIncomingProofRequests$,
-          !data.incomingProofRequestHandlers ? of(undefined) : this.fetchIncomingProofRequestHandlers$,
           !data.reachableSubjects ? of(undefined) : this.fetchReachableSubjects$
         ]).pipe(
           switchMapTo(of(undefined))
@@ -277,18 +268,6 @@ export class StateService implements OnDestroy {
           else return 0
         })
         this._incomingProofRequest$.next(data)
-      })
-    )
-
-  private readonly fetchIncomingProofRequestHandlers$ =
-    this.api.getIncomingProofRequestHandlers$.pipe(
-      map(data => {
-        data.sort((a, b) => {
-          if (a.credential < b.credential) return 1
-          else if (b.credential < a.credential) return -1
-          else return 0
-        })
-        this._incomingProofRequestHandler$.next(data)
       })
     )
 

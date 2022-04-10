@@ -1,0 +1,43 @@
+<ng-container *ngIf="!!(canMakeProposals$ | async)">
+  <h1>Add New Subject</h1>
+  <mat-form-field>
+    <mat-label>Parent</mat-label>
+    <input matInput [formControl]="newSubjectParent" required>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Child (new subject)</mat-label>
+    <input matInput [formControl]="newSubjectChild" required>
+  </mat-form-field>
+  <button mat-button [disabled]="!!(loading$ | async) || newSubject.invalid" (click)="proposeNewSubject()">Propose</button>
+
+
+  <h1>Add New Child Connection</h1>
+  <mat-form-field>
+    <mat-label>Parent</mat-label>
+    <input matInput [formControl]="newChildParent" required>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Child (new subject)</mat-label>
+    <mat-select [formControl]="newChildChild" required>
+      <mat-option *ngFor="let subject of (possibleNewChildren$ | async) || []" [value]="subject">{{subject}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button [disabled]="!!(loading$ | async) || newChild.invalid" (click)="proposeNewChild()">Propose</button>
+
+
+  <h1>Add New Component Set</h1>
+  <mat-form-field>
+    <mat-label>Parent</mat-label>
+    <input matInput [formControl]="newSetParent" required>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Component Set</mat-label>
+    <mat-select [formControl]="newSetChildren" required multiple>
+      <mat-option *ngFor="let subject of (possibleNewSetElements$ | async) || []" [value]="subject">{{subject}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <button mat-button [disabled]="!!(loading$ | async) || newComponentSet.invalid" (click)="proposeNewComponentSet()">Propose</button>
+</ng-container>
+
+<app-subjects-table></app-subjects-table>
+<app-subject-proposals-table></app-subject-proposals-table>

@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import {EMPTY, Observable, OperatorFunction, switchMap} from "rxjs";
 import {
   AriesInitialisationData, DIDDetails,
-  HeldCredential, IncomingProofRequest, IncomingProofRequestHandler, InitialisationData, IssuedCredential,
+  HeldCredential, IncomingProofRequest, InitialisationData, IssuedCredential,
   Master, MasterProposal,
   MasterProposalData, MasterProposalVote, OutgoingProofRequest, PublicDIDInitialisationData, ReachableSubject,
-  Subject, SubjectProposal,
+  Subject, SubjectProposal, SubjectProposalData, SubjectProposalVote,
   UpdateReq,
   UpdateRes
 } from "@project-types/interface-api";
@@ -38,8 +38,6 @@ export class ApiService {
 
   readonly getIncomingProofRequests$: Observable<IncomingProofRequest[]> = EMPTY
 
-  readonly getIncomingProofRequestHandlers$: Observable<IncomingProofRequestHandler[]> = EMPTY
-
   readonly getReachableSubjects$: Observable<ReachableSubject[]> = EMPTY
 
   readonly submitFullInitialisation: OperatorFunction<AriesInitialisationData & InitialisationData, void> =
@@ -70,6 +68,21 @@ export class ApiService {
     )
 
   readonly voteOnMasterProposal: OperatorFunction<MasterProposalVote, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly proposeSubject: OperatorFunction<SubjectProposalData, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly voteOnSubjectProposal: OperatorFunction<SubjectProposalVote, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly getDescendants: OperatorFunction<string, string[]> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )

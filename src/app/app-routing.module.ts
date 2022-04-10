@@ -1,15 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {ConfigComponent} from "./config/config.component";
 import {MastersComponent} from "./masters/masters.component";
-import {UserComponent} from "./user/user.component";
 import {InitialisationComponent} from "./initialisation/initialisation.component";
+import {SubjectsComponent} from "./subjects/subjects.component";
 
 const routes: Routes = [
-  {
-    path: 'config',
-    component: ConfigComponent
-  },
   {
     path: 'initialisation',
     component: InitialisationComponent
@@ -19,8 +14,8 @@ const routes: Routes = [
     component: MastersComponent
   },
   {
-    path: 'user',
-    component: UserComponent
+    path: 'subjects',
+    component: SubjectsComponent
   },
   {
     path: '**',

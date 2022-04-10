@@ -29,6 +29,9 @@ import { MatSortModule } from '@angular/material/sort';
 import {MatSelectModule} from "@angular/material/select";
 import { MastersTableComponent } from './masters/masters-table/masters-table.component';
 import { MasterProposalsTableComponent } from './masters/master-proposals-table/master-proposals-table.component';
+import { SubjectsComponent } from './subjects/subjects.component';
+import { SubjectsTableComponent } from './subjects/subjects-table/subjects-table.component';
+import { SubjectProposalsTableComponent } from './subjects/subject-proposals-table/subject-proposals-table.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +43,10 @@ import { MasterProposalsTableComponent } from './masters/master-proposals-table/
     UserComponent,
     InitialisationComponent,
     MastersTableComponent,
-    MasterProposalsTableComponent
+    MasterProposalsTableComponent,
+    SubjectsComponent,
+    SubjectsTableComponent,
+    SubjectProposalsTableComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),
