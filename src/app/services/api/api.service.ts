@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {EMPTY, Observable, OperatorFunction, switchMap} from "rxjs";
 import {
   AriesInitialisationData, DIDDetails,
-  HeldCredential, IncomingProofRequest, InitialisationData, IssuedCredential,
+  HeldCredential, HeldCredentialData, IncomingProofRequest, InitialisationData, IssuedCredential,
   Master, MasterProposal,
   MasterProposalData, MasterProposalVote, OutgoingProofRequest, PublicDIDInitialisationData, ReachableSubject,
   Subject, SubjectProposal, SubjectProposalData, SubjectProposalVote,
@@ -83,6 +83,26 @@ export class ApiService {
     )
 
   readonly getDescendants: OperatorFunction<string, string[]> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly updatePublicOnHeldCredential: OperatorFunction<HeldCredential, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly deleteHeldCredential: OperatorFunction<HeldCredentialData, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly revokeIssuedCredential: OperatorFunction<IssuedCredential, void> =
+    source => source.pipe(
+      switchMap(() => EMPTY)
+    )
+
+  readonly issueCredential: OperatorFunction<IssuedCredential, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )

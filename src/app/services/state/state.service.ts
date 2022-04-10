@@ -221,8 +221,8 @@ export class StateService implements OnDestroy {
         data.sort((a, b) => {
           if (a.subject < b.subject) return 1
           else if (b.subject < a.subject) return -1
-          else if (a.issuerDID < b.issuerDID) return 1
-          else if (b.issuerDID < a.issuerDID) return -1
+          else if (a.did < b.did) return 1
+          else if (b.did < a.did) return -1
           else return 0
         })
         this._heldCredentials$.next(data)
@@ -233,8 +233,8 @@ export class StateService implements OnDestroy {
     this.api.getIssuedCredentials$.pipe(
       map(data => {
         data.sort((a, b) => {
-          if (a.ownerDID < b.ownerDID) return 1
-          else if (b.ownerDID < a.ownerDID) return -1
+          if (a.did < b.did) return 1
+          else if (b.did < a.did) return -1
           else if (a.subject < b.subject) return 1
           else if (b.subject < a.subject) return -1
           else return 0

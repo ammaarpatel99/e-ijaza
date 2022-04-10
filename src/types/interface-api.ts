@@ -139,14 +139,17 @@ export interface SubjectProposalVote extends SubjectProposalData {
   vote: boolean
 }
 
-export interface HeldCredential {
-  issuerDID: string
+export interface HeldCredentialData {
+  did: string
   subject: string
-  autoReveal: boolean
+}
+
+export interface HeldCredential extends HeldCredentialData {
+  public: boolean
 }
 
 export interface IssuedCredential {
-  ownerDID: string
+  did: string
   subject: string
 }
 

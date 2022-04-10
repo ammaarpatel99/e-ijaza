@@ -32,6 +32,9 @@ import { MasterProposalsTableComponent } from './masters/master-proposals-table/
 import { SubjectsComponent } from './subjects/subjects.component';
 import { SubjectsTableComponent } from './subjects/subjects-table/subjects-table.component';
 import { SubjectProposalsTableComponent } from './subjects/subject-proposals-table/subject-proposals-table.component';
+import { CredentialsComponent } from './credentials/credentials.component';
+import { HeldCredentialsTableComponent } from './credentials/held-credentials-table/held-credentials-table.component';
+import { IssuedCredentialsTableComponent } from './credentials/issued-credentials-table/issued-credentials-table.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +49,10 @@ import { SubjectProposalsTableComponent } from './subjects/subject-proposals-tab
     MasterProposalsTableComponent,
     SubjectsComponent,
     SubjectsTableComponent,
-    SubjectProposalsTableComponent
+    SubjectProposalsTableComponent,
+    CredentialsComponent,
+    HeldCredentialsTableComponent,
+    IssuedCredentialsTableComponent
   ],
   imports: [
     BrowserModule.withServerTransition({appId: 'serverApp'}),
