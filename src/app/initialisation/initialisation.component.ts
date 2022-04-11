@@ -73,6 +73,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   ngAfterViewInit() {
     this.watchState()
+    this.stateService.update$.subscribe()
   }
 
   ngOnDestroy() {
@@ -110,8 +111,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
       InitialisationState.PUBLIC_DID_REGISTERED,
       InitialisationState.COMPLETE
     ]
-    let loadingFromState = true // starts with loading to wait for initial state
-    this.loadingService.startLoading() // wait for initial data
+    let loadingFromState = false
 
     this.stateService.initialisationState$.pipe(
       tap(state => {

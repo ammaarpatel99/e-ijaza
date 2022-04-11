@@ -41,10 +41,6 @@ export class SubjectsComponent implements OnInit, OnDestroy {
     children: new FormControl(undefined, Validators.required)
   })
 
-  readonly descendentsForSet$ = this.newSetParent.valueChanges.pipe(
-    this.api.getDescendants
-  )
-
   readonly possibleNewChildren$ = combineLatest([
     this.newChildParent.valueChanges,
     this.stateService.reachableFromMasterCreds$
@@ -53,7 +49,7 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   )
 
   readonly possibleNewSetElements$ = combineLatest([
-    this.newChildParent.valueChanges.pipe(
+    this.newSetParent.valueChanges.pipe(
       switchMap(parent => this.api.getDescendants(of(parent)).pipe(map(subjects => [parent, subjects] as [typeof parent, typeof subjects])))
     ),
     this.stateService.reachableFromMasterCreds$

@@ -4,6 +4,7 @@ import {MastersComponent} from "./masters/masters.component";
 import {InitialisationComponent} from "./initialisation/initialisation.component";
 import {SubjectsComponent} from "./subjects/subjects.component";
 import {ProofsComponent} from "./proofs/proofs.component";
+import {CredentialsComponent} from "./credentials/credentials.component";
 
 const routes: Routes = [
   {
@@ -21,6 +22,10 @@ const routes: Routes = [
   {
     path: 'proofs',
     component: ProofsComponent
+  },
+  {
+    path: 'credentials',
+    component: CredentialsComponent
   },
   {
     path: '**',

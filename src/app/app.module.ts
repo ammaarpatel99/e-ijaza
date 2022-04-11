@@ -11,14 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { ConfigComponent } from './config/config.component';
 import {HttpClientModule} from "@angular/common/http";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
-import { CredComponent } from './cred/cred.component';
 import { MastersComponent } from './masters/masters.component';
-import { UserComponent } from './user/user.component';
 import { InitialisationComponent } from './initialisation/initialisation.component';
 import {MatStepperModule} from "@angular/material/stepper";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
@@ -45,10 +42,7 @@ import { MatTreeModule } from '@angular/material/tree';
   declarations: [
     AppComponent,
     NavContainerComponent,
-    ConfigComponent,
-    CredComponent,
     MastersComponent,
-    UserComponent,
     InitialisationComponent,
     MastersTableComponent,
     MasterProposalsTableComponent,

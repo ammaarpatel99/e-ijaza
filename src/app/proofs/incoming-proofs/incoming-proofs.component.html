@@ -23,13 +23,13 @@
           </ng-container>
         </ng-container>
         <ng-template #noProof>
-          You are not authorized in {{row.subject}}
+          You are NOT authorized in {{row.subject}}
         </ng-template>
       </td>
     </ng-container>
 
     <!-- Vote Column -->
-    <ng-container matColumnDef="vote">
+    <ng-container matColumnDef="action">
       <th mat-header-cell *matHeaderCellDef>Vote</th>
       <td mat-cell *matCellDef="let row">
         <button mat-button color="primary" (click)="respondToRequest(row, true)" [disabled]="!!(loading$ | async)">Respond</button>

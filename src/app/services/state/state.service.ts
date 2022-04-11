@@ -141,8 +141,7 @@ export class StateService implements OnDestroy {
       first(),
       tap(() => this.fetching$.next(true)),
       switchMapTo(this._fetchState$),
-      tap(() => this.fetching$.next(false)),
-      this.loadingService.rxjsOperator()
+      tap(() => this.fetching$.next(false))
     )
 
   private readonly fetchMasters$ =
@@ -290,8 +289,8 @@ export class StateService implements OnDestroy {
     private readonly api: ApiService,
     private readonly loadingService: LoadingService
   ) {
-    this.update$.subscribe()
     this.regularlyUpdate()
+    this.update$.subscribe()
   }
 
   ngOnDestroy() {

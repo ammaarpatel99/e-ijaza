@@ -14,6 +14,14 @@ import {Immutable} from "@project-utils";
   styleUrls: ['./masters.component.scss']
 })
 export class MastersComponent {
+  readonly proposalForm = new FormGroup({
+    did: new FormControl('', Validators.required),
+    subject: new FormControl('', Validators.required)
+  })
+  get did() { return this.proposalForm.get('did') as FormControl }
+  get subject() { return this.proposalForm.get('subject') as FormControl }
+
+
   readonly canMakeProposal$ = this.stateService.appType$.pipe(
     switchMap(type => {
       if (type === AppType.USER) return of(true)
@@ -47,13 +55,6 @@ export class MastersComponent {
     }),
     this.reduceToProposableSubjects
   )
-
-  get did() { return this.proposalForm.get('did') as FormControl }
-  get subject() { return this.proposalForm.get('subject') as FormControl }
-  readonly proposalForm = new FormGroup({
-    did: new FormControl('', Validators.required),
-    subject: new FormControl('', Validators.required)
-  })
 
   constructor(
     private readonly stateService: StateService,

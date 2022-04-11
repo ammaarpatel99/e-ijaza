@@ -23,7 +23,7 @@ export class SubjectProposalsTableComponent implements AfterViewInit {
   readonly loading$ = this.loadingService.loading$
   readonly displayedColumns$ = this.stateService.appType$.pipe(
     map(type => {
-      if (type === AppType.CONTROLLER) return ['subject', 'action', 'child', 'vote']
+      if (type === AppType.USER) return ['subject', 'action', 'child', 'vote']
       else return ['subject', 'action', 'child', 'votes_for', 'votes_against', 'votes_total']
     })
   )
