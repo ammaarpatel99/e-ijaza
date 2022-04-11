@@ -1,4 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {Inject, Injectable, OnDestroy, PLATFORM_ID} from '@angular/core';
 import {
   AppType, HeldCredential, IncomingProofRequest,
   InitialisationState, IssuedCredential,
@@ -24,6 +24,7 @@ import {
 import {map} from "rxjs/operators";
 import {ApiService} from "../api/api.service";
 import {LoadingService} from "../loading/loading.service";
+import {isPlatformBrowser} from "@angular/common";
 
 @Injectable({
   providedIn: 'root'
@@ -287,9 +288,10 @@ export class StateService implements OnDestroy {
 
   constructor(
     private readonly api: ApiService,
-    private readonly loadingService: LoadingService
+    private readonly loadingService: LoadingService,
+    @Inject(PLATFORM_ID) platformID: string
   ) {
-    this.regularlyUpdate()
+    if (isPlatformBrowser(platformID)) this.regularlyUpdate()
     this.update$.subscribe()
   }
 

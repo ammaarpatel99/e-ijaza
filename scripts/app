@@ -27,14 +27,14 @@ elif [ "$1" = "start" ]; then
     -p "${3}:4000" -p "${4}:4001" -p "${6}:4002" \
     -e WEBHOOK_URL="localhost:4000/webhook" \
     -v "$(pwd):/home/indy/app" \
-    -v "$(pwd)/logs/${2}-$(date +"-%F-%T"):/home/indy/logs" \
+    -v "$(pwd)/logs/${2}-$(date +"%F-%H-%M-%S"):/home/indy/logs" \
     e_ijaza_app_dev
   else
     docker run -itd \
     --name "$2" \
     -p "${3}:4000" -p "${4}:4001" \
     -e WEBHOOK_URL="localhost:4000/webhook" \
-    -v "$(pwd)/logs/${2}-$(date +"-%F-%T"):/home/indy/logs" \
+    -v "$(pwd)/logs/${2}-$(date +"%F-%H-%M-%S"):/home/indy/logs" \
     e_ijaza_app
   fi
 
