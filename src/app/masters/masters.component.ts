@@ -42,7 +42,7 @@ export class MastersComponent {
 
   readonly subjectsCanProposeIn$ = this.stateService.appType$.pipe(
     switchMap(type => {
-      if (type === AppType.MASTER) return this.stateService.subjectNames$
+      if (type === AppType.CONTROLLER) return this.stateService.subjectNames$
       else return this.stateService.reachableFromMasterCreds$
     }),
     this.reduceToProposableSubjects

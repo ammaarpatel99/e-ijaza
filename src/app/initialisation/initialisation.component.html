@@ -68,7 +68,7 @@
   <div class="form">
     <mat-button-toggle-group [formControl]="appType" required >
       <mat-button-toggle [value]="APP_TYPES.USER">user</mat-button-toggle>
-      <mat-button-toggle [value]="APP_TYPES.MASTER">master server</mat-button-toggle>
+      <mat-button-toggle [value]="APP_TYPES.CONTROLLER">master server</mat-button-toggle>
     </mat-button-toggle-group>
     <ng-container *ngIf="appType.value === APP_TYPES.USER">
       <mat-form-field>

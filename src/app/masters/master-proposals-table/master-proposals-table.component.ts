@@ -23,7 +23,7 @@ export class MasterProposalsTableComponent implements AfterViewInit {
   readonly loading$ = this.loadingService.loading$
   readonly displayedColumns$ = this.stateService.appType$.pipe(
     map(type => {
-      if (type === AppType.MASTER) return ['did', 'action', 'subject', 'vote']
+      if (type === AppType.CONTROLLER) return ['did', 'action', 'subject', 'vote']
       else return ['did', 'action', 'subject', 'votes_for', 'votes_against', 'votes_total']
     })
   )

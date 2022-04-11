@@ -15,7 +15,7 @@ import {LoadingService} from "../services/loading/loading.service";
 import {ApiService} from "../services/api/api.service";
 
 const isAppTypeValidator: ValidatorFn = control => {
-  if ([AppType.MASTER, AppType.USER].includes(control.value)) return null
+  if ([AppType.CONTROLLER, AppType.USER].includes(control.value)) return null
   return {invalidAppType: {value: control.value}}
 }
 
@@ -82,7 +82,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   private manageValidators() {
     const subscription1 = this.appType.valueChanges.subscribe(value => {
-      if (value === AppType.MASTER) {
+      if (value === AppType.CONTROLLER) {
         this.masterDID.removeValidators(Validators.required)
         this.name.removeValidators(Validators.required)
       } else {

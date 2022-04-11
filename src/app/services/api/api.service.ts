@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {EMPTY, Observable, OperatorFunction, switchMap} from "rxjs";
 import {
   AriesInitialisationData,
-  DIDDetails,
+  DIDDetails, FullInitialisationData,
   HeldCredential,
   HeldCredentialData,
   IncomingProofRequest,
@@ -54,7 +54,7 @@ export class ApiService {
 
   readonly getReachableSubjects$: Observable<ReachableSubject[]> = EMPTY
 
-  readonly submitFullInitialisation: OperatorFunction<AriesInitialisationData & InitialisationData, void> =
+  readonly submitFullInitialisation: OperatorFunction<FullInitialisationData, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )

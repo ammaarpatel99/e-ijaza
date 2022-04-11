@@ -10,11 +10,11 @@ export interface AriesInitialisationData extends Partial<PublicDIDInitialisation
 
 export enum AppType {
   USER = 'USER',
-  MASTER = 'MASTER'
+  CONTROLLER = 'CONTROLLER'
 }
 
-export interface InitialisationData_master {
-  appType: AppType.MASTER
+export interface InitialisationData_controller {
+  appType: AppType.CONTROLLER
 }
 
 export interface InitialisationData_user {
@@ -23,7 +23,9 @@ export interface InitialisationData_user {
   name: string
 }
 
-export type InitialisationData = InitialisationData_master | InitialisationData_user
+export type InitialisationData = InitialisationData_controller | InitialisationData_user
+
+export type FullInitialisationData = AriesInitialisationData & InitialisationData
 
 export enum InitialisationState {
   START_STATE,
