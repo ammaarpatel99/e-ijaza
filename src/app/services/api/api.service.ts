@@ -75,7 +75,6 @@ export class ApiService {
   readonly getStateUpdate: OperatorFunction<UpdateReq, UpdateRes> =
     source => source.pipe(
       switchMap(() => {
-        console.log('fetching')
         return of(stateUpdateRes())
       })
     )

@@ -13,6 +13,7 @@ import {StateService} from "../services/state/state.service";
 import {map} from "rxjs/operators";
 import {LoadingService} from "../services/loading/loading.service";
 import {ApiService} from "../services/api/api.service";
+import {voidObs$} from "@project-utils";
 
 const isAppTypeValidator: ValidatorFn = control => {
   if ([AppType.CONTROLLER, AppType.USER].includes(control.value)) return null
@@ -159,7 +160,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   submitFullInitialisation() {
-    of(undefined).pipe(
+    voidObs$.pipe(
       tap(() => {
         if (this.ariesForm.invalid || this.initialisationForm.invalid) {
           throw new Error(`Can't submit full initialisation whilst forms are invalid`)
@@ -175,7 +176,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
         const initData: InitialisationData = {
           appType: this.appType.value,
           name: this.appType.value === AppType.USER ? this.name.value : undefined,
-          masterDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+          controllerDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
         }
         return {...ariesData, ...initData}
       }),
@@ -192,7 +193,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   registeredDID() {
-    of(undefined).pipe(
+    voidObs$.pipe(
       map(() => {
         const did = this.did
         if (!did) throw new Error(`Can't register did as component holds no did details`)
@@ -204,7 +205,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   autoRegisterDID() {
-    of (undefined).pipe(
+    voidObs$.pipe(
       map(() => {
         if (this.vonNetworkURL.invalid) {
           throw new Error(`Can't auto register did whilst forms are invalid`)
@@ -217,7 +218,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   submitAppInitialisation() {
-    of (undefined).pipe(
+    voidObs$.pipe(
       map(() => {
         if (this.initialisationForm.invalid) {
           throw new Error(`Can't submit app initialisation whilst forms are invalid`)
@@ -225,7 +226,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
         const initData: InitialisationData = {
           appType: this.appType.value,
           name: this.appType.value === AppType.USER ? this.name.value : undefined,
-          masterDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+          controllerDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
         }
         return initData
       }),

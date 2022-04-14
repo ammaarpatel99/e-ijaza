@@ -32,9 +32,7 @@ export function runAries(data: {
     `--tails-server-base-url ${data.tailsServerUrl} ` +
     '--notify-revocation ' +
     '--monitor-revocation-notification ' +
-    '--public-invites ' +
     '--auto-provision ' +
-    '--auto-accept-intro-invitation-requests ' +
     '--webhook-url http://localhost:4000/webhook ' +
     '--auto-ping-connection ' +
     '--preserve-exchange-records ' +

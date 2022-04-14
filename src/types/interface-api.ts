@@ -19,7 +19,7 @@ export interface InitialisationData_controller {
 
 export interface InitialisationData_user {
   appType: AppType.USER
-  masterDID: string
+  controllerDID: string
   name: string
 }
 
@@ -31,6 +31,7 @@ export enum InitialisationState {
   START_STATE,
   STARTING_ARIES,
   ARIES_READY,
+  REGISTERING_PUBLIC_DID,
   PUBLIC_DID_REGISTERED,
   INITIALISING,
   COMPLETE
@@ -46,21 +47,15 @@ export interface UpdateReq {
 }
 
 interface UpdateRes_1 {
-  state: InitialisationState.START_STATE | InitialisationState.STARTING_ARIES | InitialisationState.ARIES_READY
+  state: InitialisationState.START_STATE | InitialisationState.STARTING_ARIES | InitialisationState.ARIES_READY | InitialisationState.REGISTERING_PUBLIC_DID
 }
 
 interface UpdateRes_2 {
-  state: InitialisationState.PUBLIC_DID_REGISTERED
+  state: InitialisationState.PUBLIC_DID_REGISTERED | InitialisationState.INITIALISING
   did: string
 }
 
 interface UpdateRes_3 {
-  state: InitialisationState.INITIALISING
-  did: string
-  appType: AppType
-}
-
-interface UpdateRes_4 {
   state: InitialisationState.COMPLETE
   did: string
   appType: AppType
@@ -76,7 +71,7 @@ interface UpdateRes_4 {
   reachableSubjects: boolean
 }
 
-export type UpdateRes = UpdateRes_1 | UpdateRes_2 | UpdateRes_3 | UpdateRes_4
+export type UpdateRes = UpdateRes_1 | UpdateRes_2 | UpdateRes_3
 
 export interface Master {
   did: string

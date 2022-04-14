@@ -4,7 +4,7 @@
     <ng-template matStepLabel>Setup</ng-template>
     <ng-container [ngTemplateOutlet]="aries_form"></ng-container>
     <ng-container [ngTemplateOutlet]="initialisation_form"></ng-container>
-    <button mat-button [disabled]="ariesForm.invalid || initialisationForm.invalid || (loading$ | async)" (click)="submitFullInitialisation()" >
+    <button mat-button [disabled]="ariesForm.invalid || initialisationForm.invalid || !!(loading$ | async)" (click)="submitFullInitialisation()" >
       Submit
     </button>
   </mat-step>
