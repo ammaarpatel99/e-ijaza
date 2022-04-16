@@ -1,12 +1,9 @@
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { IssuedCredentialsTableDataSource, IssuedCredentialsTableItem } from './issued-credentials-table-datasource';
 import {Immutable} from "@project-utils";
-import {AppType, IssuedCredential, MasterProposal, MasterProposalData} from "@project-types/interface-api";
-import {MasterProposalsTableDataSource} from "../../masters/master-proposals-table/master-proposals-table-datasource";
-import {map} from "rxjs/operators";
+import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
@@ -38,14 +35,14 @@ export class IssuedCredentialsTableComponent implements AfterViewInit {
     this.table.dataSource = this.dataSource;
   }
 
-  vote(inFavour: boolean, proposal: MasterProposalData) {
+  vote(inFavour: boolean, proposal: API.MasterProposalData) {
     of({...proposal, vote: inFavour}).pipe(
       this.api.voteOnMasterProposal,
       this.loadingService.rxjsOperator()
     ).subscribe()
   }
 
-  revoke(cred: Immutable<IssuedCredential>) {
+  revoke(cred: Immutable<API.IssuedCredential>) {
     this.api.revokeIssuedCredential(of(cred)).pipe(
       this.loadingService.rxjsOperator()
     ).subscribe()

@@ -1,7 +1,7 @@
-import {Subject} from "@server/subject-ontology/subject";
-import {ChildRelation} from "@server/subject-ontology/child-relation";
-import {ComponentSet} from "@server/subject-ontology/component-set";
-import {ReadWriteMutex} from "@server/subject-ontology/read-write-mutex";
+import {Subject} from "./subject";
+import {ChildRelation} from "./child-relation";
+import {ComponentSet} from "./component-set";
+import {ReadWriteMutex} from "./read-write-mutex";
 
 export class SubjectOntology {
   static readonly instance = new SubjectOntology()

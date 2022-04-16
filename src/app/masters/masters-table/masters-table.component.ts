@@ -3,7 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import {MastersTableDataSource, MasterTableItem} from './masters-table-datasource';
 import {StateService} from "../../services/state/state.service";
-import {Master, ProposalType} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {LoadingService} from "../../services/loading/loading.service";
 import {of} from "rxjs";
@@ -26,7 +26,7 @@ export class MastersTableComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatTable) table!: MatTable<Immutable<MasterTableItem>>;
   dataSource: MastersTableDataSource;
-  expandedElement: Master | undefined
+  expandedElement: API.Master | undefined
 
   readonly loading$ = this.loadingService.loading$
 
@@ -47,7 +47,7 @@ export class MastersTableComponent implements AfterViewInit {
   }
 
   proposeRemoval(did: string, subject: string) {
-    of({did, subject, proposalType: ProposalType.REMOVE}).pipe(
+    of({did, subject, proposalType: API.ProposalType.REMOVE}).pipe(
       this.api.proposeMaster,
       this.loadingService.rxjsOperator()
     ).subscribe()

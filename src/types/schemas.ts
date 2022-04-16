@@ -1,12 +1,20 @@
-export enum ProposalAction {
-  ADD = 'add',
-  REMOVE = 'remove'
+export enum AppType {
+  USER = 'USER',
+  CONTROLLER = 'CONTROLLER'
+}
+
+export enum ProposalType {
+  ADD = 'ADD',
+  REMOVE = 'REMOVE'
 }
 
 export enum SubjectProposalType {
-  CHILD = 'child',
-  COMPONENT_SET = 'component_set'
+  CHILD = 'CHILD',
+  COMPONENT_SET = 'COMPONENT_SET'
 }
+
+
+
 
 export interface SubjectsSchema {
   subjects: string[]
@@ -20,10 +28,23 @@ export interface SubjectSchema {
   }
 }
 
-export interface SubjectProposalSchema {
+
+
+
+export interface SubjectProposal {
+  subject: string
+  action: ProposalType
+  change: {
+    type: SubjectProposalType.CHILD
+    child: string
+  } | {
+    type: SubjectProposalType.COMPONENT_SET
+    component_set: string[]
+  }
+}
+
+export interface SubjectProposalStateSchema {
   proposal: {
-    subject: string
-    action: ProposalAction
     votes: {
       [DID: string]: {
         cred_rev_id: string
@@ -31,30 +52,17 @@ export interface SubjectProposalSchema {
         connection_id: string
       } | boolean
     }
-    change: {
-      type: SubjectProposalType.CHILD
-      child: string
-    } | {
-      type: SubjectProposalType.COMPONENT_SET
-      component_set: string[]
-    }
-  }
+  } & SubjectProposal
 }
 
-export interface SubjectVoteSchema {
+export interface SubjectProposalVoteSchema {
   voteDetails: {
-    subject: string
-    action: ProposalAction
     voterDID: string
-    change: {
-      type: SubjectProposalType.CHILD
-      child: string
-    } | {
-      type: SubjectProposalType.COMPONENT_SET
-      component_set: string[]
-    }
-  }
+  } & SubjectProposal
 }
+
+
+
 
 export interface MastersInternalSchema {
   credentials: {
@@ -73,11 +81,16 @@ export interface MastersPublicSchema {
   }
 }
 
-export interface MastersProposalSchema {
+
+
+export interface MasterProposal {
+  did: string,
+  subject: string
+  action: ProposalType
+}
+
+export interface MasterProposalStateSchema {
   proposal: {
-    did: string,
-    subject: string
-    action: ProposalAction
     votes: {
       [DID: string]: {
         cred_rev_id: string
@@ -85,20 +98,30 @@ export interface MastersProposalSchema {
         connection_id: string
       } | boolean
     }
-  }
+  } & MasterProposal
 }
 
-export interface MastersVoteSchema {
+export interface MasterProposalVoteSchema {
   voteDetails: {
-    did: string
-    subject: string
-    action: ProposalAction
     voterDID: string
-  }
+  } & MasterProposal
 }
+
+
+
 
 export interface TeachingSchema {
   subject: string
 }
 
 
+
+export interface AppStateSchema {
+  appState: {
+    appType: AppType.USER
+    name: string
+    controllerDID: string
+  } | {
+    appType: AppType.CONTROLLER
+  }
+}

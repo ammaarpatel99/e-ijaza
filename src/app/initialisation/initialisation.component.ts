@@ -1,13 +1,7 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {
-  AppType,
-  AriesInitialisationData,
-  DIDDetails,
-  InitialisationData,
-  InitialisationState
-} from '@project-types/interface-api'
+import {API} from '@project-types'
 import {FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {AsyncSubject, finalize, of, takeUntil, tap} from "rxjs";
+import {AsyncSubject, finalize, takeUntil, tap} from "rxjs";
 import {MatStepper} from "@angular/material/stepper";
 import {StateService} from "../services/state/state.service";
 import {map} from "rxjs/operators";
@@ -16,7 +10,7 @@ import {ApiService} from "../services/api/api.service";
 import {voidObs$} from "@project-utils";
 
 const isAppTypeValidator: ValidatorFn = control => {
-  if ([AppType.CONTROLLER, AppType.USER].includes(control.value)) return null
+  if ([API.AppType.CONTROLLER, API.AppType.USER].includes(control.value)) return null
   return {invalidAppType: {value: control.value}}
 }
 
@@ -32,7 +26,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   readonly loading$ = this.loadingService.loading$
 
-  readonly APP_TYPES = AppType
+  readonly APP_TYPES = API.AppType
 
   get advertisedEndpoint() { return this.ariesForm.get('advertisedEndpoint') as FormControl }
   get genesisURL() { return this.ariesForm.get('genesisURL') as FormControl }
@@ -51,14 +45,14 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   get masterDID() { return this.initialisationForm.get('masterDID') as FormControl }
   get name() { return this.initialisationForm.get('name') as FormControl }
   readonly initialisationForm = new FormGroup({
-    appType: new FormControl(AppType.USER, [Validators.required, isAppTypeValidator]),
+    appType: new FormControl(API.AppType.USER, [Validators.required, isAppTypeValidator]),
     masterDID: new FormControl('', Validators.required),
     name: new FormControl('', Validators.required)
   })
 
   readonly vonNetworkURL = new FormControl('http://localhost:9000', Validators.required)
 
-  private _did: DIDDetails | undefined
+  private _did: API.DIDDetails | undefined
   get did() { return this._did }
 
   constructor(
@@ -84,7 +78,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   private manageValidators() {
     const subscription1 = this.appType.valueChanges.subscribe(value => {
-      if (value === AppType.CONTROLLER) {
+      if (value === API.AppType.CONTROLLER) {
         this.masterDID.removeValidators(Validators.required)
         this.name.removeValidators(Validators.required)
       } else {
@@ -107,10 +101,10 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   private watchState() {
     const nonLoadingStates = [
-      InitialisationState.START_STATE,
-      InitialisationState.ARIES_READY,
-      InitialisationState.PUBLIC_DID_REGISTERED,
-      InitialisationState.COMPLETE
+      API.InitialisationState.START_STATE,
+      API.InitialisationState.ARIES_READY,
+      API.InitialisationState.PUBLIC_DID_REGISTERED,
+      API.InitialisationState.COMPLETE
     ]
     let loadingFromState = false
 
@@ -167,16 +161,16 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
         }
       }),
       map(() => {
-        const ariesData: AriesInitialisationData = {
+        const ariesData: API.AriesInitialisationData = {
           genesisURL: this.genesisURL.value,
           tailsServerURL: this.tailsServerURL.value,
           advertisedEndpoint: this.advertisedEndpoint.value
         }
         if (this.autoRegisterPublicDID.value) ariesData.vonNetworkURL = this.initVonNetworkURL.value
-        const initData: InitialisationData = {
+        const initData: API.InitialisationData = {
           appType: this.appType.value,
-          name: this.appType.value === AppType.USER ? this.name.value : undefined,
-          controllerDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+          name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
+          controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
         }
         return {...ariesData, ...initData}
       }),
@@ -223,10 +217,10 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
         if (this.initialisationForm.invalid) {
           throw new Error(`Can't submit app initialisation whilst forms are invalid`)
         }
-        const initData: InitialisationData = {
+        const initData: API.InitialisationData = {
           appType: this.appType.value,
-          name: this.appType.value === AppType.USER ? this.name.value : undefined,
-          controllerDID: this.appType.value === AppType.USER ? this.masterDID.value : undefined
+          name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
+          controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
         }
         return initData
       }),

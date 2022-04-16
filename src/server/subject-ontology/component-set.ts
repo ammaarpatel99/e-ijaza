@@ -1,6 +1,6 @@
-import {Subject} from "@server/subject-ontology/subject";
-import {Search} from "@server/subject-ontology/search";
-import {Searchable} from "@server/subject-ontology/searchable";
+import {Subject} from "./subject";
+import {Search} from "./search";
+import {Searchable} from "./searchable";
 
 export class ComponentSet extends Searchable {
   private readonly searchState = new Map<Search, Set<Subject>>()

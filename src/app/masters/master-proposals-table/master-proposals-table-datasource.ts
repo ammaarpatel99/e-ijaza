@@ -2,7 +2,7 @@ import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import {map, startWith, switchMapTo} from 'rxjs/operators';
 import { Observable} from 'rxjs';
-import {MasterProposal} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
 
@@ -12,7 +12,7 @@ import {StateService} from "../../services/state/state.service";
  * encapsulate all logic for fetching and manipulating the displayed data
  * (including sorting, pagination, and filtering).
  */
-export class MasterProposalsTableDataSource extends DataSource<Immutable<MasterProposal>> {
+export class MasterProposalsTableDataSource extends DataSource<Immutable<API.MasterProposal>> {
   paginator: MatPaginator | undefined;
   readonly length$ = this.stateService.masterProposals$.pipe(
     map(data => data.length)
@@ -29,7 +29,7 @@ export class MasterProposalsTableDataSource extends DataSource<Immutable<MasterP
    * the returned stream emits new items.
    * @returns A stream of the items to be rendered.
    */
-  connect(): Observable<Immutable<MasterProposal[]>> {
+  connect(): Observable<Immutable<API.MasterProposal[]>> {
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
@@ -51,7 +51,7 @@ export class MasterProposalsTableDataSource extends DataSource<Immutable<MasterP
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<MasterProposal[]>): Immutable<MasterProposal[]> {
+  private getPagedData(data: Immutable<API.MasterProposal[]>): Immutable<API.MasterProposal[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);

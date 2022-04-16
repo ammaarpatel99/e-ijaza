@@ -4,7 +4,7 @@ import {MatTable} from '@angular/material/table';
 import {SubjectsTableDataSource, SubjectsTableItem} from './subjects-table-datasource';
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {Immutable} from "@project-utils";
-import {Master, ProposalType, SubjectProposalData, SubjectProposalType} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
@@ -26,7 +26,7 @@ export class SubjectsTableComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatTable) table!: MatTable<Immutable<SubjectsTableItem>>;
   dataSource: SubjectsTableDataSource;
-  expandedElement: Master | undefined
+  expandedElement: API.Master | undefined
 
   readonly loading$ = this.loadingService.loading$
 
@@ -47,14 +47,14 @@ export class SubjectsTableComponent implements AfterViewInit {
   }
 
   proposeRemoval(subject: string, toRemove: string | string[]) {
-    const data: SubjectProposalData = {
+    const data: API.SubjectProposalData = {
       subject,
-      proposalType: ProposalType.REMOVE,
+      proposalType: API.ProposalType.REMOVE,
       change: typeof toRemove === 'string' ? {
-        type: SubjectProposalType.CHILD,
+        type: API.SubjectProposalType.CHILD,
         child: toRemove
       } : {
-        type: SubjectProposalType.COMPONENT_SET,
+        type: API.SubjectProposalType.COMPONENT_SET,
         componentSet: toRemove
       }
     }

@@ -1,5 +1,5 @@
-import {Search} from "@server/subject-ontology/search";
-import {Subject} from "@server/subject-ontology/subject";
+import {Search} from "./search";
+import {Subject} from "./subject";
 
 export abstract class Searchable {
   private readonly searchPaths = new Map<Search, ReadonlySet<Subject> | null>()

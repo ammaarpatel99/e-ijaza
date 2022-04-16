@@ -3,7 +3,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import { HeldCredentialsTableDataSource } from './held-credentials-table-datasource';
 import {Immutable} from "@project-utils";
-import {HeldCredential, HeldCredentialData} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
@@ -16,7 +16,7 @@ import {of} from "rxjs";
 })
 export class HeldCredentialsTableComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatTable) table!: MatTable<Immutable<HeldCredential>>;
+  @ViewChild(MatTable) table!: MatTable<Immutable<API.HeldCredential>>;
   dataSource: HeldCredentialsTableDataSource;
 
   readonly loading$ = this.loadingService.loading$
@@ -35,7 +35,7 @@ export class HeldCredentialsTableComponent implements AfterViewInit {
     this.table.dataSource = this.dataSource;
   }
 
-  setPublic(cred: Immutable<HeldCredentialData>, makePublic: boolean) {
+  setPublic(cred: Immutable<API.HeldCredentialData>, makePublic: boolean) {
     this.api.updatePublicOnHeldCredential(
       of({...cred, public: makePublic})
     ).pipe(
@@ -43,7 +43,7 @@ export class HeldCredentialsTableComponent implements AfterViewInit {
     ).subscribe()
   }
 
-  delete(cred: Immutable<HeldCredential>) {
+  delete(cred: Immutable<API.HeldCredential>) {
     this.api.deleteHeldCredential(of(cred)).pipe(
       this.loadingService.rxjsOperator()
     ).subscribe()

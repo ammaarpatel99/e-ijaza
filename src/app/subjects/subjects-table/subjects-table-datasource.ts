@@ -1,12 +1,12 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import {map, startWith, switchMapTo} from 'rxjs/operators';
-import {Observable, OperatorFunction, switchMap, withLatestFrom} from 'rxjs';
-import {Subject} from "@project-types/interface-api";
+import {Observable, OperatorFunction, switchMap} from 'rxjs';
+import {API} from "@project-types";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
 
-export interface SubjectsTableItem extends Subject {
+export interface SubjectsTableItem extends API.Subject {
   removableSubjects: string[]
   removableComponentSets: string[][]
 }
@@ -16,13 +16,13 @@ export interface SubjectsTableItem extends Subject {
  * encapsulate all logic for fetching and manipulating the displayed data
  * (including sorting, pagination, and filtering).
  */
-export class SubjectsTableDataSource extends DataSource<Immutable<Subject>> {
+export class SubjectsTableDataSource extends DataSource<Immutable<API.Subject>> {
   paginator: MatPaginator | undefined;
   readonly length$ = this.stateService.subjects$.pipe(
     map(data => data.length)
   )
 
-  private readonly addAdditionalData: OperatorFunction<Immutable<Subject[]>, Immutable<SubjectsTableItem[]>> =
+  private readonly addAdditionalData: OperatorFunction<Immutable<API.Subject[]>, Immutable<SubjectsTableItem[]>> =
     source => source.pipe(
       switchMap(data => {
         return this.stateService.reachableFromMasterCreds$.pipe(
@@ -73,7 +73,7 @@ export class SubjectsTableDataSource extends DataSource<Immutable<Subject>> {
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<Subject[]>): Immutable<Subject[]> {
+  private getPagedData(data: Immutable<API.Subject[]>): Immutable<API.Subject[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);

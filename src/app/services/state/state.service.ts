@@ -1,12 +1,5 @@
 import {Inject, Injectable, OnDestroy, PLATFORM_ID} from '@angular/core';
-import {
-  AppType, HeldCredential, IncomingProofRequest,
-  InitialisationState, IssuedCredential,
-  Master, MasterProposal,
-  OutgoingProofRequest, ReachableSubject,
-  Subject, SubjectProposal,
-  SubjectProposalType, UpdateReq
-} from '@project-types/interface-api'
+import {API} from '@project-types'
 import {Immutable} from '@project-utils'
 import {
   AsyncSubject,
@@ -42,43 +35,43 @@ export class StateService implements OnDestroy {
   private waiting = false
   private readonly fetching$ = new BehaviorSubject(false)
 
-  private readonly _initialisationState$ = new ReplaySubject<Immutable<InitialisationState>>(1)
+  private readonly _initialisationState$ = new ReplaySubject<Immutable<API.InitialisationState>>(1)
   readonly initialisationState$ = this._initialisationState$.asObservable()
 
   private readonly _did$ = new ReplaySubject<string>(1)
   readonly did$ = this._did$.asObservable()
 
-  private readonly _appType$ = new ReplaySubject<AppType>(1)
+  private readonly _appType$ = new ReplaySubject<API.AppType>(1)
   readonly appType$ = this._appType$.asObservable()
 
-  private readonly _masters$ = new ReplaySubject<Immutable<Master[]>>(1)
+  private readonly _masters$ = new ReplaySubject<Immutable<API.Master[]>>(1)
   readonly masters$ = this._masters$.asObservable()
 
-  private readonly _masterProposals$ = new ReplaySubject<Immutable<MasterProposal[]>>(1)
+  private readonly _masterProposals$ = new ReplaySubject<Immutable<API.MasterProposal[]>>(1)
   readonly masterProposals$ = this._masterProposals$.asObservable()
 
-  private readonly _subjects$ = new ReplaySubject<Immutable<Subject[]>>(1)
+  private readonly _subjects$ = new ReplaySubject<Immutable<API.Subject[]>>(1)
   readonly subjects$ = this._subjects$.asObservable()
   readonly subjectNames$ = this.subjects$.pipe(
     map(arr => arr.map(subject => subject.name) as Immutable<string[]>)
   )
 
-  private readonly _subjectProposals$ = new ReplaySubject<Immutable<SubjectProposal[]>>(1)
+  private readonly _subjectProposals$ = new ReplaySubject<Immutable<API.SubjectProposal[]>>(1)
   readonly subjectProposals$ = this._subjectProposals$.asObservable()
 
-  private readonly _heldCredentials$ = new ReplaySubject<Immutable<HeldCredential[]>>(1)
+  private readonly _heldCredentials$ = new ReplaySubject<Immutable<API.HeldCredential[]>>(1)
   readonly heldCredentials$ = this._heldCredentials$.asObservable()
 
-  private readonly _issuedCredentials$ = new ReplaySubject<Immutable<IssuedCredential[]>>(1)
+  private readonly _issuedCredentials$ = new ReplaySubject<Immutable<API.IssuedCredential[]>>(1)
   readonly issuedCredentials$ = this._issuedCredentials$.asObservable()
 
-  private readonly _outgoingProofRequests$ = new ReplaySubject<Immutable<OutgoingProofRequest[]>>(1)
+  private readonly _outgoingProofRequests$ = new ReplaySubject<Immutable<API.OutgoingProofRequest[]>>(1)
   readonly outgoingProofRequests$ = this._outgoingProofRequests$.asObservable()
 
-  private readonly _incomingProofRequests$ = new ReplaySubject<Immutable<IncomingProofRequest[]>>(1)
+  private readonly _incomingProofRequests$ = new ReplaySubject<Immutable<API.IncomingProofRequest[]>>(1)
   readonly incomingProofRequests$ = this._incomingProofRequests$.asObservable()
 
-  private readonly _reachableSubjects$ = new ReplaySubject<Immutable<ReachableSubject[]>>(1)
+  private readonly _reachableSubjects$ = new ReplaySubject<Immutable<API.ReachableSubject[]>>(1)
   readonly reachableSubjects$ = this._reachableSubjects$.asObservable()
 
   readonly reachableFromMasterCreds$ = this.reachableSubjects$.pipe(
@@ -103,17 +96,17 @@ export class StateService implements OnDestroy {
 
   private readonly _fetchState$: Observable<void> =
     of(undefined).pipe(
-      map((): UpdateReq => ({timestamp: this.serverTimestamp})),
+      map((): API.State.UpdateReq => ({timestamp: this.serverTimestamp})),
       this.api.getStateUpdate,
       tap(data => {
         this.innerTimestamp = StateService.TIMESTAMP_NOW()
         this._initialisationState$.next(data.state)
         if ("did" in data) this._did$.next(data.did)
         if ('appType' in data) this._appType$.next(data.appType)
-        if (data.state === InitialisationState.COMPLETE) this.serverTimestamp = data.timestamp
+        if (data.state === API.InitialisationState.COMPLETE) this.serverTimestamp = data.timestamp
       }),
       switchMap(data => {
-        if (data.state !== InitialisationState.COMPLETE) return of(undefined)
+        if (data.state !== API.InitialisationState.COMPLETE) return of(undefined)
         return forkJoin([
           !data.masters ? of(undefined) : this.fetchMasters$,
           !data.masterProposals ? of(undefined) : this.fetchMasterProposals$,
@@ -196,7 +189,7 @@ export class StateService implements OnDestroy {
           else if (b.change.type < a.change.type) return -1
           else if (a.proposalType < b.proposalType) return 1
           else if (b.proposalType < a.proposalType) return -1
-          else if (a.change.type === SubjectProposalType.CHILD) {
+          else if (a.change.type === API.SubjectProposalType.CHILD) {
             if (a.change.child < (b.change as any).child) return 1
             else if ((b.change as any).child < a.change.child) return -1
             else return 0

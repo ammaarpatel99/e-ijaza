@@ -1,32 +1,27 @@
 import {BehaviorSubject, catchError, first, from, of, switchMap, tap} from "rxjs";
-import {InitialisationStateData} from "@project-types/server";
 import {Immutable, repeatWithBackoff$, voidObs$} from "@project-utils";
-import {
-  AriesInitialisationData,
-  FullInitialisationData,
-  InitialisationData,
-  InitialisationState
-} from "@project-types/interface-api";
-import {createDID, getPublicDID, isAlive, setPublicDID} from "@server/aries-api-wrapper"
+import {Server, API} from "@project-types";
+import {createDID, getPublicDID, isAlive, setPublicDID} from "../aries-api"
 import {map} from "rxjs/operators";
 import {runAries} from "./run-aries";
 import axios from "axios";
+import {initialiseController$, initialiseUser$} from './initialise'
 
 export class Initialisation {
   static readonly instance = new Initialisation()
   private constructor() { }
 
-  private readonly _initialisationData$ = new BehaviorSubject<Immutable<InitialisationStateData>>({state: InitialisationState.START_STATE})
+  private readonly _initialisationData$ = new BehaviorSubject<Immutable<Server.InitialisationStateData>>({state: Server.InitialisationState.START_STATE})
   readonly initialisationData$ = this._initialisationData$.asObservable()
-  private initialisationDataCache: Immutable<InitialisationData> | undefined
+  private initialisationDataCache: Immutable<API.InitialisationData> | undefined
 
-  fullInitialisation$(data: FullInitialisationData) {
+  fullInitialisation$(data: API.FullInitialisationData) {
     return of(data).pipe(
       switchMap(data =>
         this.initialisationData$.pipe(
           first(),
           map(data => {
-            if (data.state !== InitialisationState.START_STATE) {
+            if (data.state !== Server.InitialisationState.START_STATE) {
               throw new Error(`Attempting to complete full initialisation whilst in incorrect state.`)
             }
           }),
@@ -54,7 +49,7 @@ export class Initialisation {
     return this.initialisationData$.pipe(
       first(),
       map(data => {
-        if (data.state >= InitialisationState.STARTING_ARIES) {
+        if (data.state !== Server.InitialisationState.START_STATE) {
           throw new Error(`Attempting to connect to Aries whilst in incorrect state.`)
         }
       }),
@@ -78,7 +73,7 @@ export class Initialisation {
         this.initialisationData$.pipe(
           first(),
           map(data => {
-            if (data.state !== InitialisationState.ARIES_READY) {
+            if (data.state !== Server.InitialisationState.ARIES_READY) {
               throw new Error(`Attempting to auto register public did whilst in incorrect state.`)
             }
           }),
@@ -96,7 +91,7 @@ export class Initialisation {
         this.initialisationData$.pipe(
           first(),
           map(data => {
-            if (data.state !== InitialisationState.ARIES_READY) {
+            if (data.state !== Server.InitialisationState.ARIES_READY) {
               throw new Error(`Attempting to register public did whilst in incorrect state.`)
             }
           }),
@@ -115,13 +110,13 @@ export class Initialisation {
     )
   }
 
-  initialise$(data: InitialisationData) {
+  initialise$(data: API.InitialisationData) {
     return of(data).pipe(
       switchMap(data =>
         this.initialisationData$.pipe(
           first(),
           map(data => {
-            if (data.state !== InitialisationState.PUBLIC_DID_REGISTERED) {
+            if (data.state !== Server.InitialisationState.PUBLIC_DID_REGISTERED) {
               throw new Error(`Attempting to initialise whilst in incorrect state.`)
             }
           }),
@@ -135,14 +130,14 @@ export class Initialisation {
   private initialiseIfData$() {
     return voidObs$.pipe(
       map(() => this.initialisationDataCache),
-      switchMap(data => data ? this._initialise$(data) : of(undefined as void))
+      switchMap(data => data ? this._initialise$(data) : voidObs$)
     )
   }
 
   private fetchPublicDID$() {
     return voidObs$.pipe(
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.REGISTERING_PUBLIC_DID})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.REGISTERING_PUBLIC_DID})
       }),
       switchMap(() => from(getPublicDID())),
       map(result => result.result?.did),
@@ -151,8 +146,8 @@ export class Initialisation {
         return did
       }),
       tap({
-        next: did => this._initialisationData$.next({state: InitialisationState.PUBLIC_DID_REGISTERED, did}),
-        error: () => this._initialisationData$.next({state: InitialisationState.ARIES_READY})
+        next: did => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY})
       }),
       map(() => undefined as void)
     )
@@ -161,15 +156,15 @@ export class Initialisation {
   private _registerDID$(did: string) {
     return of(did).pipe(
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.REGISTERING_PUBLIC_DID})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.REGISTERING_PUBLIC_DID})
       }),
       switchMap(did =>
         from(setPublicDID({did}))
           .pipe(map(() => did))
       ),
       tap({
-        next: did => this._initialisationData$.next({state: InitialisationState.PUBLIC_DID_REGISTERED, did}),
-        error: () => this._initialisationData$.next({state: InitialisationState.ARIES_READY})
+        next: did => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY})
       }),
       map(() => undefined as void)
     )
@@ -178,16 +173,16 @@ export class Initialisation {
   private _autoRegisterDID$(vonNetworkURL: string) {
     return voidObs$.pipe(
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.REGISTERING_PUBLIC_DID})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.REGISTERING_PUBLIC_DID})
       }),
       switchMap(() => this.generateDID$()),
       switchMap(didData =>
-        from(axios.post(vonNetworkURL + '/register', {role: 'ENDORSER', alias: null, ...didData}))
+        from(axios.post(vonNetworkURL + '/register', {role: 'ENDORSER', alias: null, did: didData.did, verkey: didData.verkey}))
           .pipe(map(() => didData.did))
       ),
       tap({
-        next: did => this._initialisationData$.next({state: InitialisationState.PUBLIC_DID_REGISTERED, did}),
-        error: () => this._initialisationData$.next({state: InitialisationState.ARIES_READY})
+        next: did => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY})
       }),
       map(() => undefined as void)
     )
@@ -200,7 +195,7 @@ export class Initialisation {
       repeatWithBackoff$<undefined>({
         initialTimeout: 1000,
         exponential: false,
-        backoff: 500,
+        backoff: 1000,
         maxRepeats: 20,
         failCallback: () => { throw new Error(`Aries didn't start`) }
       }),
@@ -208,10 +203,10 @@ export class Initialisation {
     )
   }
 
-  private createAriesAgent$(data: Omit<AriesInitialisationData, 'vonNetworkURL'>) {
+  private createAriesAgent$(data: Omit<API.AriesInitialisationData, 'vonNetworkURL'>) {
     return of(data).pipe(
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.STARTING_ARIES})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.STARTING_ARIES})
       }),
       map(data => runAries({
         advertisedEndpoint: data.advertisedEndpoint,
@@ -221,12 +216,12 @@ export class Initialisation {
         walletName: 'walletName'
       })),
       tap({
-        error: () => this._initialisationData$.next({state: InitialisationState.START_STATE})
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.START_STATE})
       }),
       switchMap(() => this.waitForAries$()),
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.ARIES_READY}),
-        error: () => this._initialisationData$.next({state: InitialisationState.START_STATE})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY}),
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.START_STATE})
       }),
       map(() => undefined as void)
     )
@@ -235,41 +230,49 @@ export class Initialisation {
   private _connectToAries$() {
     return voidObs$.pipe(
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.STARTING_ARIES})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.STARTING_ARIES})
       }),
       switchMap(() => from(isAlive())),
       map(result => {
         if (!result.alive) throw new Error(`Can't establish connection with Aries agent.`)
       }),
       tap({
-        next: () => this._initialisationData$.next({state: InitialisationState.ARIES_READY}),
-        error: () => this._initialisationData$.next({state: InitialisationState.START_STATE})
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY}),
+        error: () => this._initialisationData$.next({state: Server.InitialisationState.START_STATE})
       }),
       map(() => undefined as void)
     )
   }
 
-  private _initialise$(data: InitialisationData) {
+  private _initialise$(data: API.InitialisationData) {
     return of(data).pipe(
       tap({
         next: () => this._initialisationData$.next({
-          state: InitialisationState.INITIALISING,
+          state: Server.InitialisationState.INITIALISING,
           did: (this._initialisationData$.value as {did: string}).did
         })
       }),
-      switchMap(data => of(data)), // TODO: initialise everything
+      switchMap(data => (
+          data.appType === API.AppType.CONTROLLER
+          ? initialiseController$(data)
+          : initialiseUser$(data)
+        ).pipe(
+          map(() => data)
+        )
+      ),
       tap({
         next: data => this._initialisationData$.next({
-          state: InitialisationState.COMPLETE,
+          state: Server.InitialisationState.COMPLETE,
           did: (this._initialisationData$.value as {did: string}).did,
           name: 'e-Ijaza controller',
           ...data
         }),
         error: () => this._initialisationData$.next({
-          state: InitialisationState.PUBLIC_DID_REGISTERED,
+          state: Server.InitialisationState.PUBLIC_DID_REGISTERED,
           did: (this._initialisationData$.value as {did: string}).did
         })
-      })
+      }),
+      map(() => undefined as void)
     )
   }
 }

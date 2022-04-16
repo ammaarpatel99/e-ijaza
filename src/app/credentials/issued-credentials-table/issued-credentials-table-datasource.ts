@@ -2,11 +2,11 @@ import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import {map, startWith, switchMapTo} from 'rxjs/operators';
 import {Observable, OperatorFunction, combineLatest} from 'rxjs';
-import {IssuedCredential} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
 
-export interface IssuedCredentialsTableItem extends IssuedCredential {
+export interface IssuedCredentialsTableItem extends API.IssuedCredential {
   reachable: boolean
 }
 
@@ -21,7 +21,7 @@ export class IssuedCredentialsTableDataSource extends DataSource<Immutable<Issue
     map(data => data.length)
   )
 
-  private readonly addData: OperatorFunction<Immutable<IssuedCredential[]>, Immutable<IssuedCredentialsTableItem[]>> =
+  private readonly addData: OperatorFunction<Immutable<API.IssuedCredential[]>, Immutable<IssuedCredentialsTableItem[]>> =
     source => combineLatest([
       source,
       this.stateService.reachableSubjects$.pipe(map(subjects => subjects.map(subject => subject.name)))
@@ -63,7 +63,7 @@ export class IssuedCredentialsTableDataSource extends DataSource<Immutable<Issue
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<IssuedCredential[]>): Immutable<IssuedCredential[]> {
+  private getPagedData(data: Immutable<API.IssuedCredential[]>): Immutable<API.IssuedCredential[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);

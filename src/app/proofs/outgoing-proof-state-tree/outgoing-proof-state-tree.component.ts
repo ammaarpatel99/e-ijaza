@@ -1,15 +1,15 @@
 import {Component, Input} from '@angular/core';
 import { MatTreeFlatDataSource, MatTreeFlattener } from '@angular/material/tree';
 import { FlatTreeControl } from '@angular/cdk/tree';
-import {OutgoingProofRequest} from "@project-types/interface-api";
+import {API} from "@project-types";
 
-export type TreeNode = OutgoingProofRequest
+export type TreeNode = API.OutgoingProofRequest
 
 /**
  * Flattened tree node that has been created from a FileNode through the flattener. Flattened
  * nodes include level index and whether they can be expanded or not.
  */
-export interface FlatTreeNode extends OutgoingProofRequest {
+export interface FlatTreeNode extends API.OutgoingProofRequest {
   level: number;
 }
 
@@ -20,7 +20,7 @@ export interface FlatTreeNode extends OutgoingProofRequest {
 })
 export class OutgoingProofStateTreeComponent {
   @Input()
-  set proof(proof: OutgoingProofRequest) {
+  set proof(proof: API.OutgoingProofRequest) {
     this.dataSource.data = [proof]
   }
 

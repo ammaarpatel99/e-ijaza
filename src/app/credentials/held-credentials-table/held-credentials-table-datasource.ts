@@ -4,14 +4,14 @@ import {map, startWith, switchMapTo} from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import {StateService} from "../../services/state/state.service";
 import {Immutable} from "@project-utils";
-import {HeldCredential} from "@project-types/interface-api";
+import {API} from "@project-types";
 
 /**
  * Data source for the HeldCredentialsTable view. This class should
  * encapsulate all logic for fetching and manipulating the displayed data
  * (including sorting, pagination, and filtering).
  */
-export class HeldCredentialsTableDataSource extends DataSource<Immutable<HeldCredential>> {
+export class HeldCredentialsTableDataSource extends DataSource<Immutable<API.HeldCredential>> {
   paginator: MatPaginator | undefined;
   readonly length$ = this.stateService.heldCredentials$.pipe(
     map(data => data.length)
@@ -28,7 +28,7 @@ export class HeldCredentialsTableDataSource extends DataSource<Immutable<HeldCre
    * the returned stream emits new items.
    * @returns A stream of the items to be rendered.
    */
-  connect(): Observable<Immutable<HeldCredential[]>> {
+  connect(): Observable<Immutable<API.HeldCredential[]>> {
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
@@ -50,7 +50,7 @@ export class HeldCredentialsTableDataSource extends DataSource<Immutable<HeldCre
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<HeldCredential[]>): Immutable<HeldCredential[]> {
+  private getPagedData(data: Immutable<API.HeldCredential[]>): Immutable<API.HeldCredential[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);

@@ -4,7 +4,7 @@ import {ApiService} from "../services/api/api.service";
 import {LoadingService} from "../services/loading/loading.service";
 import {FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
 import {AsyncSubject, combineLatest, of, switchMap, takeUntil, tap} from "rxjs";
-import {AppType, ProposalType, SubjectProposalType} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {map} from "rxjs/operators";
 
 @Component({
@@ -17,7 +17,7 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   readonly loading$ = this.loadingService.loading$
 
   readonly canMakeProposals$ = this.stateService.appType$.pipe(
-    map(appType => appType === AppType.USER)
+    map(appType => appType === API.AppType.USER)
   )
 
   get newSubjectParent() {return this.newSubject.get('parent') as FormControl}
@@ -144,9 +144,9 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   proposeNewSubject() {
     this.api.proposeSubject(of({
       subject: this.newSubjectParent.value,
-      proposalType: ProposalType.ADD,
+      proposalType: API.ProposalType.ADD,
       change: {
-        type: SubjectProposalType.CHILD,
+        type: API.SubjectProposalType.CHILD,
         child: this.newSubjectChild.value
       }
     })).pipe(
@@ -157,9 +157,9 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   proposeNewChild() {
     this.api.proposeSubject(of({
       subject: this.newChildParent.value,
-      proposalType: ProposalType.ADD,
+      proposalType: API.ProposalType.ADD,
       change: {
-        type: SubjectProposalType.CHILD,
+        type: API.SubjectProposalType.CHILD,
         child: this.newChildChild.value
       }
     })).pipe(
@@ -170,9 +170,9 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   proposeNewComponentSet() {
     this.api.proposeSubject(of({
       subject: this.newSetParent.value,
-      proposalType: ProposalType.ADD,
+      proposalType: API.ProposalType.ADD,
       change: {
-        type: SubjectProposalType.COMPONENT_SET,
+        type: API.SubjectProposalType.COMPONENT_SET,
         componentSet: this.newSetChildren.value
       }
     })).pipe(

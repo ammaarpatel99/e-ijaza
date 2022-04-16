@@ -24,10 +24,8 @@
     ],
     "paths": {
       "@project-types": ["src/types"],
-      "@project-types/*": ["src/types/*"],
       "@project-utils": ["src/utils"],
-      "@project-utils/*": ["src/utils/*"],
-      "@server/*": ["src/server/*"]
+      "@server": ["src/server"]
     }
   },
   "angularCompilerOptions": {

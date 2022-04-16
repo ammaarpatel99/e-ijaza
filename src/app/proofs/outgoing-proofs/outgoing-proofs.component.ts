@@ -2,7 +2,7 @@ import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTable } from '@angular/material/table';
 import { OutgoingProofsDataSource } from './outgoing-proofs-datasource';
-import {OutgoingProofRequest} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
@@ -24,9 +24,9 @@ import {of} from "rxjs";
 })
 export class OutgoingProofsComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatTable) table!: MatTable<Immutable<OutgoingProofRequest>>;
+  @ViewChild(MatTable) table!: MatTable<Immutable<API.OutgoingProofRequest>>;
   dataSource: OutgoingProofsDataSource;
-  expandedElement: OutgoingProofRequest | undefined
+  expandedElement: API.OutgoingProofRequest | undefined
 
   readonly loading$ = this.loadingService.loading$
 
@@ -46,7 +46,7 @@ export class OutgoingProofsComponent implements AfterViewInit {
     this.table.dataSource = this.dataSource;
   }
 
-  delete(item: OutgoingProofRequest) {
+  delete(item: API.OutgoingProofRequest) {
     this.api.deleteOutgoingProofRequest(of(item)).pipe(
       this.loadingService.rxjsOperator()
     ).subscribe()

@@ -1,7 +1,7 @@
-import {ChildRelation} from "@server/subject-ontology/child-relation";
-import {ComponentSet} from "@server/subject-ontology/component-set";
-import {Searchable} from "@server/subject-ontology/searchable";
-import {Search} from "@server/subject-ontology/search";
+import {ChildRelation} from "./child-relation";
+import {ComponentSet} from "./component-set";
+import {Searchable} from "./searchable";
+import {Search} from "./search";
 
 export class Subject extends Searchable {
   private readonly childRelations = new Set<ChildRelation>()
@@ -11,8 +11,8 @@ export class Subject extends Searchable {
     super()
   }
 
-  protected getConnected(): ReadonlySet<Searchable> {
-    return new Set([...this.childRelations, ...this.componentSets]);
+  protected override getConnected(): ReadonlySet<Searchable> {
+    return new Set([...this.childRelations, ...this.componentSets] as Searchable[])
   }
 
   protected produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> {

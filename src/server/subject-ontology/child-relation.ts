@@ -1,6 +1,6 @@
-import {Subject} from "@server/subject-ontology/subject";
-import {Searchable} from "@server/subject-ontology/searchable";
-import {Search} from "@server/subject-ontology/search";
+import {Subject} from "./subject";
+import {Searchable} from "./searchable";
+import {Search} from "./search";
 
 export class ChildRelation extends Searchable {
   constructor(
@@ -11,7 +11,7 @@ export class ChildRelation extends Searchable {
   }
 
   protected getConnected(): ReadonlySet<Searchable> {
-    return new Set([this.child])
+    return new Set([this.child] as Searchable[])
   }
 
   protected produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> {

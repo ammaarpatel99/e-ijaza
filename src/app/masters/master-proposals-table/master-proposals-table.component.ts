@@ -3,7 +3,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatTable} from '@angular/material/table';
 import {MasterProposalsTableDataSource} from './master-proposals-table-datasource';
 import {Immutable} from "@project-utils";
-import {AppType, MasterProposal, MasterProposalData} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
@@ -17,13 +17,13 @@ import {of} from "rxjs";
 })
 export class MasterProposalsTableComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatTable) table!: MatTable<Immutable<MasterProposal>>;
+  @ViewChild(MatTable) table!: MatTable<Immutable<API.MasterProposal>>;
   dataSource: MasterProposalsTableDataSource;
 
   readonly loading$ = this.loadingService.loading$
   readonly displayedColumns$ = this.stateService.appType$.pipe(
     map(type => {
-      if (type === AppType.USER) return ['did', 'action', 'subject', 'vote']
+      if (type === API.AppType.USER) return ['did', 'action', 'subject', 'vote']
       else return ['did', 'action', 'subject', 'votes_for', 'votes_against', 'votes_total']
     })
   )
@@ -41,7 +41,7 @@ export class MasterProposalsTableComponent implements AfterViewInit {
     this.table.dataSource = this.dataSource;
   }
 
-  vote(inFavour: boolean, proposal: MasterProposalData) {
+  vote(inFavour: boolean, proposal: API.MasterProposalData) {
     of({...proposal, vote: inFavour}).pipe(
       this.api.voteOnMasterProposal,
       this.loadingService.rxjsOperator()

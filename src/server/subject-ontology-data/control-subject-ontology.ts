@@ -1,6 +1,6 @@
 import {ReplaySubject} from "rxjs";
 import {Immutable} from "@project-utils";
-import {Subject} from "@server/subject-ontology/subject";
+import {Subject} from "../subject-ontology/subject";
 
 export class ControlSubjectOntology {
   static readonly instance = new ControlSubjectOntology()

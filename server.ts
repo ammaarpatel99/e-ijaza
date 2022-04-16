@@ -10,7 +10,7 @@ import { existsSync } from 'fs';
 
 import * as bodyParser from 'body-parser'
 
-import {apiRouter, webhookRouter} from './src/server'
+import {apiRouter, webhookRouter, attemptInitialisation$} from './src/server'
 import * as path from "path";
 
 
@@ -30,9 +30,12 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', distFolder);
 
-  // Express Rest API endpoints
-  server.use('/api', apiRouter);
-  server.use('/webhook', webhookRouter)
+  attemptInitialisation$().subscribe(() => {
+    // Express Rest API endpoints
+    server.use('/api', apiRouter);
+    server.use('/webhook', webhookRouter)
+  })
+
 
   // Serve static files from /browser
   server.get('*.*', express.static(distFolder, {

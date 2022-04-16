@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {StateService} from "../services/state/state.service";
 import {of, OperatorFunction, switchMap, combineLatest} from "rxjs";
-import {AppType, ProposalType} from "@project-types/interface-api";
+import {API} from "@project-types";
 import {map, startWith} from "rxjs/operators";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ApiService} from "../services/api/api.service";
@@ -24,7 +24,7 @@ export class MastersComponent {
 
   readonly canMakeProposal$ = this.stateService.appType$.pipe(
     switchMap(type => {
-      if (type === AppType.USER) return of(true)
+      if (type === API.AppType.USER) return of(true)
       else return this.stateService.masters$.pipe(
         map(data => data.length === 0)
       )
@@ -50,7 +50,7 @@ export class MastersComponent {
 
   readonly subjectsCanProposeIn$ = this.stateService.appType$.pipe(
     switchMap(type => {
-      if (type === AppType.CONTROLLER) return this.stateService.subjectNames$
+      if (type === API.AppType.CONTROLLER) return this.stateService.subjectNames$
       else return this.stateService.reachableFromMasterCreds$
     }),
     this.reduceToProposableSubjects
@@ -66,7 +66,7 @@ export class MastersComponent {
     of({
       did: this.did.value,
       subject: this.subject.value,
-      proposalType: ProposalType.ADD
+      proposalType: API.ProposalType.ADD
     }).pipe(
       this.api.proposeMaster,
       this.loadingService.rxjsOperator()

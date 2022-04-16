@@ -1,41 +1,15 @@
 import {Injectable} from '@angular/core';
 import {EMPTY, Observable, of, OperatorFunction, switchMap, tap} from "rxjs";
-import {
-  AppType,
-  DIDDetails,
-  FullInitialisationData,
-  HeldCredential,
-  HeldCredentialData,
-  IncomingProofRequest,
-  InitialisationData,
-  InitialisationState,
-  IssuedCredential,
-  Master,
-  MasterProposal,
-  MasterProposalData,
-  MasterProposalVote,
-  NewProofRequest,
-  OutgoingProofRequest,
-  ProposalType,
-  PublicDIDInitialisationData,
-  ReachableSubject,
-  Subject,
-  SubjectProposal,
-  SubjectProposalData,
-  SubjectProposalType,
-  SubjectProposalVote,
-  UpdateReq,
-  UpdateRes
-} from "@project-types/interface-api";
+import {API} from "@project-types";
 
 let i = 0
-function stateUpdateRes(): UpdateRes {
+function stateUpdateRes(): API.State.UpdateRes {
   if (i === 0) {
     i++
     return {
-      state: InitialisationState.COMPLETE,
+      state: API.InitialisationState.COMPLETE,
       did: 'my did',
-      appType: AppType.USER,
+      appType: API.AppType.USER,
       timestamp: 0,
       subjects: true,
       masterProposals: true,
@@ -49,9 +23,9 @@ function stateUpdateRes(): UpdateRes {
     }
   }
   return {
-    state: InitialisationState.COMPLETE,
+    state: API.InitialisationState.COMPLETE,
     did: 'my did',
-    appType: AppType.USER,
+    appType: API.AppType.USER,
     timestamp: 0,
     subjects: false,
     masterProposals: false,
@@ -72,25 +46,25 @@ export class ApiService {
 
   constructor() { }
 
-  readonly getStateUpdate: OperatorFunction<UpdateReq, UpdateRes> =
+  readonly getStateUpdate: OperatorFunction<API.State.UpdateReq, API.State.UpdateRes> =
     source => source.pipe(
       switchMap(() => {
         return of(stateUpdateRes())
       })
     )
 
-  readonly getMasters$: Observable<Master[]> = of([{
+  readonly getMasters$: Observable<API.Master[]> = of([{
     did: 'master did',
     subjects: ['subject 1']
   }])
 
-  readonly getMasterProposals$: Observable<MasterProposal[]> = of([{
+  readonly getMasterProposals$: Observable<API.MasterProposal[]> = of([{
     did: 'master 2',
     subject: 'subject 1',
-    proposalType: ProposalType.ADD
+    proposalType: API.ProposalType.ADD
   }])
 
-  readonly getSubjects$: Observable<Subject[]> = of([
+  readonly getSubjects$: Observable<API.Subject[]> = of([
     {
       name: 'subject 1',
       componentSets: [],
@@ -108,27 +82,27 @@ export class ApiService {
     }
     ])
 
-  readonly getSubjectProposals$: Observable<SubjectProposal[]> = of([{
-    proposalType: ProposalType.ADD,
+  readonly getSubjectProposals$: Observable<API.SubjectProposal[]> = of([{
+    proposalType: API.ProposalType.ADD,
     subject: 'subject 1',
     change: {
-      type: SubjectProposalType.COMPONENT_SET,
+      type: API.SubjectProposalType.COMPONENT_SET,
       componentSet: ['subject 2', 'subject 3']
     }
   }])
 
-  readonly getHeldCredentials$: Observable<HeldCredential[]> = of([{
+  readonly getHeldCredentials$: Observable<API.HeldCredential[]> = of([{
     did: 'issuer did',
     subject: 'subject 1',
     public: false
   }])
 
-  readonly getIssuedCredentials$: Observable<IssuedCredential[]> = of([{
+  readonly getIssuedCredentials$: Observable<API.IssuedCredential[]> = of([{
     did: 'receiver did',
     subject: 'subject 2'
   }])
 
-  readonly getOutgoingProofRequests$: Observable<OutgoingProofRequest[]> = of([{
+  readonly getOutgoingProofRequests$: Observable<API.OutgoingProofRequest[]> = of([{
     did: 'did to check',
     subject: 'subject to check',
     result: null,
@@ -145,7 +119,7 @@ export class ApiService {
     }]
   }])
 
-  readonly getIncomingProofRequests$: Observable<IncomingProofRequest[]> = of([{
+  readonly getIncomingProofRequests$: Observable<API.IncomingProofRequest[]> = of([{
     did: 'someone else',
     subject: 'a subject',
     proof: false
@@ -155,7 +129,7 @@ export class ApiService {
     proof: [{did: 'a teacher', subject: 'one subject'}, {did: 'another teacher', subject: 'second subject'}]
   }])
 
-  readonly getReachableSubjects$: Observable<ReachableSubject[]> = of([
+  readonly getReachableSubjects$: Observable<API.ReachableSubject[]> = of([
     {
       name: 'subject 1',
       reachableByMasterCredentials: true
@@ -170,47 +144,47 @@ export class ApiService {
     }
   ])
 
-  readonly submitFullInitialisation: OperatorFunction<FullInitialisationData, void> =
+  readonly submitFullInitialisation: OperatorFunction<API.FullInitialisationData, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )
 
-  readonly generateDID$: Observable<DIDDetails> = EMPTY
+  readonly generateDID$: Observable<API.DIDDetails> = EMPTY
 
-  readonly registerDID: OperatorFunction<DIDDetails, void> =
+  readonly registerDID: OperatorFunction<API.DIDDetails, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )
 
-  readonly autoRegisterDID: OperatorFunction<PublicDIDInitialisationData, void> =
+  readonly autoRegisterDID: OperatorFunction<API.PublicDIDInitialisationData, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )
 
-  readonly submitAppInitialisation: OperatorFunction<InitialisationData, void> =
+  readonly submitAppInitialisation: OperatorFunction<API.InitialisationData, void> =
     source => source.pipe(
       switchMap(() => EMPTY)
     )
 
-  readonly proposeMaster: OperatorFunction<MasterProposalData, void> =
+  readonly proposeMaster: OperatorFunction<API.MasterProposalData, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly voteOnMasterProposal: OperatorFunction<MasterProposalVote, void> =
+  readonly voteOnMasterProposal: OperatorFunction<API.MasterProposalVote, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly proposeSubject: OperatorFunction<SubjectProposalData, void> =
+  readonly proposeSubject: OperatorFunction<API.SubjectProposalData, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly voteOnSubjectProposal: OperatorFunction<SubjectProposalVote, void> =
+  readonly voteOnSubjectProposal: OperatorFunction<API.SubjectProposalVote, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
@@ -222,43 +196,43 @@ export class ApiService {
       switchMap(() => of(['subject 2', 'subject 3']))
     )
 
-  readonly updatePublicOnHeldCredential: OperatorFunction<HeldCredential, void> =
+  readonly updatePublicOnHeldCredential: OperatorFunction<API.HeldCredential, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly deleteHeldCredential: OperatorFunction<HeldCredentialData, void> =
+  readonly deleteHeldCredential: OperatorFunction<API.HeldCredentialData, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly revokeIssuedCredential: OperatorFunction<IssuedCredential, void> =
+  readonly revokeIssuedCredential: OperatorFunction<API.IssuedCredential, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly issueCredential: OperatorFunction<IssuedCredential, void> =
+  readonly issueCredential: OperatorFunction<API.IssuedCredential, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly respondToIncomingProofRequest: OperatorFunction<IncomingProofRequest, void> =
+  readonly respondToIncomingProofRequest: OperatorFunction<API.IncomingProofRequest, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly deleteOutgoingProofRequest: OperatorFunction<OutgoingProofRequest, void> =
+  readonly deleteOutgoingProofRequest: OperatorFunction<API.OutgoingProofRequest, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))
     )
 
-  readonly createOutgoingProofRequest: OperatorFunction<NewProofRequest, void> =
+  readonly createOutgoingProofRequest: OperatorFunction<API.NewProofRequest, void> =
     source => source.pipe(
       tap(x => console.log(x)),
       switchMap(() => of(undefined))

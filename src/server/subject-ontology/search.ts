@@ -1,5 +1,5 @@
-import {Subject} from "@server/subject-ontology/subject";
-import {Searchable} from "@server/subject-ontology/searchable";
+import {Subject} from "./subject";
+import {Searchable} from "./searchable";
 
 export interface Options {
   startingSet: ReadonlySet<Subject>
