@@ -43,9 +43,9 @@ export function initialiseControllerSchemas$() {
   )
 }
 
-export function initialiseUserSchemas$(controllerDID: string) {
+export function initialiseUserSchemas$() {
   return voidObs$.pipe(
-    switchMap(() => SchemasFromController.instance.getSchemasAndCredDefsFromController$(controllerDID)),
+    switchMap(() => SchemasFromController.instance.getSchemasAndCredDefsFromController$()),
     switchMap(() => forkJoin([
       teachingSchema.fetchOrSetCredID$(),
       appStateSchema.fetchOrSetCredID$()

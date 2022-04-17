@@ -26,9 +26,9 @@ export function runAries(data: {
     '--auto-respond-messages ' +
     '--auto-respond-credential-offer ' +
     '--auto-respond-credential-request ' +
+    '--auto-store-credential ' +
     '--auto-respond-presentation-proposal ' +
     '--auto-verify-presentation ' +
-    '--auto-store-credential ' +
     `--tails-server-base-url ${data.tailsServerUrl} ` +
     '--notify-revocation ' +
     '--monitor-revocation-notification ' +

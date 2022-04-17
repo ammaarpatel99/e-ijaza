@@ -1,6 +1,8 @@
 export {
   isAlive,
-  connectViaPublicDID$
+  connectViaPublicDID$,
+  connectToSelf$,
+  deleteSelfConnections$
 } from './utils'
 
 export * from './did'

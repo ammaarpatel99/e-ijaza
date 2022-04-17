@@ -16,12 +16,12 @@ interface InitialisationStateData_1 {
 }
 
 interface InitialisationStateData_2 {
-  state: InitialisationState.PUBLIC_DID_REGISTERED | InitialisationState.INITIALISING
+  state: InitialisationState.PUBLIC_DID_REGISTERED
   did: string
 }
 
 interface InitialisationStateData_3_base {
-  state: InitialisationState.COMPLETE
+  state: InitialisationState.INITIALISING | InitialisationState.COMPLETE
   did: string
   name: string
 }

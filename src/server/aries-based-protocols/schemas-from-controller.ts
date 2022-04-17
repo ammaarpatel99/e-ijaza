@@ -1,5 +1,5 @@
 import {WebhookMonitor} from "../webhook";
-import {filter, from, last, of, switchMap} from "rxjs";
+import {filter, first, from, last, switchMap} from "rxjs";
 import {deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
 import {State} from '../state'
 import {
@@ -41,8 +41,9 @@ export class SchemasFromController {
     ).subscribe()
   }
 
-  getSchemasAndCredDefsFromController$(controllerDID?: string) {
-    return (controllerDID ? of(controllerDID) : State.instance.controllerDID$).pipe(
+  getSchemasAndCredDefsFromController$() {
+    return State.instance.controllerDID$.pipe(
+      first(),
       switchMap(controllerDID => connectViaPublicDID$({their_public_did: controllerDID})),
       switchMap(conn_id =>
         this.proofRequest$(conn_id)

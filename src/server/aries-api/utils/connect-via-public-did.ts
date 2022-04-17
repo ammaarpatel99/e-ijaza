@@ -1,9 +1,8 @@
 import {Aries} from '@project-types'
-import {WebhookMonitor} from "../../webhook";
-import {deleteConnection} from '../connections'
 import {requestConnectionAgainstDID} from "../did";
-import {from, Observable, of, switchMap, tap} from "rxjs";
+import {from, of, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
+import {waitForConnectionToComplete$} from "./wait-for-connection-to-complete$";
 
 export function connectViaPublicDID$ (
   pathOptions: Aries.paths['/didexchange/create-request']['post']['parameters']['query']
@@ -18,22 +17,3 @@ export function connectViaPublicDID$ (
   )
 }
 
-function waitForConnectionToComplete$(conn_id: string) {
-  return new Observable<string>(subscriber => {
-    WebhookMonitor.instance.monitorConnection$(conn_id).pipe(
-      tap({
-        complete: () => {
-          subscriber.next(conn_id)
-          subscriber.complete()
-        },
-        error: e => {
-          from(deleteConnection({conn_id}))
-            .subscribe({
-              complete: () => subscriber.error(e),
-              error: _e => subscriber.error(_e)
-            })
-        }
-      })
-    ).subscribe()
-  })
-}

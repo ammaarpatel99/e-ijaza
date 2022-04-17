@@ -1,6 +1,8 @@
 import {Initialisation} from './initialisation'
 import {map} from "rxjs/operators";
 import {filter} from "rxjs";
+import {MasterCredentialsManager} from "./master-credentials";
+import {ShareMastersData} from "./aries-based-protocols";
 
 export class State {
   static readonly instance = new State()
@@ -41,4 +43,10 @@ export class State {
         filter(data => data !== null),
         map(data => data as Exclude<typeof data, null>)
       )
+
+  readonly controllerMasters$ =
+    MasterCredentialsManager.instance.state$
+
+  readonly userMasters$ =
+    ShareMastersData.instance.userState$
 }

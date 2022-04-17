@@ -55,15 +55,15 @@ export class WebhookMonitor {
   private readonly proofs = new Map<string, ReplaySubject<ProofData>>()
 
   monitorConnection$(conn_id: string) {
-    return WebhookMonitor.monitor$(this.connections, conn_id)
+    return WebhookMonitor.monitor$(this.connections, conn_id).asObservable()
   }
 
   monitorCredential$(cred_ex_id: string) {
-    return WebhookMonitor.monitor$(this.credentials, cred_ex_id)
+    return WebhookMonitor.monitor$(this.credentials, cred_ex_id).asObservable()
   }
 
   monitorProof$(proof_ex_id: string) {
-    return WebhookMonitor.monitor$(this.proofs, proof_ex_id)
+    return WebhookMonitor.monitor$(this.proofs, proof_ex_id).asObservable()
   }
 
   processConnection(data: ConnectionData) {

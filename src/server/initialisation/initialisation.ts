@@ -6,6 +6,7 @@ import {map} from "rxjs/operators";
 import {runAries} from "./run-aries";
 import axios from "axios";
 import {initialiseController$, initialiseUser$} from './initialise'
+import {InitialisationStateData} from "../../types/server";
 
 export class Initialisation {
   static readonly instance = new Initialisation()
@@ -249,24 +250,22 @@ export class Initialisation {
       tap({
         next: () => this._initialisationData$.next({
           state: Server.InitialisationState.INITIALISING,
-          did: (this._initialisationData$.value as {did: string}).did
+          did: (this._initialisationData$.value as {did: string}).did,
+          name: 'e-Ijaza controller',
+          ...data
         })
       }),
       switchMap(data => (
           data.appType === API.AppType.CONTROLLER
-          ? initialiseController$(data)
-          : initialiseUser$(data)
-        ).pipe(
-          map(() => data)
+          ? initialiseController$()
+          : initialiseUser$()
         )
       ),
       tap({
         next: data => this._initialisationData$.next({
-          state: Server.InitialisationState.COMPLETE,
-          did: (this._initialisationData$.value as {did: string}).did,
-          name: 'e-Ijaza controller',
-          ...data
-        }),
+          ...this._initialisationData$.value,
+          state: Server.InitialisationState.COMPLETE
+        } as InitialisationStateData),
         error: () => this._initialisationData$.next({
           state: Server.InitialisationState.PUBLIC_DID_REGISTERED,
           did: (this._initialisationData$.value as {did: string}).did

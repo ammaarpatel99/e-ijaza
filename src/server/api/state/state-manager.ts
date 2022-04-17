@@ -20,7 +20,7 @@ export class StateManager {
   private appType: API.AppType | undefined
 
   private _masters: TimedData<API.Master[]> | undefined
-  get master() {
+  get masters() {
     const data = this._masters?.data
     if (data === undefined) throw new Error(`Requested masters from state (api) but not set`)
     return data
@@ -87,6 +87,17 @@ export class StateManager {
     state.initialisationState$.subscribe(data => this.initState = data)
     state.did$.subscribe(data => this.did = data)
     state.appType$.subscribe(data => this.appType = data)
+    state.controllerMasters$.subscribe(data => this._masters = {
+      timestamp: Date.now(),
+      data: [...data].map(([did, subjectsMap]) => {
+        const subjects = [...subjectsMap].map(([subject]) => subject)
+        return {did, subjects}
+      })
+    })
+    state.userMasters$.subscribe(data => this._masters = {
+      timestamp: Date.now(),
+      data: [...data].map(([did, subjectsSet]) => ({did, subjects: [...subjectsSet]}))
+    })
     // TODO: add remaining
   }
 
