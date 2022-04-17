@@ -1,4 +1,4 @@
-import {CredentialIssuer, MasterCredsStoreProtocol, ShareMastersData} from '../aries-based-protocols'
+import {CredentialIssuer, MasterCredsStoreProtocol} from '../aries-based-protocols'
 import {first, ReplaySubject, switchMap} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
@@ -12,8 +12,7 @@ export class MasterCredentialsManager {
   readonly state$ = this._state$.asObservable()
 
   initialise$() {
-    return ShareMastersData.instance.controllerInitialise$().pipe(
-      switchMap(() => MasterCredsStoreProtocol.instance.getFromStore$()),
+    return MasterCredsStoreProtocol.instance.getFromStore$().pipe(
       map(state => this._state$.next(state))
     )
   }

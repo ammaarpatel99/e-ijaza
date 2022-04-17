@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
-import {voidObs$} from "@project-utils";
-import {forkJoin, from, last, of, switchMap} from "rxjs";
+import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin, from, last, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -11,19 +11,15 @@ import {
 import {mastersInternalSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
+import {State} from "../state";
 
 export class MasterCredsStoreProtocol {
   static readonly instance = new MasterCredsStoreProtocol()
   private constructor() { }
 
-  update$(masterState: Server.ControllerMasters) {
-    return this.deleteStored$().pipe(
-      switchMap(() => connectToSelf$()),
-      switchMap(connections =>
-        this.storeData(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
-          .pipe(map(() => connections))
-      ),
-      switchMap(connections => deleteSelfConnections$(connections))
+  initialise$() {
+    return voidObs$.pipe(
+      map(() => this.watchState())
     )
   }
 
@@ -31,15 +27,27 @@ export class MasterCredsStoreProtocol {
     return this.getStored$().pipe(
       map(creds => creds.results?.shift()),
       map(store => {
-        if (!store) return
+        if (!store) return new Map()
         const credentials = JSON.parse(store.attrs!['credentials']) as Schemas.MastersInternalSchema['credentials']
         return MasterCredsStoreProtocol.schemaToState({credentials})
-      }),
-      switchMap(state => {
-        if (state) return of(state)
-        const newState = new Map() as Server.ControllerMasters
-        return this.update$(newState).pipe(map(() => newState))
       })
+    )
+  }
+
+  private watchState() {
+    State.instance.controllerMasters$.pipe(
+      switchMap(state => this.update$(state))
+    ).subscribe()
+  }
+
+  private update$(masterState: Immutable<Server.ControllerMasters>) {
+    return this.deleteStored$().pipe(
+      switchMap(() => connectToSelf$()),
+      switchMap(connections =>
+        this.storeData(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
+          .pipe(map(() => connections))
+      ),
+      switchMap(connections => deleteSelfConnections$(connections))
     )
   }
 
@@ -64,7 +72,7 @@ export class MasterCredsStoreProtocol {
     )
   }
 
-  private static stateToSchema(state: Server.ControllerMasters): Schemas.MastersInternalSchema {
+  private static stateToSchema(state: Immutable<Server.ControllerMasters>): Schemas.MastersInternalSchema {
     const data = [...state]
       .map(([did, creds]) => {
         const subjectsWithData = [...creds]
