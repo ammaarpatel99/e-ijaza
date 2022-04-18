@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {forkJoin, from, last, switchMap} from "rxjs";
+import {catchError, debounceTime, forkJoin, from, last, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -35,8 +35,15 @@ export class MasterCredsStoreProtocol {
   }
 
   private watchState() {
-    State.instance.controllerMasters$.pipe(
+    const obs$ = State.instance.controllerMasters$.pipe(
+      debounceTime(1000),
       switchMap(state => this.update$(state))
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
@@ -44,7 +51,7 @@ export class MasterCredsStoreProtocol {
     return this.deleteStored$().pipe(
       switchMap(() => connectToSelf$()),
       switchMap(connections =>
-        this.storeData(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
+        this.storeData$(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
           .pipe(map(() => connections))
       ),
       switchMap(connections => deleteSelfConnections$(connections))
@@ -95,7 +102,7 @@ export class MasterCredsStoreProtocol {
     return new Map(data)
   }
 
-  private storeData(data: Schemas.MastersInternalSchema, connection_id: string) {
+  private storeData$(data: Schemas.MastersInternalSchema, connection_id: string) {
     return voidObs$.pipe(
       switchMap(() => from(issueCredential({
         connection_id,

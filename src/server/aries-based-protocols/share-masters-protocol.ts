@@ -1,6 +1,17 @@
 import {Server, Schemas} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, filter, first, forkJoin, from, last, of, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {
+  catchError,
+  debounceTime,
+  filter,
+  first,
+  forkJoin,
+  from,
+  last,
+  ReplaySubject,
+  switchMap,
+  withLatestFrom
+} from "rxjs";
 import {
   connectViaPublicDID$,
   deleteCredential,
@@ -8,7 +19,6 @@ import {
   getIssuedCredentials,
   offerCredentialFromProposal,
   proposeCredential,
-  requestCredentialFromOffer,
   revokeCredential
 } from "../aries-api";
 import {map} from "rxjs/operators";
@@ -72,7 +82,7 @@ export class ShareMastersProtocol {
   }
 
   private handleRequests() {
-    WebhookMonitor.instance.credentials$.pipe(
+    const obs$ = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === mastersPublicSchema.schemaID
         && cred.state === 'proposal_received'
@@ -102,12 +112,25 @@ export class ShareMastersProtocol {
       switchMap(cred_ex_id =>
         WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
       )
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
   private revokeSharedOnUpdate() {
-    State.instance.controllerMasters$.pipe(
+    const obs$ = State.instance.controllerMasters$.pipe(
+      debounceTime(1000),
       switchMap(() => this.revokeIssued$())
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
@@ -168,9 +191,15 @@ export class ShareMastersProtocol {
   }
 
   private watchRevocations() {
-    WebhookMonitor.instance.revocations$.pipe(
+    const obs$ = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(mastersPublicSchema.name)),
       switchMap(() => this.refreshData$())
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 }

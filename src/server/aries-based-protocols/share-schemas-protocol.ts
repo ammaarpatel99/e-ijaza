@@ -1,5 +1,5 @@
 import {WebhookMonitor} from "../webhook";
-import {filter, first, from, last, switchMap} from "rxjs";
+import {catchError, filter, first, from, last, switchMap} from "rxjs";
 import {deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
 import {State} from '../state'
 import {
@@ -21,7 +21,7 @@ export class ShareSchemasProtocol {
   private constructor() { }
 
   initialiseController() {
-    WebhookMonitor.instance.proofs$.pipe(
+    const obs$ = WebhookMonitor.instance.proofs$.pipe(
       filter(proof => proof.presentation_request?.name === 'Schema Set Up' && proof.state === 'request_received'),
       switchMap(proof => from(
         presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
@@ -38,6 +38,12 @@ export class ShareSchemasProtocol {
           }
         })
       ))
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
@@ -50,7 +56,7 @@ export class ShareSchemasProtocol {
           .pipe(map(pres_ex_id => ({conn_id, pres_ex_id})))
       ),
       switchMap(({pres_ex_id, conn_id}) =>
-        this.processProofResult(pres_ex_id)
+        this.processProofResult$(pres_ex_id)
           .pipe(map(() => ({pres_ex_id, conn_id})))
       ),
       switchMap(({pres_ex_id, conn_id}) => this.deleteConnectionAndProof$(conn_id, pres_ex_id))
@@ -94,7 +100,7 @@ export class ShareSchemasProtocol {
     )
   }
 
-  private processProofResult(pres_ex_id: string) {
+  private processProofResult$(pres_ex_id: string) {
     return WebhookMonitor.instance.monitorProof$(pres_ex_id).pipe(
       last(),
       map(result => {

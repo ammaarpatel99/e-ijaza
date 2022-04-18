@@ -1,8 +1,10 @@
 import {Immutable, voidObs$} from "@project-utils";
-import {map, shareReplay, tap} from "rxjs/operators";
+import {bufferTime, map, shareReplay, tap} from "rxjs/operators";
 import {catchError, filter, first, forkJoin, from, last, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {
-  connectViaPublicDID$, deleteCredential, getHeldCredentials,
+  connectViaPublicDID$,
+  deleteCredential,
+  getHeldCredentials,
   getIssuedCredentials,
   offerCredentialFromProposal,
   proposeCredential,
@@ -79,7 +81,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private handleSubjectListRequests() {
-    WebhookMonitor.instance.credentials$.pipe(
+    const obs$ = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === subjectsSchema.schemaID
         && cred.state === 'proposal_received'
@@ -106,11 +108,17 @@ export class ShareSubjectOntologyProtocol {
       switchMap(cred_ex_id =>
         WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
       )
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
   private handleSubjectRequests() {
-    WebhookMonitor.instance.credentials$.pipe(
+    const obs$ = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === subjectSchema.schemaID
         && cred.state === 'proposal_received'
@@ -157,6 +165,12 @@ export class ShareSubjectOntologyProtocol {
       switchMap(cred_ex_id =>
         WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
       )
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     ).subscribe()
   }
 
@@ -182,7 +196,23 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    SubjectsStoreProtocol.instance.changes$.pipe(
+    const obs$ = SubjectsStoreProtocol.instance.changes$.pipe(
+      bufferTime(1000),
+      map(x => {
+        if (x.length === 0) return
+        let data: typeof x[number] = {state: x[x.length - 1].state, edited: [], deleted: [], subjectsListChanged: false}
+        for (const newData of x) {
+          if (newData.subjectsListChanged) data = {...data, subjectsListChanged: true}
+          const deleted = new Set(data.deleted)
+          const edited = new Set(data.edited)
+          newData.deleted.forEach(subject => {edited.delete(subject); deleted.add(subject)})
+          newData.edited.forEach(subject => {deleted.delete(subject); edited.add(subject)})
+          data = {...data, deleted: [...deleted], edited: [...edited]}
+        }
+        return data
+      }),
+      filter(x => !!x),
+      map(x => x!),
       switchMap(({deleted,edited,subjectsListChanged}) => {
         const arr = [
           ...deleted.map(subject => {
@@ -201,6 +231,12 @@ export class ShareSubjectOntologyProtocol {
             .pipe(tap(() => this.issuedList.clear()))
         )
         return forkJoin(arr)
+      })
+    )
+    obs$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs$
       })
     ).subscribe()
   }
@@ -335,12 +371,12 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private watchRevocations() {
-    WebhookMonitor.instance.revocations$.pipe(
+    const obs1$ = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectsSchema.name)),
       switchMap(() => this.clearSubjectsList$()),
       switchMap(() => this.getSubjectsList$())
-    ).subscribe()
-    WebhookMonitor.instance.revocations$.pipe(
+    )
+    const obs2$ = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectSchema.name)),
       map(data => {
         const info = data.comment.split(':')
@@ -371,6 +407,18 @@ export class ShareSubjectOntologyProtocol {
             )
           })
         )
+      })
+    )
+    obs1$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs1$
+      })
+    ).subscribe()
+    obs2$.pipe(
+      catchError(e => {
+        console.error(e)
+        return obs2$
       })
     ).subscribe()
   }
