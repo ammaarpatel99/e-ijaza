@@ -1,4 +1,4 @@
-import {SchemasFromController} from '../aries-based-protocols'
+import {ShareSchemasProtocol} from '../aries-based-protocols'
 import {
   teachingSchema,
   mastersInternalSchema,
@@ -38,14 +38,14 @@ export function initialiseControllerSchemas$() {
       schemas.map(schema => schema.fetchOrSetCredID$())
     )),
     map(() => {
-      SchemasFromController.instance.initialiseController()
+      ShareSchemasProtocol.instance.initialiseController()
     })
   )
 }
 
 export function initialiseUserSchemas$() {
   return voidObs$.pipe(
-    switchMap(() => SchemasFromController.instance.getSchemasAndCredDefsFromController$()),
+    switchMap(() => ShareSchemasProtocol.instance.getSchemasAndCredDefsFromController$()),
     switchMap(() => forkJoin([
       teachingSchema.fetchOrSetCredID$(),
       appStateSchema.fetchOrSetCredID$()

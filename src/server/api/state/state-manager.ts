@@ -98,7 +98,14 @@ export class StateManager {
       timestamp: Date.now(),
       data: [...data].map(([did, subjectsSet]) => ({did, subjects: [...subjectsSet]}))
     })
-    // TODO: add remaining
+    state.subjectOntology$.subscribe(data => this._subjects = {
+      timestamp: Date.now(),
+      data: [...data].map(([subject, data]) => ({
+        name: subject,
+        children: [...data.children],
+        componentSets: [...data.componentSets].map(set => [...set])
+      }))
+    })
   }
 
   private static hasNewData<T>(data: TimedData<T> | undefined, timestamp: number) {

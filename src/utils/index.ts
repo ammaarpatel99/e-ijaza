@@ -1,3 +1,5 @@
 export * from './immutable'
 export * from './repeat-with-backoff'
 export * from './void-observable'
+export * from './mutex'
+export * from './read-write-mutex'

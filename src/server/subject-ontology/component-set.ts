@@ -4,12 +4,14 @@ import {Searchable} from "./searchable";
 
 export class ComponentSet extends Searchable {
   private readonly searchState = new Map<Search, Set<Subject>>()
+  readonly set: ReadonlySet<Subject>
 
   constructor(
     readonly parent: Subject,
-    readonly set: ReadonlySet<Subject>
+    set: ReadonlySet<Subject>
   ) {
     super()
+    this.set = new Set(set)
   }
 
   override clearSearches() {
@@ -22,12 +24,13 @@ export class ComponentSet extends Searchable {
     this.searchState.delete(search)
   }
 
-  protected getConnected(): ReadonlySet<Searchable> {
+  protected override getConnected(): ReadonlySet<Searchable> {
     return new Set([this.parent])
   }
 
-  protected produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> | undefined {
-    if (!(from instanceof Subject)) throw new Error(`Reaching component set but not from a subject`)
+  protected override produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> | undefined {
+    if (!(from instanceof Subject) || !this.set.has(from))
+      throw new Error(`Reaching component set but not from a subject within the set`)
     let set = this.searchState.get(search)?.add(from)
     if (!set) {
       set = new Set([from])
@@ -35,7 +38,7 @@ export class ComponentSet extends Searchable {
     }
     if (set.size !== this.set.size) return undefined
     const path = [...this.set]
-      .flatMap(subject => [...(subject.getSearchPath(search)!), subject])
+      .flatMap(subject => [...(subject.getSearchPath(search)!)])
     return new Set(path)
   }
 }

@@ -10,7 +10,9 @@ export abstract class Searchable {
 
   markAsStart(search: Search) {
     if (this.hasSearchPath(search)) throw Error(`Can't mark as start when already has path`)
-    this.searchPaths.set(search, new Set())
+    const path = new Set<Subject>()
+    if (this instanceof Subject) path.add(this)
+    this.searchPaths.set(search, path)
     search.addToSearchQueue(this)
   }
 

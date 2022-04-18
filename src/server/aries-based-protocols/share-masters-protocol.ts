@@ -1,6 +1,6 @@
 import {Server, Schemas} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, filter, first, forkJoin, from, last, of, ReplaySubject, switchMap, tap, withLatestFrom} from "rxjs";
+import {catchError, filter, first, forkJoin, from, last, of, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {
   connectViaPublicDID$,
   deleteCredential,
@@ -16,8 +16,8 @@ import {mastersPublicSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 
-export class ShareMastersData {
-  static readonly instance = new ShareMastersData()
+export class ShareMastersProtocol {
+  static readonly instance = new ShareMastersProtocol()
   private constructor() { }
 
   // CONTROLLER
@@ -140,10 +140,6 @@ export class ShareMastersData {
         }
       }))),
       switchMap(credData => WebhookMonitor.instance.monitorCredential$(credData.credential_exchange_id!)),
-      switchMap(res => {
-        if (res.state !== 'offer_received') return of(res)
-        return from(requestCredentialFromOffer({cred_ex_id: res.credential_exchange_id!}))
-      }),
       last(),
       map(res => JSON.parse(res.credential!.attrs!['credentials']) as Schemas.MastersPublicSchema['credentials']),
       map(res => {

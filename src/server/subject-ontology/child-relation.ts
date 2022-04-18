@@ -10,11 +10,12 @@ export class ChildRelation extends Searchable {
     super()
   }
 
-  protected getConnected(): ReadonlySet<Searchable> {
-    return new Set([this.child] as Searchable[])
+  protected override getConnected(): ReadonlySet<Searchable> {
+    return new Set([this.child])
   }
 
-  protected produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> {
-    return new Set([...(this.parent.getSearchPath(search)!), this.parent])
+  protected override produceSearchPath(search: Search, from: Searchable): ReadonlySet<Subject> {
+    if (!(from instanceof Subject)) throw new Error(`Reaching child relation but not from a subject`)
+    return this.parent.getSearchPath(search)!
   }
 }

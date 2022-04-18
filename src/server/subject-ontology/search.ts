@@ -10,24 +10,31 @@ export interface Options {
 
 export class Search {
   private readonly toSearch = new Set<Searchable>()
-  private readonly goals: Set<Subject> | undefined
+  readonly goals?: ReadonlySet<Subject>
+  private readonly goalsRemaining?: Set<Subject>
   private readonly closestFirst
+
+  private _deleted = false
+  get deleted() {return this._deleted}
 
   constructor({startingSet, ignore = new Set(), goals, closestFirst = false}: Options) {
     this.closestFirst = closestFirst
-    if (goals) this.goals = new Set([...goals])
-    ignore.forEach(subject => subject.markAsStart(this))
+    if (goals) {
+      this.goals = goals
+      this.goalsRemaining = new Set(goals)
+    }
+    ignore.forEach(subject => subject.setUnsearchable(this))
     startingSet.forEach(subject => subject.markAsStart(this))
 
-    while (this.toSearch.size > 0 && this.goals?.size !== 0) {
+    while (this.toSearch.size > 0 && (this.goalsRemaining?.size || 1) > 0) {
       this.getNextSearchItems().forEach(searchable => searchable.search(this))
     }
   }
 
   addToSearchQueue(searchable: Searchable) {
     this.toSearch.add(searchable)
-    if (this.goals) {
-      this.goals.delete(searchable as Subject)
+    if (this.goalsRemaining) {
+      this.goalsRemaining.delete(searchable as Subject)
     }
   }
 
@@ -43,4 +50,9 @@ export class Search {
       return [next]
     }
   }
+
+  markAsDeleted() {
+    this._deleted = true
+  }
 }
+

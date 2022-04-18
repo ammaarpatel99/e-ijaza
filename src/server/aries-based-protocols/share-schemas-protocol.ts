@@ -16,8 +16,8 @@ import {map} from "rxjs/operators";
 import {connectViaPublicDID$} from "../aries-api";
 
 
-export class SchemasFromController {
-  static readonly instance = new SchemasFromController()
+export class ShareSchemasProtocol {
+  static readonly instance = new ShareSchemasProtocol()
   private constructor() { }
 
   initialiseController() {
