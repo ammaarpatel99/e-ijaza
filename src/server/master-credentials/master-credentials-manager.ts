@@ -1,8 +1,9 @@
 import {CredentialIssuer, MasterCredsStoreProtocol} from '../aries-based-protocols'
-import {first, ReplaySubject, switchMap} from "rxjs";
+import {first, forkJoin, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
 import {Immutable} from "@project-utils";
+import {State} from "../state";
 
 export class MasterCredentialsManager {
   static readonly instance = new MasterCredentialsManager()
@@ -13,7 +14,8 @@ export class MasterCredentialsManager {
 
   initialise$() {
     return MasterCredsStoreProtocol.instance.getFromStore$().pipe(
-      map(state => this._state$.next(state))
+      map(state => this._state$.next(state)),
+      map(() => this.watchSubjectOntology())
     )
   }
 
@@ -68,5 +70,46 @@ export class MasterCredentialsManager {
         this._state$.next(newState)
       })
     )
+  }
+
+  private watchSubjectOntology() {
+    State.instance.subjectOntology$.pipe(
+      map(data => new Set(...data.keys())),
+      withLatestFrom(this._state$),
+      switchMap(([subjects, masters]) => {
+        const revokeRequests = [...masters]
+          .flatMap(([did, data]) => [...data]
+            .filter(([subject, _]) => !subjects.has(subject))
+            .map(([subject, credInfo]) =>
+              CredentialIssuer.instance.revoke$(credInfo)
+                .pipe(map(() => ({did, subject})))
+            )
+          )
+        return forkJoin(revokeRequests).pipe(
+          map(revoked => ({masters, revoked}))
+        )
+      }),
+      map(({masters, revoked}) => {
+        const data = [...masters].map(([did, subjects]) => {
+          const map = new Map(subjects)
+          return [did, map] as [typeof did, typeof map]
+        })
+        const newState = new Map(data)
+        let changed = false
+        revoked.forEach(({did, subject}) => {
+          let subjectMap = newState.get(did)
+          if (subjectMap) {
+            subjectMap.delete(subject)
+            changed = true
+          }
+        })
+        if (changed) {
+          [...newState].forEach(([did, data]) => {
+            if (data.size === 0) newState.delete(did)
+          })
+          this._state$.next(newState)
+        }
+      })
+    ).subscribe()
   }
 }

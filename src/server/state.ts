@@ -63,5 +63,4 @@ export class State {
           .pipe(map(() => state))
       )
     )
-
 }
