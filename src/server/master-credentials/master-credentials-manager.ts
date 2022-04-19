@@ -1,5 +1,5 @@
 import {CredentialIssuer, MasterCredsStoreProtocol} from '../aries-based-protocols'
-import {first, forkJoin, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {catchError, first, forkJoin, mergeMap, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
 import {Immutable} from "@project-utils";
@@ -73,10 +73,10 @@ export class MasterCredentialsManager {
   }
 
   private watchSubjectOntology() {
-    State.instance.subjectOntology$.pipe(
+    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
       map(data => new Set(...data.keys())),
       withLatestFrom(this._state$),
-      switchMap(([subjects, masters]) => {
+      mergeMap(([subjects, masters]) => {
         const revokeRequests = [...masters]
           .flatMap(([did, data]) => [...data]
             .filter(([subject, _]) => !subjects.has(subject))
@@ -109,7 +109,12 @@ export class MasterCredentialsManager {
           })
           this._state$.next(newState)
         }
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 }

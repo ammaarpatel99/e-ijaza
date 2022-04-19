@@ -42,8 +42,6 @@ export class SubjectOntologyManager {
   }
 
   removeComponentSet$(parent: string, set: ReadonlySet<string>) {
-    const componentSetID = (set: Immutable<Set<string>>) => [...set].sort().join('-')
-    const setToRemoveID = componentSetID(set)
     return this._state$.pipe(
       first(),
       map(state => {

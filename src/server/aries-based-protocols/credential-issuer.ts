@@ -1,6 +1,5 @@
 import {connectViaPublicDID$, issueCredential, revokeCredential} from "../aries-api";
-import {State} from "../state";
-import {first, from, last, switchMap} from "rxjs";
+import {from, last, switchMap} from "rxjs";
 import {teachingSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
@@ -12,9 +11,7 @@ export class CredentialIssuer {
   private constructor() { }
 
   issue$(did: string, subject: string) {
-    return State.instance.name$.pipe(
-      first(),
-      switchMap(my_label => connectViaPublicDID$({their_public_did: did, my_label})),
+    return connectViaPublicDID$({their_public_did: did}).pipe(
       switchMap(connection_id => from(issueCredential({
         connection_id,
         auto_remove: false,

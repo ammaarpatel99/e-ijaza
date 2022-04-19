@@ -1,19 +1,29 @@
 import {Aries} from '@project-types'
 import {requestConnectionAgainstDID} from "../did";
-import {from, of, switchMap} from "rxjs";
+import {from, last, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
-import {waitForConnectionToComplete$} from "./wait-for-connection-to-complete$";
+import {State} from "../../state";
+import {WebhookMonitor} from "../../webhook";
 
 export function connectViaPublicDID$ (
-  pathOptions: Aries.paths['/didexchange/create-request']['post']['parameters']['query']
+  pathOptions: Omit<Aries.paths['/didexchange/create-request']['post']['parameters']['query'], 'my_label'>
 ) {
-  if (!pathOptions.their_public_did.startsWith(`did:sov:`)) {
-    pathOptions.their_public_did = `did:sov:${pathOptions.their_public_did}`
-  }
-  return of(pathOptions).pipe(
+  return State.instance.name$.pipe(
+    map(my_label => {
+      const options = {...pathOptions, my_label}
+      if (!options.their_public_did.startsWith(`did:sov:`)) {
+        options.their_public_did = `did:sov:${options.their_public_did}`
+      }
+      return options
+    }),
     switchMap(options => from(requestConnectionAgainstDID(options))),
     map(res => res.connection_id!),
-    switchMap(conn_id => waitForConnectionToComplete$(conn_id))
+    switchMap(conn_id =>
+      WebhookMonitor.instance.monitorConnection$(conn_id).pipe(
+        last(),
+        map(() => conn_id)
+      )
+    )
   )
 }
 

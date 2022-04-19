@@ -1,5 +1,5 @@
 import {Immutable, voidObs$} from "@project-utils";
-import {bufferTime, map, shareReplay, tap} from "rxjs/operators";
+import {bufferTime, map, mergeMap, shareReplay, tap} from "rxjs/operators";
 import {
   catchError,
   filter,
@@ -103,7 +103,7 @@ export class ShareSubjectOntologyProtocol {
         [cred_ex_id, {subjects: [...subjectOntology.keys()]}] as
           [string, Schemas.SubjectsSchema]
       ),
-      switchMap(([cred_ex_id, data]) =>
+      mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
           counter_proposal: {
             cred_def_id: subjectsSchema.credID,
@@ -160,7 +160,7 @@ export class ShareSubjectOntologyProtocol {
         }
         return [cred_ex_id, schema] as [typeof cred_ex_id, typeof schema]
       }),
-      switchMap(([cred_ex_id, data]) =>
+      mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
           counter_proposal: {
             cred_def_id: subjectSchema.credID,
@@ -225,7 +225,7 @@ export class ShareSubjectOntologyProtocol {
       }),
       filter(x => !!x),
       map(x => x!),
-      switchMap(({deleted,edited,subjectsListChanged}) => {
+      mergeMap(({deleted,edited,subjectsListChanged}) => {
         const arr = [
           ...deleted.map(subject => {
             const set = this.issuedSubject.get(subject) || new Set()
@@ -385,7 +385,7 @@ export class ShareSubjectOntologyProtocol {
   private watchRevocations() {
     const obs1$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectsSchema.name)),
-      switchMap(() => this.clearSubjectsList$()),
+      mergeMap(() => this.clearSubjectsList$()),
       switchMap(() => this.getSubjectsList$()),
       map(() => undefined as void),
       catchError(e => {

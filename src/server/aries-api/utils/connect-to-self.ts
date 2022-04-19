@@ -1,13 +1,13 @@
 import {voidObs$} from "@project-utils";
-import {forkJoin, from, switchMap} from "rxjs";
+import {forkJoin, from, last, switchMap} from "rxjs";
 import {createInvitation, deleteConnection, receiveInvitation} from "../connections";
 import {map} from "rxjs/operators";
-import {waitForConnectionToComplete$} from "./wait-for-connection-to-complete$";
+import {WebhookMonitor} from "../../webhook";
 
 export function connectToSelf$() {
   return voidObs$.pipe(
     switchMap(() => from(
-      createInvitation({auto_accept: true, alias: 'me 2'}, {my_label: 'me 1'})
+      createInvitation({auto_accept: true, alias: 'me 1'}, {my_label: 'me 2'})
     )),
     switchMap(({connection_id: conn_id1, invitation}) =>
       from(receiveInvitation({auto_accept: true}, invitation)).pipe(
@@ -15,8 +15,10 @@ export function connectToSelf$() {
       )
     ),
     switchMap(connections =>
-      waitForConnectionToComplete$(connections[0])
-        .pipe(map(() => connections))
+      WebhookMonitor.instance.monitorConnection$(connections[0]).pipe(
+        last(),
+        map(() => connections)
+      )
     )
   )
 }

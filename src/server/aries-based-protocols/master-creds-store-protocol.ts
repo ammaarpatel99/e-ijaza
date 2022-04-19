@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, Observable, switchMap} from "rxjs";
+import {catchError, debounceTime, forkJoin, from, last, mergeMap, Observable, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -37,7 +37,7 @@ export class MasterCredsStoreProtocol {
   private watchState() {
     const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
       debounceTime(1000),
-      switchMap(state => this.update$(state)),
+      mergeMap(state => this.update$(state)),
       catchError(e => {
         console.error(e)
         return obs$

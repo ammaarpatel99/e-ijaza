@@ -7,7 +7,7 @@ import {
   first,
   forkJoin,
   from,
-  last, Observable,
+  last, mergeMap, Observable,
   ReplaySubject,
   switchMap,
   withLatestFrom
@@ -96,7 +96,7 @@ export class ShareMastersProtocol {
         const obj = Object.fromEntries(data)
         return [cred_ex_id, {credentials: obj}] as [string, Schemas.MastersPublicSchema]
       }),
-      switchMap(([cred_ex_id, data]) =>
+      mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
           counter_proposal: {
             cred_def_id: mastersPublicSchema.credID,
@@ -125,7 +125,7 @@ export class ShareMastersProtocol {
   private revokeSharedOnUpdate() {
     const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
       debounceTime(1000),
-      switchMap(() => this.revokeIssued$()),
+      mergeMap(() => this.revokeIssued$()),
       catchError(e => {
         console.error(e)
         return obs$
@@ -193,7 +193,7 @@ export class ShareMastersProtocol {
   private watchRevocations() {
     const obs$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(mastersPublicSchema.name)),
-      switchMap(() => this.refreshData$()),
+      mergeMap(() => this.refreshData$()),
       catchError(e => {
         console.error(e)
         return obs$

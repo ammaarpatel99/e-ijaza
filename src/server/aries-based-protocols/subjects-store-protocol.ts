@@ -1,6 +1,17 @@
 import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, Observable, ReplaySubject, switchMap, tap} from "rxjs";
+import {
+  catchError,
+  debounceTime,
+  forkJoin,
+  from,
+  last,
+  mergeMap,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  tap
+} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -79,7 +90,7 @@ export class SubjectsStoreProtocol {
         return {deleted, edited, state, subjectsListChanged} as ChangeData
       }),
       tap(changeData => this._changes$.next(changeData)),
-      switchMap(({state, deleted, edited, subjectsListChanged}) => {
+      mergeMap(({state, deleted, edited, subjectsListChanged}) => {
         const arr = [
           ...deleted.map(subject => this.deleteStoredSubjects$(subject)),
           ...edited.map(subject => this.storeSubject$(state, subject))
