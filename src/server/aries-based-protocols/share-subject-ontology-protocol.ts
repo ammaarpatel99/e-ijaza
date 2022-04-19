@@ -1,6 +1,17 @@
 import {Immutable, voidObs$} from "@project-utils";
 import {bufferTime, map, shareReplay, tap} from "rxjs/operators";
-import {catchError, filter, first, forkJoin, from, last, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {
+  catchError,
+  filter,
+  first,
+  forkJoin,
+  from,
+  last,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  withLatestFrom
+} from "rxjs";
 import {
   connectViaPublicDID$,
   deleteCredential,
@@ -118,7 +129,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private handleSubjectRequests() {
-    const obs$ = WebhookMonitor.instance.credentials$.pipe(
+    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === subjectSchema.schemaID
         && cred.state === 'proposal_received'
@@ -163,15 +174,16 @@ export class ShareSubjectOntologyProtocol {
         })).pipe(map(() => cred_ex_id))
       ),
       switchMap(cred_ex_id =>
-        WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
-      )
-    )
-    obs$.pipe(
+        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
+      ),
+      last(),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    ) as Observable<void>
+    obs$.subscribe()
   }
 
   private revokeIssued$(credData: Set<Server.CredentialInfo>, comment?: string) {
@@ -196,7 +208,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    const obs$ = SubjectsStoreProtocol.instance.changes$.pipe(
+    const obs$: Observable<void> = SubjectsStoreProtocol.instance.changes$.pipe(
       bufferTime(1000),
       map(x => {
         if (x.length === 0) return
@@ -231,14 +243,14 @@ export class ShareSubjectOntologyProtocol {
             .pipe(tap(() => this.issuedList.clear()))
         )
         return forkJoin(arr)
-      })
-    )
-    obs$.pipe(
+      }),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
   // USER
@@ -371,14 +383,21 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private watchRevocations() {
-    const obs1$ = WebhookMonitor.instance.revocations$.pipe(
+    const obs1$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectsSchema.name)),
       switchMap(() => this.clearSubjectsList$()),
-      switchMap(() => this.getSubjectsList$())
+      switchMap(() => this.getSubjectsList$()),
+      map(() => undefined as void),
+      catchError(e => {
+        console.error(e)
+        return obs1$
+      })
     )
-    const obs2$ = WebhookMonitor.instance.revocations$.pipe(
+    obs1$.subscribe()
+
+    const obs2$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectSchema.name)),
-      map(data => {
+      switchMap(data => {
         const info = data.comment.split(':')
         if (info.length < 2 || !['deleted', 'edited'].includes(info[0]) || !info[1]) {
           console.error(`Subject revocation has invalid comment: "${data.comment}"`)
@@ -407,19 +426,12 @@ export class ShareSubjectOntologyProtocol {
             )
           })
         )
-      })
-    )
-    obs1$.pipe(
-      catchError(e => {
-        console.error(e)
-        return obs1$
-      })
-    ).subscribe()
-    obs2$.pipe(
+      }),
       catchError(e => {
         console.error(e)
         return obs2$
       })
-    ).subscribe()
+    )
+    obs2$.subscribe()
   }
 }

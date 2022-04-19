@@ -7,7 +7,7 @@ import {
   first,
   forkJoin,
   from,
-  last,
+  last, Observable,
   ReplaySubject,
   switchMap,
   withLatestFrom
@@ -82,7 +82,7 @@ export class ShareMastersProtocol {
   }
 
   private handleRequests() {
-    const obs$ = WebhookMonitor.instance.credentials$.pipe(
+    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === mastersPublicSchema.schemaID
         && cred.state === 'proposal_received'
@@ -110,28 +110,28 @@ export class ShareMastersProtocol {
         })).pipe(map(() => cred_ex_id))
       ),
       switchMap(cred_ex_id =>
-        WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
-      )
-    )
-    obs$.pipe(
+        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
+      ),
+      last(),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
   private revokeSharedOnUpdate() {
-    const obs$ = State.instance.controllerMasters$.pipe(
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
       debounceTime(1000),
-      switchMap(() => this.revokeIssued$())
-    )
-    obs$.pipe(
+      switchMap(() => this.revokeIssued$()),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
   // USER
@@ -191,15 +191,14 @@ export class ShareMastersProtocol {
   }
 
   private watchRevocations() {
-    const obs$ = WebhookMonitor.instance.revocations$.pipe(
+    const obs$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(mastersPublicSchema.name)),
-      switchMap(() => this.refreshData$())
-    )
-    obs$.pipe(
+      switchMap(() => this.refreshData$()),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 }

@@ -26,7 +26,7 @@ export class StateManager {
     return data
   }
 
-  private _masterProposals: TimedData<API.MasterProposalsFetchRes> | undefined
+  private _masterProposals: TimedData<API.MasterProposal[]> | undefined
   get masterProposals() {
     const data = this._masterProposals?.data
     if (data === undefined) throw new Error(`Requested master proposals from state (api) but not set`)

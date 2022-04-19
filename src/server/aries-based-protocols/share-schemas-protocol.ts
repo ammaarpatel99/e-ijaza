@@ -1,5 +1,5 @@
 import {WebhookMonitor} from "../webhook";
-import {catchError, filter, first, from, last, switchMap} from "rxjs";
+import {catchError, filter, first, from, last, Observable, switchMap} from "rxjs";
 import {deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
 import {State} from '../state'
 import {
@@ -21,7 +21,7 @@ export class ShareSchemasProtocol {
   private constructor() { }
 
   initialiseController() {
-    const obs$ = WebhookMonitor.instance.proofs$.pipe(
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
       filter(proof => proof.presentation_request?.name === 'Schema Set Up' && proof.state === 'request_received'),
       switchMap(proof => from(
         presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
@@ -37,14 +37,14 @@ export class ShareSchemasProtocol {
             appStateSchema: appStateSchema.schemaID
           }
         })
-      ))
-    )
-    obs$.pipe(
+      )),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
   getSchemasAndCredDefsFromController$() {

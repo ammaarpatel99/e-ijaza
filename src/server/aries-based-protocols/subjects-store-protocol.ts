@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, ReplaySubject, switchMap, tap} from "rxjs";
+import {catchError, debounceTime, forkJoin, from, last, Observable, ReplaySubject, switchMap, tap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -66,7 +66,7 @@ export class SubjectsStoreProtocol {
   }
 
   private watchState() {
-    const obs$ = State.instance.subjectOntology$.pipe(
+    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
       debounceTime(1000),
       map(state => {
         const previous = this.previous || new Map()
@@ -87,14 +87,13 @@ export class SubjectsStoreProtocol {
         if (subjectsListChanged) arr.push(this.storeSubjectList$(state))
         return forkJoin(arr).pipe(map(() => state))
       }),
-      map(state => this.previous = state)
-    )
-    obs$.pipe(
+      map(state => {this.previous = state}),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
   private getStoredSubjectsList$() {
