@@ -2,7 +2,9 @@ export {
   isAlive,
   connectViaPublicDID$,
   connectToSelf$,
-  deleteSelfConnections$
+  deleteSelfConnections$,
+  revokeCredential$,
+  connectToController$
 } from './utils'
 
 export * from './did'

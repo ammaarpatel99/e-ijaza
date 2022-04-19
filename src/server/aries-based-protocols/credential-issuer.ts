@@ -1,10 +1,9 @@
-import {connectViaPublicDID$, issueCredential, revokeCredential} from "../aries-api";
+import {connectViaPublicDID$, issueCredential, revokeCredential$} from "../aries-api";
 import {from, last, switchMap} from "rxjs";
 import {teachingSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Server} from '@project-types'
-import {voidObs$} from "@project-utils";
 
 export class CredentialIssuer {
   static readonly instance = new CredentialIssuer()
@@ -37,14 +36,6 @@ export class CredentialIssuer {
   }
 
   revoke$(credInfo: Server.CredentialInfo) {
-    return voidObs$.pipe(
-      switchMap(() => from(revokeCredential({
-        connection_id: credInfo.connection_id,
-        cred_rev_id: credInfo.cred_rev_id,
-        rev_reg_id: credInfo.rev_reg_id,
-        publish: true,
-        notify: true
-      })))
-    )
+    return revokeCredential$(credInfo)
   }
 }

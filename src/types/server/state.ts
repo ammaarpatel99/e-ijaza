@@ -11,23 +11,22 @@ export type Subjects = Map<string, {
   componentSets: Set<Set<string>>
 }>
 
-export interface  ControllerMasterProposal {
+export type MasterProposal = {
   did: string
   subject: string
   proposalType: ProposalType
+}
+
+export interface  ControllerMasterProposal extends MasterProposal {
   votes: Map<string, CredentialInfo | boolean>
 }
 
 export type ControllerMasterProposals = Map<string, ControllerMasterProposal>
 
-export interface UserMasterVote {
-  did: string;
-  subject: string;
-  proposalType: ProposalType;
+export interface UserMasterVote extends MasterProposal  {
   voterDID: string;
   credentialID: string;
+  cred_def_id: string;
 }
 
-export type UserMasterProposals = Map<string, UserMasterVote>
-
-export type MasterProposal = ControllerMasterProposal | UserMasterVote
+export type UserMasterVotes = Map<string, UserMasterVote>
