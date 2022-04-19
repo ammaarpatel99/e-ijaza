@@ -1,7 +1,6 @@
 import {WebhookMonitor} from "../webhook";
-import {catchError, filter, first, from, last, mergeMap, Observable, switchMap} from "rxjs";
-import {deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
-import {State} from '../state'
+import {catchError, filter, from, last, mergeMap, Observable, switchMap} from "rxjs";
+import {connectToController$, deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
 import {
   mastersPublicSchema,
   masterVoteSchema,
@@ -13,7 +12,6 @@ import {
 } from "../schemas";
 import {voidObs$} from "@project-utils";
 import {map} from "rxjs/operators";
-import {connectViaPublicDID$} from "../aries-api";
 
 
 export class ShareSchemasProtocol {
@@ -48,9 +46,7 @@ export class ShareSchemasProtocol {
   }
 
   getSchemasAndCredDefsFromController$() {
-    return State.instance.controllerDID$.pipe(
-      first(),
-      switchMap(controllerDID => connectViaPublicDID$({their_public_did: controllerDID})),
+    return connectToController$().pipe(
       switchMap(conn_id =>
         this.proofRequest$(conn_id)
           .pipe(map(pres_ex_id => ({conn_id, pres_ex_id})))

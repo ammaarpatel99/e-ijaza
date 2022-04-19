@@ -13,7 +13,7 @@ import {
   withLatestFrom
 } from "rxjs";
 import {
-  connectViaPublicDID$,
+  connectToController$,
   deleteCredential,
   getHeldCredentials,
   getIssuedCredentials,
@@ -278,9 +278,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private getSubjectsList$() {
-    return State.instance.controllerDID$.pipe(
-      first(),
-      switchMap(controllerDID => connectViaPublicDID$({their_public_did: controllerDID})),
+    return connectToController$().pipe(
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
@@ -316,9 +314,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private getSubject$(subject: string) {
-    return State.instance.controllerDID$.pipe(
-      first(),
-      switchMap(controllerDID => connectViaPublicDID$({their_public_did: controllerDID})),
+    return connectToController$().pipe(
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
