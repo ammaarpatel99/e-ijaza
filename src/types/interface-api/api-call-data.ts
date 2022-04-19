@@ -36,8 +36,6 @@ export interface MasterProposalVote extends MasterProposalData {
   vote: boolean
 }
 
-export type MasterProposalsFetchRes = MasterProposal[] | MasterProposalVote[]
-
 
 
 export interface Subject {

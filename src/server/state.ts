@@ -1,7 +1,7 @@
 import {Initialisation} from './initialisation'
 import {map, shareReplay} from "rxjs/operators";
 import {filter, switchMap} from "rxjs";
-import {MasterCredentialsManager} from "./master-credentials";
+import {MasterCredentialsManager, MasterProposalsManager} from "./master-credentials";
 import {ShareMastersProtocol, ShareSubjectOntologyProtocol} from "./aries-based-protocols";
 import {SubjectOntologyManager, SubjectOntology} from "./subject-ontology";
 import {Server} from '@project-types'
@@ -64,4 +64,7 @@ export class State {
       ),
       shareReplay(1)
     )
+
+  readonly controllerMasterProposals$ =
+    MasterProposalsManager.instance.state$
 }
