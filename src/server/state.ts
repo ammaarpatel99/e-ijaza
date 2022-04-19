@@ -1,5 +1,5 @@
 import {Initialisation} from './initialisation'
-import {map} from "rxjs/operators";
+import {map, shareReplay} from "rxjs/operators";
 import {filter, switchMap} from "rxjs";
 import {MasterCredentialsManager} from "./master-credentials";
 import {ShareMastersProtocol, ShareSubjectOntologyProtocol} from "./aries-based-protocols";
@@ -61,6 +61,7 @@ export class State {
       switchMap(state =>
         SubjectOntology.instance.update$(state)
           .pipe(map(() => state))
-      )
+      ),
+      shareReplay(1)
     )
 }
