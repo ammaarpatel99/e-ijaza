@@ -5,6 +5,7 @@ import {Immutable, ReadWriteMutex, voidObs$} from "@project-utils";
 import {Server} from "@project-types"
 import {map} from "rxjs/operators";
 import {Search} from "./search";
+import {SearchWrapper} from "./search-wrapper";
 
 export class SubjectOntology {
   static readonly instance = new SubjectOntology()
@@ -123,5 +124,37 @@ export class SubjectOntology {
     [...this.subjects, ...this.childRelations, ...this.componentSets].forEach(item => item.removeSearch(search))
     search.markAsDeleted()
     this.searches.delete(search)
+  }
+
+  standardSearch$(startingSet: ReadonlySet<string>, goals?: ReadonlySet<string>, closestFirst?: boolean) {
+    return voidObs$.pipe(
+      map(() => {
+        const subjects = new Map([...this.subjects].map(subject => [subject.name, subject] as [string, Subject]));
+        const _startingSet = new Set([...startingSet].map(subjectName => {
+          const subject = subjects.get(subjectName)
+          if (!subject) throw new Error(`starting set includes ${subjectName} which doesn't exist`)
+          return subject
+        }))
+        const _goals = goals ? new Set([...goals].map(subjectName => {
+          const subject = subjects.get(subjectName)
+          if (!subject) throw new Error(`goals includes ${subjectName} which doesn't exist`)
+          return subject
+        })) : undefined
+        const {searchWrapper} = this.createSearch({startingSet: _startingSet, goals: _goals, closestFirst})
+        return searchWrapper
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
+
+  private createSearch(options: ConstructorParameters<typeof Search>[0]) {
+    const search = new Search(options)
+    this.searches.add(search)
+    const searchWrapper = new SearchWrapper(
+      search,
+      subjectName => [...this.subjects].filter(subject => subject.name === subjectName).shift(),
+      () => this.removeSearch(search)
+    )
+    return {search, searchWrapper}
   }
 }

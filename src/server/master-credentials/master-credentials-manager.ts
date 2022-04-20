@@ -20,7 +20,7 @@ export class MasterCredentialsManager {
   }
 
   addMaster$(did: string, subject: string) {
-    this.state$.pipe(
+    return this.state$.pipe(
       first(),
       map(state => {
         if (!!state.get(did)?.get(subject))
@@ -50,7 +50,7 @@ export class MasterCredentialsManager {
   }
 
   removeMaster$(did: string, subject: string) {
-    this.state$.pipe(
+    return this.state$.pipe(
       first(),
       switchMap(state => {
         const credInfo = state.get(did)?.get(subject)

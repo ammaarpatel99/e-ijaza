@@ -13,7 +13,14 @@ export class SubjectOntologyManager {
 
   controllerInitialise$() {
     return SubjectsStoreProtocol.instance.getFromStore$().pipe(
-      map(state => this._state$.next(state))
+      map(state => {
+        this._state$.next(state)
+        if (!state.get('knowledge')) {
+          const newState = new Map(state)
+          newState.set('knowledge', {children: new Set(), componentSets: new Set()})
+          this._state$.next(newState)
+        }
+      })
     )
   }
 

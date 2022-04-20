@@ -30,3 +30,8 @@ export interface UserMasterVote extends MasterProposal  {
 }
 
 export type UserMasterVotes = Map<string, UserMasterVote>
+
+export interface ControllerMasterVote extends MasterProposal {
+  vote: boolean
+  voterDID: string
+}

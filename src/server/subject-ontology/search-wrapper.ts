@@ -10,7 +10,8 @@ export class SearchWrapper {
 
   constructor(
     private readonly search: Search,
-    private readonly getSubject: (subject: string) => Subject | undefined
+    private readonly getSubject: (subject: string) => Subject | undefined,
+    readonly deleteSearch: () => void
   ) {
   }
 

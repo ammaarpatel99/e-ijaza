@@ -20,6 +20,17 @@ export class MasterVoteProtocol {
 
   // CONTROLLER
 
+  private readonly _controllerVotes$ = new ReplaySubject<Immutable<Server.ControllerMasterVote>>(1)
+  readonly controllerVotes$ = this._controllerVotes$.asObservable()
+
+  controllerInitialisation$() {
+    return voidObs$.pipe(
+      map(() => {
+        this.watchVotes()
+      })
+    )
+  }
+
   issueVote$(voterDID: string, proposal: Server.MasterProposal) {
     const data: Schemas.MasterProposalVoteSchema = {
       voteDetails: {
@@ -43,7 +54,11 @@ export class MasterVoteProtocol {
       }))),
       switchMap(({credential_exchange_id}) => WebhookMonitor.instance.monitorCredential$(credential_exchange_id!)),
       last(),
-      map(() => undefined as void)
+      map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
+        connection_id: connection_id!,
+        rev_reg_id: revoc_reg_id!,
+        cred_rev_id: revocation_id!
+      }))
     )
   }
 
@@ -51,10 +66,37 @@ export class MasterVoteProtocol {
     return revokeCredential$(credInfo, MasterProposalsManager.proposalToID(proposal))
   }
 
+  watchVotes() {
+    WebhookMonitor.instance.proofs$.pipe(
+      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === 'Vote on Master Proposal'),
+      map(proof => {
+        const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
+          .filter(([_, data]) => data.name === 'voteDetails')
+          .map(([id, _]) => id).shift()!
+        const voteChoiceID = Object.entries(proof.presentation_request!.requested_attributes)
+          .filter(([_, data]) => data.name === 'voteChoice')
+          .map(([id, _]) => id).shift()!
+        const voteDetails = JSON.parse(proof.presentation!.requested_proof!.revealed_attrs![voteDetailsID].raw!) as Schemas.MasterProposalVoteSchema['voteDetails']
+        const voteChoice = JSON.parse(proof.presentation!.requested_proof!.revealed_attrs![voteChoiceID].raw!) as boolean
+        return {voteDetails, voteChoice}
+      }),
+      map(({voteDetails, voteChoice}) => ({
+        subject: voteDetails.subject,
+        vote: voteChoice,
+        did: voteDetails.did,
+        proposalType: voteDetails.action,
+        voterDID: voteDetails.voterDID
+      }) as Server.ControllerMasterVote),
+      map(data => {
+        this._controllerVotes$.next(data)
+      })
+    )
+  }
+
   // USER
 
-  private readonly _votes$ = new ReplaySubject<Immutable<Server.UserMasterVotes>>(1)
-  readonly votes$ = this._votes$.asObservable()
+  private readonly _userVotes$ = new ReplaySubject<Immutable<Server.UserMasterVotes>>(1)
+  readonly userVotes$ = this._userVotes$.asObservable()
 
   userInitialisation$() {
     return voidObs$.pipe(
@@ -110,11 +152,11 @@ export class MasterVoteProtocol {
         credentialID: data.credentialID,
         cred_def_id: data.cred_def_id
       }) as Server.UserMasterVote),
-      withLatestFrom(this._votes$),
+      withLatestFrom(this._userVotes$),
       map(([vote, votes]) => {
         const map = new Map(votes)
         map.set(MasterProposalsManager.proposalToID(vote), vote)
-        this._votes$.next(map)
+        this._userVotes$.next(map)
       }),
       catchError(e => {
         console.error(e)
@@ -128,11 +170,11 @@ export class MasterVoteProtocol {
     const obs$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(masterVoteSchema.name)),
       map(data => data.comment),
-      withLatestFrom(this._votes$),
+      withLatestFrom(this._userVotes$),
       map(([proposalID, votes]) => {
         const map = new Map(votes)
         map.delete(proposalID)
-        this._votes$.next(map)
+        this._userVotes$.next(map)
       }),
       catchError(e => {
         console.error(e)
@@ -142,9 +184,9 @@ export class MasterVoteProtocol {
     obs$.subscribe()
   }
 
-  vote$(vote: API.MasterProposalVote) {
+  sendVote$(vote: API.MasterProposalVote) {
     const id = MasterProposalsManager.proposalToID(vote)
-    return this._votes$.pipe(
+    return this._userVotes$.pipe(
       first(),
       map(votes => {
         const _vote = votes.get(id)
