@@ -7,18 +7,18 @@ import {
   getHeldCredentials,
   issueCredential
 } from "../aries-api";
-import {masterProposalSchema} from "../schemas";
+import {subjectProposalSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-import {MasterProposalsManager} from "../master-credentials";
+import {OntologyProposalManager} from "../subject-ontology";
 
-export class MasterProposalStoreProtocol {
-  static readonly instance = new MasterProposalStoreProtocol()
+export class OntologyProposalStoreProtocol {
+  static readonly instance = new OntologyProposalStoreProtocol()
   private constructor() { }
 
-  private previous: Immutable<Server.ControllerMasterProposals> | undefined
+  private previous: Immutable<Server.ControllerOntologyProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
   initialise$() {
@@ -30,19 +30,21 @@ export class MasterProposalStoreProtocol {
   getFromStore$() {
     return voidObs$.pipe(
       switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${masterProposalSchema.schemaID}"}`})
+        getHeldCredentials({wql: `{"schema_id": "${subjectProposalSchema.schemaID}"}`})
       )),
       map(result => result.results || []),
       map(creds => creds.map(cred => {
-        const data = JSON.parse(cred.attrs!['proposal']) as Schemas.MasterProposalStateSchema['proposal']
+        const data = JSON.parse(cred.attrs!['proposal']) as Schemas.SubjectProposalStateSchema['proposal']
         const votes = new Map(Object.entries(data.votes))
-        const proposal: Server.ControllerMasterProposal = {
+        const change: Server.ControllerOntologyProposal['change'] = data.change.type === Server.SubjectProposalType.CHILD
+          ? {type: Server.SubjectProposalType.CHILD, child: data.change.child}
+          : {type: Server.SubjectProposalType.COMPONENT_SET, component_set: new Set(data.change.component_set)}
+        const proposal: Server.ControllerOntologyProposal = {
           proposalType: data.action,
           subject: data.subject,
-          did: data.did,
-          votes
+          votes, change
         }
-        const proposalID = MasterProposalsManager.proposalToID(proposal)
+        const proposalID = OntologyProposalManager.proposalToID(proposal)
         this.credentialIDs.set(proposalID, cred.referent!)
         return [proposalID, proposal] as [typeof proposalID, typeof proposal]
       })),
@@ -52,7 +54,7 @@ export class MasterProposalStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance.controllerMasterProposals$.pipe(
+    const obs$: Observable<void> = State.instance.controllerOntologyProposals$.pipe(
       debounceTime(1000),
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {
@@ -62,7 +64,7 @@ export class MasterProposalStoreProtocol {
           from(deleteCredential({credential_id}))
         })
         const arr2 = [...edited].map(([id, proposal]) =>
-          this.storeProposal$(MasterProposalStoreProtocol.proposalToSchema(proposal))
+          this.storeProposal$(OntologyProposalStoreProtocol.proposalToSchema(proposal))
             .pipe(map(cred_ex_id => this.credentialIDs.set(id, cred_ex_id)))
         )
 
@@ -80,7 +82,7 @@ export class MasterProposalStoreProtocol {
     obs$.subscribe()
   }
 
-  private stateToChanges(state: Immutable<Server.ControllerMasterProposals>) {
+  private stateToChanges(state: Immutable<Server.ControllerOntologyProposals>) {
     const previous = this.previous || new Map() as typeof state
     const deleted = new Map([...previous]
       .filter(([id, _]) => !state.has(id)))
@@ -89,24 +91,26 @@ export class MasterProposalStoreProtocol {
     return {state, deleted, edited}
   }
 
-  private static proposalToSchema(proposal: Immutable<Server.ControllerMasterProposal>) {
+  private static proposalToSchema(proposal: Immutable<Server.ControllerOntologyProposal>): Schemas.SubjectProposalStateSchema {
     return {
       proposal: {
-        did: proposal.did,
         action: proposal.proposalType,
         subject: proposal.subject,
-        votes: Object.fromEntries([...proposal.votes])
+        votes: Object.fromEntries([...proposal.votes]),
+        change: proposal.change.type === Server.SubjectProposalType.CHILD
+          ? {type: Server.SubjectProposalType.CHILD, child: proposal.change.child}
+          : {type: Server.SubjectProposalType.COMPONENT_SET, component_set: [...proposal.change.component_set]}
       }
-    } as Schemas.MasterProposalStateSchema
+    }
   }
 
-  private storeProposal$(proposal: Immutable<Schemas.MasterProposalStateSchema>) {
+  private storeProposal$(proposal: Immutable<Schemas.SubjectProposalStateSchema>) {
     return connectToSelf$().pipe(
       switchMap(connections =>
         from(issueCredential({
           connection_id: connections[0],
           auto_remove: true,
-          cred_def_id: masterProposalSchema.credID,
+          cred_def_id: subjectProposalSchema.credID,
           credential_proposal: {
             attributes: [{
               name: 'proposal',

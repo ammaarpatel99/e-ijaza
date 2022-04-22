@@ -3,7 +3,7 @@ import {map, shareReplay} from "rxjs/operators";
 import {filter, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "./master-credentials";
 import {ShareMastersProtocol, ShareSubjectOntologyProtocol} from "./aries-based-protocols";
-import {SubjectOntologyManager, SubjectOntology} from "./subject-ontology";
+import {SubjectOntologyManager, SubjectOntology, OntologyProposalManager} from "./subject-ontology";
 import {Server} from '@project-types'
 
 export class State {
@@ -67,4 +67,7 @@ export class State {
 
   readonly controllerMasterProposals$ =
     MasterProposalsManager.instance.state$
+
+  readonly controllerOntologyProposals$ =
+    OntologyProposalManager.instance.state$
 }
