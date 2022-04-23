@@ -4,11 +4,10 @@ import {connectToController$, deleteConnection, deleteProof, presentProof, reque
 import {
   mastersPublicSchema,
   masterVoteSchema,
-  subjectSchema,
-  subjectsSchema,
+  subjectDataSchema,
+  subjectsListSchema,
   subjectVoteSchema,
-  teachingSchema,
-  appStateSchema
+  teachingSchema
 } from "../schemas";
 import {voidObs$} from "@project-utils";
 import {map} from "rxjs/operators";
@@ -18,21 +17,22 @@ export class ShareSchemasProtocol {
   static readonly instance = new ShareSchemasProtocol()
   private constructor() { }
 
+  private static PROOF_NAME = 'Schema Set Up'
+
   initialiseController() {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.presentation_request?.name === 'Schema Set Up' && proof.state === 'request_received'),
+      filter(proof => proof.presentation_request?.name === ShareSchemasProtocol.PROOF_NAME && proof.state === 'request_received'),
       mergeMap(proof => from(
         presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
           requested_attributes: {},
           requested_predicates: {},
           self_attested_attributes: {
-            subjectSchema: subjectSchema.schemaID,
-            subjectsSchema: subjectsSchema.schemaID,
+            subjectDataSchema: subjectDataSchema.schemaID,
+            subjectsListSchema: subjectsListSchema.schemaID,
             subjectVoteSchema: subjectVoteSchema.schemaID,
             mastersPublicSchema: mastersPublicSchema.schemaID,
-            mastersVoteSchema: masterVoteSchema.schemaID,
-            teachingSchema: teachingSchema.schemaID,
-            appStateSchema: appStateSchema.schemaID
+            masterVoteSchema: masterVoteSchema.schemaID,
+            teachingSchema: teachingSchema.schemaID
           }
         })
       )),
@@ -45,7 +45,7 @@ export class ShareSchemasProtocol {
     obs$.subscribe()
   }
 
-  getSchemasAndCredDefsFromController$() {
+  getSchemasFromController$() {
     return connectToController$().pipe(
       switchMap(conn_id =>
         this.proofRequest$(conn_id)
@@ -67,11 +67,11 @@ export class ShareSchemasProtocol {
           name: "Set Up",
           version: '1.0',
           requested_attributes: {
-            subjectSchema: {
-              name: 'subjectSchema'
+            subjectDataSchema: {
+              name: 'subjectDataSchema'
             },
-            subjectsSchema: {
-              name: 'subjectsSchema'
+            subjectsListSchema: {
+              name: 'subjectsListSchema'
             },
             subjectVoteSchema: {
               name: 'subjectVoteSchema'
@@ -79,14 +79,11 @@ export class ShareSchemasProtocol {
             mastersPublicSchema: {
               name: 'mastersPublicSchema'
             },
-            mastersVoteSchema: {
-              name: 'mastersVoteSchema'
+            masterVoteSchema: {
+              name: 'masterVoteSchema'
             },
             teachingSchema: {
               name: 'teachingSchema'
-            },
-            appStateSchema: {
-              name: 'appStateSchema'
             }
           },
           requested_predicates: {}
@@ -104,23 +101,21 @@ export class ShareSchemasProtocol {
           throw new Error(`invalid proof result from request for schemas and credentials`)
         }
         return {
-          subjectSchema: result.presentation.requested_proof.self_attested_attrs['subjectSchema'],
-          subjectsSchema: result.presentation.requested_proof.self_attested_attrs['subjectsSchema'],
+          subjectDataSchema: result.presentation.requested_proof.self_attested_attrs['subjectDataSchema'],
+          subjectsListSchema: result.presentation.requested_proof.self_attested_attrs['subjectsListSchema'],
           subjectVoteSchema: result.presentation.requested_proof.self_attested_attrs['subjectVoteSchema'],
           mastersPublicSchema: result.presentation.requested_proof.self_attested_attrs['mastersPublicSchema'],
-          mastersVoteSchema: result.presentation.requested_proof.self_attested_attrs['mastersVoteSchema'],
-          teachingSchema: result.presentation.requested_proof.self_attested_attrs['teachingSchema'],
-          appStateSchema: result.presentation.requested_proof.self_attested_attrs['appStateSchema']
+          masterVoteSchema: result.presentation.requested_proof.self_attested_attrs['masterVoteSchema'],
+          teachingSchema: result.presentation.requested_proof.self_attested_attrs['teachingSchema']
         }
       }),
       map(data => {
         mastersPublicSchema.schemaID = data.mastersPublicSchema
-        masterVoteSchema.schemaID = data.mastersVoteSchema
-        subjectsSchema.schemaID = data.subjectsSchema
-        subjectSchema.schemaID = data.subjectSchema
+        masterVoteSchema.schemaID = data.masterVoteSchema
+        subjectsListSchema.schemaID = data.subjectsListSchema
+        subjectDataSchema.schemaID = data.subjectDataSchema
         subjectVoteSchema.schemaID = data.subjectVoteSchema
         teachingSchema.schemaID = data.teachingSchema
-        appStateSchema.schemaID = data.appStateSchema
       })
     )
   }

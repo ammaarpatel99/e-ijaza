@@ -19,7 +19,7 @@ import {
   getHeldCredentials,
   issueCredential
 } from "../aries-api";
-import {subjectSchema, subjectsSchema} from "../schemas";
+import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
@@ -110,7 +110,7 @@ export class SubjectsStoreProtocol {
   private getStoredSubjectsList$() {
     return voidObs$.pipe(
       switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectsSchema.schemaID}"}`})
+        getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
       )),
       map(result => result.results || [])
     )
@@ -128,7 +128,7 @@ export class SubjectsStoreProtocol {
   private getStoredSubjects$(subject?: string) {
     return voidObs$.pipe(
       switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectSchema.schemaID}"}`})
+        getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
       )),
       map(result => result.results || []),
       map(creds => {
@@ -155,7 +155,7 @@ export class SubjectsStoreProtocol {
       switchMap(() => connectToSelf$()),
       switchMap(connections =>
         from(issueCredential({
-          cred_def_id: subjectsSchema.credID,
+          cred_def_id: subjectsListSchema.credID,
           connection_id: connections[0],
           auto_remove: true,
           credential_proposal: {
@@ -193,7 +193,7 @@ export class SubjectsStoreProtocol {
       switchMap(() => connectToSelf$()),
       switchMap(connections => getData$.pipe(switchMap(data =>
         from(issueCredential({
-          cred_def_id: subjectSchema.credID,
+          cred_def_id: subjectDataSchema.credID,
           connection_id: connections[0],
           auto_remove: true,
           credential_proposal: {

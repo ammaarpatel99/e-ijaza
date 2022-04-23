@@ -5,11 +5,10 @@ import {
   masterProposalSchema,
   mastersPublicSchema,
   masterVoteSchema,
-  subjectSchema,
-  subjectsSchema,
+  subjectDataSchema,
+  subjectsListSchema,
   subjectProposalSchema,
   subjectVoteSchema,
-  appStateSchema,
   Schema
 } from './'
 import {voidObs$} from "@project-utils";
@@ -17,16 +16,15 @@ import {forkJoin, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 
 const schemas: Schema[] = [
-  subjectSchema,
-  subjectsSchema,
+  subjectDataSchema,
+  subjectsListSchema,
   subjectProposalSchema,
   subjectVoteSchema,
   masterProposalSchema,
   mastersInternalSchema,
   masterVoteSchema,
   mastersPublicSchema,
-  teachingSchema,
-  appStateSchema
+  teachingSchema
 ]
 
 export function initialiseControllerSchemas$() {
@@ -45,10 +43,9 @@ export function initialiseControllerSchemas$() {
 
 export function initialiseUserSchemas$() {
   return voidObs$.pipe(
-    switchMap(() => ShareSchemasProtocol.instance.getSchemasAndCredDefsFromController$()),
+    switchMap(() => ShareSchemasProtocol.instance.getSchemasFromController$()),
     switchMap(() => forkJoin([
-      teachingSchema.fetchOrSetCredID$(),
-      appStateSchema.fetchOrSetCredID$()
+      teachingSchema.fetchOrSetCredID$()
     ])),
     map(() => undefined as void)
   )

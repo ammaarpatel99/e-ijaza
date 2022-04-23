@@ -113,15 +113,3 @@ export interface MasterProposalVoteSchema {
 export interface TeachingSchema {
   subject: string
 }
-
-
-
-export interface AppStateSchema {
-  appState: {
-    appType: AppType.USER
-    name: string
-    controllerDID: string
-  } | {
-    appType: AppType.CONTROLLER
-  }
-}

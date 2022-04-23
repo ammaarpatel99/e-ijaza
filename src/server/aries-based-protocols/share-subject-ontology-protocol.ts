@@ -21,7 +21,7 @@ import {
   proposeCredential,
   revokeCredential
 } from "../aries-api";
-import {subjectSchema, subjectsSchema} from "../schemas";
+import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {Server, Schemas} from '@project-types'
@@ -57,7 +57,7 @@ export class ShareSubjectOntologyProtocol {
         getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
       )),
       map(results => results.results!),
-      map(results => results.filter(cred => cred.schema_id === subjectsSchema.schemaID)),
+      map(results => results.filter(cred => cred.schema_id === subjectsListSchema.schemaID)),
       map(results => results.map(cred => ({
         connection_id: cred.connection_id!,
         rev_reg_id: cred.revoc_reg_id!,
@@ -73,7 +73,7 @@ export class ShareSubjectOntologyProtocol {
         getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
       )),
       map(results => results.results!),
-      map(results => results.filter(cred => cred.schema_id === subjectSchema.schemaID)),
+      map(results => results.filter(cred => cred.schema_id === subjectDataSchema.schemaID)),
       map(results => results.map(cred => ({
         connection_id: cred.connection_id!,
         rev_reg_id: cred.revoc_reg_id!,
@@ -94,7 +94,7 @@ export class ShareSubjectOntologyProtocol {
   private handleSubjectListRequests() {
     const obs$ = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
-        cred.credential_proposal_dict?.schema_id === subjectsSchema.schemaID
+        cred.credential_proposal_dict?.schema_id === subjectsListSchema.schemaID
         && cred.state === 'proposal_received'
       ),
       map(cred => cred.credential_exchange_id!),
@@ -106,7 +106,7 @@ export class ShareSubjectOntologyProtocol {
       mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
           counter_proposal: {
-            cred_def_id: subjectsSchema.credID,
+            cred_def_id: subjectsListSchema.credID,
             credential_proposal: {
               attributes: [{
                 name: 'subjects',
@@ -131,7 +131,7 @@ export class ShareSubjectOntologyProtocol {
   private handleSubjectRequests() {
     const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
-        cred.credential_proposal_dict?.schema_id === subjectSchema.schemaID
+        cred.credential_proposal_dict?.schema_id === subjectDataSchema.schemaID
         && cred.state === 'proposal_received'
       ),
       map(cred => [
@@ -163,7 +163,7 @@ export class ShareSubjectOntologyProtocol {
       mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
           counter_proposal: {
-            cred_def_id: subjectSchema.credID,
+            cred_def_id: subjectDataSchema.credID,
             credential_proposal: {
               attributes: [{
                 name: 'subject',
@@ -282,7 +282,7 @@ export class ShareSubjectOntologyProtocol {
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
-        schema_id: subjectsSchema.schemaID,
+        schema_id: subjectsListSchema.schemaID,
         credential_proposal: {
           attributes: [{
             name: 'subjects',
@@ -318,7 +318,7 @@ export class ShareSubjectOntologyProtocol {
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
-        schema_id: subjectSchema.schemaID,
+        schema_id: subjectDataSchema.schemaID,
         credential_proposal: {
           attributes: [{
             name: 'subject',
@@ -348,7 +348,7 @@ export class ShareSubjectOntologyProtocol {
   private clearSubjectsList$() {
     return voidObs$.pipe(
       switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectsSchema.schemaID}"}`})
+        getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
       )),
       map(result => result.results || []),
       map(creds => creds.map(cred => from(
@@ -361,7 +361,7 @@ export class ShareSubjectOntologyProtocol {
   private clearSubjects$(subject?: string) {
     return voidObs$.pipe(
       switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectSchema.schemaID}"}`})
+        getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
       )),
       map(result => result.results || []),
       map(creds => {
@@ -380,7 +380,7 @@ export class ShareSubjectOntologyProtocol {
 
   private watchRevocations() {
     const obs1$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
-      filter(data => data.thread_id.includes(subjectsSchema.name)),
+      filter(data => data.thread_id.includes(subjectsListSchema.name)),
       mergeMap(() => this.clearSubjectsList$()),
       switchMap(() => this.getSubjectsList$()),
       map(() => undefined as void),
@@ -392,7 +392,7 @@ export class ShareSubjectOntologyProtocol {
     obs1$.subscribe()
 
     const obs2$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
-      filter(data => data.thread_id.includes(subjectSchema.name)),
+      filter(data => data.thread_id.includes(subjectDataSchema.name)),
       switchMap(data => {
         const info = data.comment.split(':')
         if (info.length < 2 || !['deleted', 'edited'].includes(info[0]) || !info[1]) {
