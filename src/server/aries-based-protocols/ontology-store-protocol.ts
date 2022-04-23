@@ -31,8 +31,8 @@ interface ChangeData {
   subjectsListChanged: boolean
 }
 
-export class SubjectsStoreProtocol {
-  static readonly instance = new SubjectsStoreProtocol()
+export class OntologyStoreProtocol {
+  static readonly instance = new OntologyStoreProtocol()
   private constructor() { }
 
   private readonly _changes$ = new ReplaySubject<Immutable<ChangeData>>(1)
@@ -62,7 +62,7 @@ export class SubjectsStoreProtocol {
       }))
     )
     return forkJoin([subjectListData$, subjectsData$]).pipe(
-      map(([subjectListData, subjectsData]) => SubjectsStoreProtocol.schemasToState(subjectListData, subjectsData)),
+      map(([subjectListData, subjectsData]) => OntologyStoreProtocol.schemasToState(subjectListData, subjectsData)),
       tap(state => this.previous = state),
       switchMap(state => this.clean$(state).pipe(map(() => state)))
     )

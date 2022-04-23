@@ -1,4 +1,4 @@
-import {SubjectsStoreProtocol} from '../aries-based-protocols'
+import {OntologyStoreProtocol} from '../aries-based-protocols'
 import {first, ReplaySubject} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
@@ -12,7 +12,7 @@ export class SubjectOntologyManager {
   readonly state$ = this._state$.asObservable()
 
   controllerInitialise$() {
-    return SubjectsStoreProtocol.instance.getFromStore$().pipe(
+    return OntologyStoreProtocol.instance.getFromStore$().pipe(
       map(state => {
         this._state$.next(state)
         if (!state.get('knowledge')) {

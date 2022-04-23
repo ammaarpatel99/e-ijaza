@@ -28,8 +28,8 @@ import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {environment} from "../../environments/environment";
 
-export class ShareMastersProtocol {
-  static readonly instance = new ShareMastersProtocol()
+export class MastersShareProtocol {
+  static readonly instance = new MastersShareProtocol()
   private constructor() { }
 
   private static stateToSchema(state: Immutable<Server.ControllerMasters>): Immutable<Schemas.MastersPublicSchema> {
@@ -122,7 +122,7 @@ export class ShareMastersProtocol {
       map(cred => cred.credential_exchange_id!),
       withLatestFrom(State.instance.controllerMasters$),
       map(([cred_ex_id, masters]) => {
-        return [cred_ex_id, ShareMastersProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
+        return [cred_ex_id, MastersShareProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
       }),
       mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
@@ -180,7 +180,7 @@ export class ShareMastersProtocol {
       last(),
       map(res => JSON.parse(res.credential!.attrs!['credentials']) as Schemas.MastersPublicSchema['credentials']),
       map(res => {
-        this._userState$.next(ShareMastersProtocol.schemaToState({credentials: res}))
+        this._userState$.next(MastersShareProtocol.schemaToState({credentials: res}))
       })
     )
   }

@@ -25,7 +25,7 @@ import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {Server, Schemas} from '@project-types'
-import {SubjectsStoreProtocol} from "./subjects-store-protocol";
+import {OntologyStoreProtocol} from "./ontology-store-protocol";
 
 type SubjectDataWithOptional = Server.Subjects extends Map<infer K, infer V> ? Map<K, Immutable<V>|null> : never
 
@@ -208,7 +208,7 @@ export class ShareSubjectOntologyProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    const obs$: Observable<void> = SubjectsStoreProtocol.instance.changes$.pipe(
+    const obs$: Observable<void> = OntologyStoreProtocol.instance.changes$.pipe(
       bufferTime(1000),
       map(x => {
         if (x.length === 0) return
