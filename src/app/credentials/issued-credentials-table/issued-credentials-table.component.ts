@@ -7,7 +7,6 @@ import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
-import {of} from "rxjs";
 
 @Component({
   selector: 'app-issued-credentials-table',
@@ -35,16 +34,9 @@ export class IssuedCredentialsTableComponent implements AfterViewInit {
     this.table.dataSource = this.dataSource;
   }
 
-  vote(inFavour: boolean, proposal: API.MasterProposalData) {
-    of({...proposal, vote: inFavour}).pipe(
-      this.api.voteOnMasterProposal,
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
   revoke(cred: Immutable<API.IssuedCredential>) {
-    this.api.revokeIssuedCredential(of(cred)).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.revokeIssuedCredential$(cred).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 }

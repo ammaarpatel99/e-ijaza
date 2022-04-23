@@ -48,7 +48,7 @@
     <tr mat-row *matRowDef="let row; columns: (displayedColumns$ | async) || [];"></tr>
   </table>
 
-  <mat-paginator #paginator
+  <mat-paginator
                  [length]="(dataSource?.length$ | async) || 0"
                  [pageIndex]="0"
                  [pageSize]="10"

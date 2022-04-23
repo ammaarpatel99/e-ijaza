@@ -7,7 +7,6 @@ import {StateService} from "../services/state/state.service";
 import {map} from "rxjs/operators";
 import {LoadingService} from "../services/loading/loading.service";
 import {ApiService} from "../services/api/api.service";
-import {voidObs$} from "@project-utils";
 
 const isAppTypeValidator: ValidatorFn = control => {
   if ([API.AppType.CONTROLLER, API.AppType.USER].includes(control.value)) return null
@@ -22,9 +21,9 @@ const isAppTypeValidator: ValidatorFn = control => {
 export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('stepper') private stepper?: MatStepper
 
-  private readonly destroy$ = new AsyncSubject<true>();
+  private readonly destroy$ = new AsyncSubject<void>();
 
-  readonly loading$ = this.loadingService.loading$
+  readonly loading$ = this.loading.loading$
 
   readonly APP_TYPES = API.AppType
 
@@ -56,8 +55,8 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   get did() { return this._did }
 
   constructor(
-    private readonly stateService: StateService,
-    private readonly loadingService: LoadingService,
+    private readonly state: StateService,
+    private readonly loading: LoadingService,
     private readonly api: ApiService
   ) { }
 
@@ -68,12 +67,74 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
   ngAfterViewInit() {
     this.watchState()
-    this.stateService.update$.subscribe()
+    this.state.update$.subscribe()
   }
 
   ngOnDestroy() {
-    this.destroy$.next(true);
+    this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  submitFullInitialisation() {
+    if (this.ariesForm.invalid || this.initialisationForm.invalid) {
+      throw new Error(`Can't submit full initialisation whilst forms are invalid`)
+    }
+
+    const ariesData: API.AriesInitialisationData = {
+      genesisURL: this.genesisURL.value,
+      tailsServerURL: this.tailsServerURL.value,
+      advertisedEndpoint: this.advertisedEndpoint.value
+    }
+    if (this.autoRegisterPublicDID.value) ariesData.vonNetworkURL = this.initVonNetworkURL.value
+    const initData: API.InitialisationData = {
+      appType: this.appType.value,
+      name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
+      controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
+    }
+    const data = {...ariesData, ...initData}
+
+    this.api.submitFullInitialisation$(data).pipe(
+      this.loading.wrapObservable()
+    ).subscribe()
+  }
+
+  generateDID() {
+    this.api.generateDID$.pipe(
+      tap(did => this._did = did),
+      this.loading.wrapObservable()
+    ).subscribe()
+  }
+
+  registeredDID() {
+    const did = this.did
+    if (!did) throw new Error(`Can't register did as component holds no did details`)
+    this.api.registerDID$(did).pipe(
+      this.loading.wrapObservable()
+    ).subscribe()
+  }
+
+  autoRegisterDID() {
+    if (this.vonNetworkURL.invalid) {
+      throw new Error(`Can't auto register did whilst forms are invalid`)
+    }
+    const data = {vonNetworkURL: this.vonNetworkURL.value}
+    this.api.autoRegisterDID$(data).pipe(
+      this.loading.wrapObservable()
+    ).subscribe()
+  }
+
+  submitAppInitialisation() {
+    if (this.initialisationForm.invalid) {
+      throw new Error(`Can't submit app initialisation whilst forms are invalid`)
+    }
+    const initData: API.InitialisationData = {
+      appType: this.appType.value,
+      name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
+      controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
+    }
+    this.api.submitAppInitialisation$(initData).pipe(
+      this.loading.wrapObservable()
+    ).subscribe()
   }
 
   private manageValidators() {
@@ -108,7 +169,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
     ]
     let loadingFromState = false
 
-    this.stateService.initialisationState$.pipe(
+    this.state.initialisationState$.pipe(
       tap(state => {
         let loop = true
         while (loop) {
@@ -123,15 +184,15 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
 
         if (!nonLoadingStates.includes(state) && !loadingFromState) {
           loadingFromState = true
-          this.loadingService.startLoading()
+          this.loading.startLoading()
         } else if (nonLoadingStates.includes(state) && loadingFromState) {
           loadingFromState = false
-          this.loadingService.startLoading()
+          this.loading.stopLoading()
         }
       }),
       takeUntil(this.destroy$),
       finalize(() => {
-        if (loadingFromState) this.loadingService.stopLoading()
+        if (loadingFromState) this.loading.stopLoading()
       })
     ).subscribe()
   }
@@ -152,81 +213,4 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
       takeUntil(this.destroy$)
     ).subscribe()
   }
-
-  submitFullInitialisation() {
-    voidObs$.pipe(
-      tap(() => {
-        if (this.ariesForm.invalid || this.initialisationForm.invalid) {
-          throw new Error(`Can't submit full initialisation whilst forms are invalid`)
-        }
-      }),
-      map(() => {
-        const ariesData: API.AriesInitialisationData = {
-          genesisURL: this.genesisURL.value,
-          tailsServerURL: this.tailsServerURL.value,
-          advertisedEndpoint: this.advertisedEndpoint.value
-        }
-        if (this.autoRegisterPublicDID.value) ariesData.vonNetworkURL = this.initVonNetworkURL.value
-        const initData: API.InitialisationData = {
-          appType: this.appType.value,
-          name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
-          controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
-        }
-        return {...ariesData, ...initData}
-      }),
-      this.api.submitFullInitialisation,
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
-  generateDID() {
-    this.api.generateDID$.pipe(
-      tap(did => this._did = did),
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
-  registeredDID() {
-    voidObs$.pipe(
-      map(() => {
-        const did = this.did
-        if (!did) throw new Error(`Can't register did as component holds no did details`)
-        return did
-      }),
-      this.api.registerDID,
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
-  autoRegisterDID() {
-    voidObs$.pipe(
-      map(() => {
-        if (this.vonNetworkURL.invalid) {
-          throw new Error(`Can't auto register did whilst forms are invalid`)
-        }
-        return {vonNetworkURL: this.vonNetworkURL.value}
-      }),
-      this.api.autoRegisterDID,
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
-  submitAppInitialisation() {
-    voidObs$.pipe(
-      map(() => {
-        if (this.initialisationForm.invalid) {
-          throw new Error(`Can't submit app initialisation whilst forms are invalid`)
-        }
-        const initData: API.InitialisationData = {
-          appType: this.appType.value,
-          name: this.appType.value === API.AppType.USER ? this.name.value : undefined,
-          controllerDID: this.appType.value === API.AppType.USER ? this.masterDID.value : undefined
-        }
-        return initData
-      }),
-      this.api.submitAppInitialisation,
-      this.loadingService.rxjsOperator()
-    ).subscribe()
-  }
-
 }

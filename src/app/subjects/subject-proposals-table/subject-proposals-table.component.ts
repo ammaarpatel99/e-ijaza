@@ -8,7 +8,6 @@ import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
 import {map} from "rxjs/operators";
-import {of} from "rxjs";
 
 @Component({
   selector: 'app-subject-proposals-table',
@@ -21,12 +20,7 @@ export class SubjectProposalsTableComponent implements AfterViewInit {
   dataSource: SubjectProposalsTableDataSource;
 
   readonly loading$ = this.loadingService.loading$
-  readonly displayedColumns$ = this.stateService.appType$.pipe(
-    map(type => {
-      if (type === API.AppType.USER) return ['subject', 'action', 'child', 'vote']
-      else return ['subject', 'action', 'child', 'votes_for', 'votes_against', 'votes_total']
-    })
-  )
+  readonly displayedColumns$ = this._displayedColumns$()
 
   constructor(
     private readonly stateService: StateService,
@@ -42,9 +36,17 @@ export class SubjectProposalsTableComponent implements AfterViewInit {
   }
 
   vote(inFavour: boolean, proposal: API.SubjectProposalData) {
-    of({...proposal, vote: inFavour}).pipe(
-      this.api.voteOnSubjectProposal,
-      this.loadingService.rxjsOperator()
+    this.api.voteOnSubjectProposal$({...proposal, vote: inFavour}).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
+  }
+
+  private _displayedColumns$() {
+    return this.stateService.appType$.pipe(
+      map(type => {
+        if (type === API.AppType.USER) return ['subject', 'action', 'child', 'vote']
+        else return ['subject', 'action', 'child', 'votes_for', 'votes_against', 'votes_total']
+      })
+    )
   }
 }

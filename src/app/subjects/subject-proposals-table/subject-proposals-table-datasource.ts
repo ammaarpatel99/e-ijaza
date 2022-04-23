@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import {map, startWith, switchMapTo} from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {Observable, switchMap} from 'rxjs';
 import {Immutable} from "@project-utils";
 import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
@@ -32,7 +32,7 @@ export class SubjectProposalsTableDataSource extends DataSource<Immutable<API.Su
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMapTo(this.stateService.subjectProposals$),
+        switchMap(() => this.stateService.subjectProposals$),
         map(data => this.getPagedData(data))
       )
     } else {

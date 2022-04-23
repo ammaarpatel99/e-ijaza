@@ -3,7 +3,6 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {StateService} from "../services/state/state.service";
 import {ApiService} from "../services/api/api.service";
 import {LoadingService} from "../services/loading/loading.service";
-import {of} from "rxjs";
 
 @Component({
   selector: 'app-proofs',
@@ -29,7 +28,8 @@ export class ProofsComponent {
   ) { }
 
   submitProof() {
-    this.api.createOutgoingProofRequest(of({did: this.did.value, subject: this.subject.value}))
+    this.api.createOutgoingProofRequest$(
+      {did: this.did.value, subject: this.subject.value}
+    ).subscribe()
   }
-
 }

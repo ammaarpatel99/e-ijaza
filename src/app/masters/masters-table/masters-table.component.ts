@@ -6,7 +6,6 @@ import {StateService} from "../../services/state/state.service";
 import {API} from "@project-types";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {LoadingService} from "../../services/loading/loading.service";
-import {of} from "rxjs";
 import {ApiService} from "../../services/api/api.service";
 import {Immutable} from "@project-utils";
 
@@ -47,9 +46,8 @@ export class MastersTableComponent implements AfterViewInit {
   }
 
   proposeRemoval(did: string, subject: string) {
-    of({did, subject, proposalType: API.ProposalType.REMOVE}).pipe(
-      this.api.proposeMaster,
-      this.loadingService.rxjsOperator()
+    this.api.proposeMaster$({did, subject, proposalType: API.ProposalType.REMOVE}).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 }

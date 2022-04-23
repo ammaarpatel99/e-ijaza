@@ -8,7 +8,6 @@ import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
-import {of} from "rxjs";
 
 @Component({
   selector: 'app-outgoing-proofs',
@@ -47,8 +46,8 @@ export class OutgoingProofsComponent implements AfterViewInit {
   }
 
   delete(item: API.OutgoingProofRequest) {
-    this.api.deleteOutgoingProofRequest(of(item)).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.deleteOutgoingProofRequest$(item).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 }

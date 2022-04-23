@@ -7,7 +7,6 @@ import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
-import {of} from "rxjs";
 
 @Component({
   selector: 'app-held-credentials-table',
@@ -36,16 +35,14 @@ export class HeldCredentialsTableComponent implements AfterViewInit {
   }
 
   setPublic(cred: Immutable<API.HeldCredentialData>, makePublic: boolean) {
-    this.api.updatePublicOnHeldCredential(
-      of({...cred, public: makePublic})
-    ).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.updatePublicOnHeldCredential$({...cred, public: makePublic}).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 
   delete(cred: Immutable<API.HeldCredential>) {
-    this.api.deleteHeldCredential(of(cred)).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.deleteHeldCredential$(cred).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 }

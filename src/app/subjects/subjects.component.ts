@@ -16,10 +16,6 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new AsyncSubject<void>()
   readonly loading$ = this.loadingService.loading$
 
-  readonly canMakeProposals$ = this.stateService.appType$.pipe(
-    map(appType => appType === API.AppType.USER)
-  )
-
   get newSubjectParent() {return this.newSubject.get('parent') as FormControl}
   get newSubjectChild() {return this.newSubject.get('child') as FormControl}
   readonly newSubject = new FormGroup({
@@ -41,21 +37,9 @@ export class SubjectsComponent implements OnInit, OnDestroy {
     children: new FormControl(undefined, Validators.required)
   })
 
-  readonly possibleNewChildren$ = combineLatest([
-    this.newChildParent.valueChanges,
-    this.stateService.reachableFromMasterCreds$
-  ]).pipe(
-    map(([parent, children]) => children.filter(child => child !== parent))
-  )
-
-  readonly possibleNewSetElements$ = combineLatest([
-    this.newSetParent.valueChanges.pipe(
-      switchMap(parent => this.api.getDescendants(of(parent)).pipe(map(subjects => [parent, subjects] as [typeof parent, typeof subjects])))
-    ),
-    this.stateService.reachableFromMasterCreds$
-  ]).pipe(
-    map(([[parent, children], subjects]) => children.filter(child => child !== parent && subjects.includes(child)))
-  )
+  readonly canMakeProposals$ = this._canMakeProposals$()
+  readonly possibleNewChildren$ = this._possibleNewChildren$()
+  readonly possibleNewSetElements$ = this._possibleNewSetElements$()
 
   constructor(
     private readonly stateService: StateService,
@@ -77,7 +61,7 @@ export class SubjectsComponent implements OnInit, OnDestroy {
 
   addValidatorForNewSubject() {
     let validator: ValidatorFn | undefined
-    this.stateService.subjects$.pipe(
+    this.stateService.subjectNames$.pipe(
       tap(subjects => {
         if (validator) this.newSubjectChild.removeValidators(validator)
         validator = control => {
@@ -97,7 +81,7 @@ export class SubjectsComponent implements OnInit, OnDestroy {
         if (validator) this.newChildChild.removeValidators(validator)
         validator = control => {
           if (children.includes(control.value)) return null
-          return {cantBeParentToSelf: control.value}
+          return {invalidChild: control.value}
         }
         this.newChildChild.addValidators(validator)
       }),
@@ -142,42 +126,81 @@ export class SubjectsComponent implements OnInit, OnDestroy {
   }
 
   proposeNewSubject() {
-    this.api.proposeSubject(of({
+    this.api.proposeSubject$({
       subject: this.newSubjectParent.value,
       proposalType: API.ProposalType.ADD,
       change: {
         type: API.SubjectProposalType.CHILD,
         child: this.newSubjectChild.value
       }
-    })).pipe(
-      this.loadingService.rxjsOperator()
+    }).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 
   proposeNewChild() {
-    this.api.proposeSubject(of({
+    this.api.proposeSubject$({
       subject: this.newChildParent.value,
       proposalType: API.ProposalType.ADD,
       change: {
         type: API.SubjectProposalType.CHILD,
         child: this.newChildChild.value
       }
-    })).pipe(
-      this.loadingService.rxjsOperator()
+    }).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 
   proposeNewComponentSet() {
-    this.api.proposeSubject(of({
+    this.api.proposeSubject$({
       subject: this.newSetParent.value,
       proposalType: API.ProposalType.ADD,
       change: {
         type: API.SubjectProposalType.COMPONENT_SET,
         componentSet: this.newSetChildren.value
       }
-    })).pipe(
-      this.loadingService.rxjsOperator()
+    }).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 
+  private _canMakeProposals$() {
+    return this.stateService.appType$.pipe(
+      map(appType => appType === API.AppType.USER)
+    )
+  }
+
+  private _possibleNewChildren$() {
+    return combineLatest([
+      this.newChildParent.valueChanges,
+      this.stateService.reachableFromMasterCreds$,
+      this.stateService.subjects$
+    ]).pipe(
+      map(([parent, reachable, subjects]) => {
+        const currentChildren = subjects
+          .filter(subject => subject.name === parent)
+          .map(subject => subject.children)
+        const invalidSubjects = [...currentChildren, parent]
+        return reachable.filter(subject => !invalidSubjects.includes(subject))
+      })
+    )
+  }
+
+  private _possibleNewSetElements$() {
+    const descendants$ = this.newSetParent.valueChanges.pipe(
+      switchMap((parent: string) =>
+        this.api.getDescendants$(parent).pipe(
+          map(subjects => [parent, subjects] as [typeof parent, typeof subjects])
+        )
+      )
+    )
+    return combineLatest([
+      descendants$,
+      this.stateService.reachableFromMasterCreds$
+    ]).pipe(
+      map(([[parent, children], subjects]) =>
+        children.filter(child => child !== parent && subjects.includes(child))
+      )
+    )
+  }
 }

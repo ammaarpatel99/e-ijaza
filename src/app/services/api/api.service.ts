@@ -1,240 +1,163 @@
 import {Injectable} from '@angular/core';
-import {EMPTY, Observable, of, OperatorFunction, switchMap, tap} from "rxjs";
+import {Observable} from "rxjs";
 import {API} from "@project-types";
-
-let i = 0
-function stateUpdateRes(): API.State.UpdateRes {
-  if (i === 0) {
-    i++
-    return {
-      state: API.InitialisationState.COMPLETE,
-      did: 'my did',
-      appType: API.AppType.USER,
-      timestamp: 0,
-      subjects: true,
-      masterProposals: true,
-      masters: true,
-      incomingProofRequests: true,
-      outgoingProofRequests: true,
-      issuedCredentials: true,
-      heldCredentials: true,
-      reachableSubjects: true,
-      subjectProposals: true
-    }
-  }
-  return {
-    state: API.InitialisationState.COMPLETE,
-    did: 'my did',
-    appType: API.AppType.USER,
-    timestamp: 0,
-    subjects: false,
-    masterProposals: false,
-    masters: false,
-    incomingProofRequests: false,
-    outgoingProofRequests: false,
-    issuedCredentials: false,
-    heldCredentials: false,
-    reachableSubjects: false,
-    subjectProposals: false
-  }
-}
+import {HttpClient} from "@angular/common/http";
+import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
+  readonly getMasters$ = this._getMasters$()
+  readonly getMasterProposals$ = this._getMasterProposals$()
+  readonly getSubjects$ = this._getSubjects$()
+  readonly getSubjectProposals$ = this._getSubjectProposals$()
+  readonly getHeldCredentials$ = this._getHeldCredentials$()
+  readonly getIssuedCredentials$ = this._getIssuedCredentials$()
+  readonly getOutgoingProofRequests$ = this._getOutgoingProofRequests$()
+  readonly getIncomingProofRequests$ = this._getIncomingProofRequests$()
+  readonly getReachableSubjects$ = this._getReachableSubjects$()
+  readonly generateDID$ = this._generateDID$()
 
-  constructor() { }
+  constructor(
+    private readonly http: HttpClient
+  ) { }
 
-  readonly getStateUpdate: OperatorFunction<API.State.UpdateReq, API.State.UpdateRes> =
-    source => source.pipe(
-      switchMap(() => {
-        return of(stateUpdateRes())
-      })
+  getStateUpdate$(body: API.State.UpdateReq) {
+    return this.http.post<API.State.UpdateRes>('/state/update', body)
+  }
+
+  submitFullInitialisation$(body: API.FullInitialisationData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly getMasters$: Observable<API.Master[]> = of([{
-    did: 'master did',
-    subjects: ['subject 1']
-  }])
-
-  readonly getMasterProposals$: Observable<API.MasterProposal[]> = of([{
-    did: 'master 2',
-    subject: 'subject 1',
-    proposalType: API.ProposalType.ADD
-  }])
-
-  readonly getSubjects$: Observable<API.Subject[]> = of([
-    {
-      name: 'subject 1',
-      componentSets: [],
-      children: ['subject 2']
-    },
-    {
-      name: 'subject 2',
-      componentSets: [],
-      children: ['subject 3']
-    },
-    {
-      name: 'subject 3',
-      componentSets: [],
-      children: []
-    }
-    ])
-
-  readonly getSubjectProposals$: Observable<API.SubjectProposal[]> = of([{
-    proposalType: API.ProposalType.ADD,
-    subject: 'subject 1',
-    change: {
-      type: API.SubjectProposalType.COMPONENT_SET,
-      componentSet: ['subject 2', 'subject 3']
-    }
-  }])
-
-  readonly getHeldCredentials$: Observable<API.HeldCredential[]> = of([{
-    did: 'issuer did',
-    subject: 'subject 1',
-    public: false
-  }])
-
-  readonly getIssuedCredentials$: Observable<API.IssuedCredential[]> = of([{
-    did: 'receiver did',
-    subject: 'subject 2'
-  }])
-
-  readonly getOutgoingProofRequests$: Observable<API.OutgoingProofRequest[]> = of([{
-    did: 'did to check',
-    subject: 'subject to check',
-    result: null,
-    proof: [{
-      did: 'third party',
-      subject: 'a subject',
-      proof: true,
-      result: true
-    },{
-      did: 'fourth party',
-      subject: 'another subject',
-      proof: [],
-      result: null
-    }]
-  }])
-
-  readonly getIncomingProofRequests$: Observable<API.IncomingProofRequest[]> = of([{
-    did: 'someone else',
-    subject: 'a subject',
-    proof: false
-  },{
-    did: 'someone else',
-    subject: 'a different subject',
-    proof: [{did: 'a teacher', subject: 'one subject'}, {did: 'another teacher', subject: 'second subject'}]
-  }])
-
-  readonly getReachableSubjects$: Observable<API.ReachableSubject[]> = of([
-    {
-      name: 'subject 1',
-      reachableByMasterCredentials: true
-    },
-    {
-      name: 'subject 2',
-      reachableByMasterCredentials: true
-    },
-    {
-      name: 'subject 3',
-      reachableByMasterCredentials: true
-    }
-  ])
-
-  readonly submitFullInitialisation: OperatorFunction<API.FullInitialisationData, void> =
-    source => source.pipe(
-      switchMap(() => EMPTY)
+  registerDID$(body: API.DIDDetails) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly generateDID$: Observable<API.DIDDetails> = EMPTY
-
-  readonly registerDID: OperatorFunction<API.DIDDetails, void> =
-    source => source.pipe(
-      switchMap(() => EMPTY)
+  autoRegisterDID$(body: API.PublicDIDInitialisationData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly autoRegisterDID: OperatorFunction<API.PublicDIDInitialisationData, void> =
-    source => source.pipe(
-      switchMap(() => EMPTY)
+  submitAppInitialisation$(body: API.InitialisationData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly submitAppInitialisation: OperatorFunction<API.InitialisationData, void> =
-    source => source.pipe(
-      switchMap(() => EMPTY)
+  proposeMaster$(body: API.MasterProposalData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly proposeMaster: OperatorFunction<API.MasterProposalData, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  voteOnMasterProposal$(body: API.MasterProposalVote) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly voteOnMasterProposal: OperatorFunction<API.MasterProposalVote, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  proposeSubject$(body: API.SubjectProposalData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly proposeSubject: OperatorFunction<API.SubjectProposalData, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  voteOnSubjectProposal$(body: API.SubjectProposalVote) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly voteOnSubjectProposal: OperatorFunction<API.SubjectProposalVote, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
-    )
+  getDescendants$(body: string) {
+    return this.http.post<string[]>('/state/update', body)
+  }
 
-  readonly getDescendants: OperatorFunction<string, string[]> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(['subject 2', 'subject 3']))
+  updatePublicOnHeldCredential$(body: API.HeldCredential) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly updatePublicOnHeldCredential: OperatorFunction<API.HeldCredential, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  deleteHeldCredential$(body: API.HeldCredentialData) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly deleteHeldCredential: OperatorFunction<API.HeldCredentialData, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  revokeIssuedCredential$(body: API.IssuedCredential) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly revokeIssuedCredential: OperatorFunction<API.IssuedCredential, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  issueCredential$(body: API.IssuedCredential) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly issueCredential: OperatorFunction<API.IssuedCredential, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  respondToIncomingProofRequest$(body: API.ResponseToIncomingProofRequest) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly respondToIncomingProofRequest: OperatorFunction<API.IncomingProofRequest, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  deleteOutgoingProofRequest$(body: API.OutgoingProofRequest) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly deleteOutgoingProofRequest: OperatorFunction<API.OutgoingProofRequest, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
+  createOutgoingProofRequest$(body: API.NewProofRequest) {
+    return this.http.post('/state/update', body).pipe(
+      map(() => undefined as void)
     )
+  }
 
-  readonly createOutgoingProofRequest: OperatorFunction<API.NewProofRequest, void> =
-    source => source.pipe(
-      tap(x => console.log(x)),
-      switchMap(() => of(undefined))
-    )
+  private _getMasters$(): Observable<API.Master[]> {
+    return this.http.get<API.Master[]>('/state/masters')
+  }
+
+  private _getMasterProposals$(): Observable<API.MasterProposal[]> {
+  return this.http.get<API.MasterProposal[]>('/state/masters/proposals')
+}
+
+  private _getSubjects$(): Observable<API.Subject[]> {
+  return this.http.get<API.Subject[]>('/state/subjects')
+}
+
+  private _getSubjectProposals$(): Observable<API.SubjectProposal[]> {
+  return this.http.get<API.SubjectProposal[]>('/state/subjects/proposals')
+}
+
+  private _getHeldCredentials$(): Observable<API.HeldCredential[]> {
+    return this.http.get<API.HeldCredential[]>('/state/subjects/proposals')
+  }
+
+  private _getIssuedCredentials$(): Observable<API.IssuedCredential[]> {
+    return this.http.get<API.IssuedCredential[]>('/state/subjects/proposals')
+  }
+
+  private _getOutgoingProofRequests$(): Observable<API.OutgoingProofRequest[]> {
+    return this.http.get<API.OutgoingProofRequest[]>('/state/subjects/proposals')
+  }
+
+  private _getIncomingProofRequests$(): Observable<API.IncomingProofRequest[]> {
+    return this.http.get<API.IncomingProofRequest[]>('/state/subjects/proposals')
+  }
+
+  private _getReachableSubjects$(): Observable<API.ReachableSubject[]> {
+    return this.http.get<API.ReachableSubject[]>('/state/subjects/proposals')
+  }
+
+  private _generateDID$(): Observable<API.DIDDetails> {
+    return this.http.get<API.DIDDetails>('/state/subjects/proposals')
+  }
 }

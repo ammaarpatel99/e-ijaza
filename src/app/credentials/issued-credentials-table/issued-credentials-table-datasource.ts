@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import {map, startWith, switchMapTo} from 'rxjs/operators';
-import {Observable, OperatorFunction, combineLatest} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {Observable, switchMap} from 'rxjs';
 import {API} from "@project-types";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
@@ -21,14 +21,6 @@ export class IssuedCredentialsTableDataSource extends DataSource<Immutable<Issue
     map(data => data.length)
   )
 
-  private readonly addData: OperatorFunction<Immutable<API.IssuedCredential[]>, Immutable<IssuedCredentialsTableItem[]>> =
-    source => combineLatest([
-      source,
-      this.stateService.reachableSubjects$.pipe(map(subjects => subjects.map(subject => subject.name)))
-    ]).pipe(
-      map(([creds, subjects]) => creds.map(cred => ({...cred, reachable: subjects.includes(cred.subject)})))
-    )
-
   constructor(
     private readonly stateService: StateService
   ) {
@@ -44,9 +36,9 @@ export class IssuedCredentialsTableDataSource extends DataSource<Immutable<Issue
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMapTo(this.stateService.issuedCredentials$),
-        map(data => this.getPagedData(data)),
-        this.addData
+        switchMap(() => this.stateService.issuedCredentials$),
+        switchMap(data => this.addReachability$(data)),
+        map(data => this.getPagedData(data))
       )
     } else {
       throw Error('Please set the paginator on the data source before connecting.');
@@ -63,12 +55,19 @@ export class IssuedCredentialsTableDataSource extends DataSource<Immutable<Issue
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<API.IssuedCredential[]>): Immutable<API.IssuedCredential[]> {
+  private getPagedData<T extends API.IssuedCredential>(data: Immutable<T[]>): Immutable<T[]> {
     if (this.paginator) {
-      const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
-      return data.slice(startIndex, this.paginator.pageSize);
+      const startIndex = this.paginator.pageIndex * this.paginator.pageSize
+      return data.slice(startIndex, this.paginator.pageSize)
     } else {
-      return data;
+      return data
     }
+  }
+
+  private addReachability$(creds: Immutable<API.IssuedCredential[]>) {
+    return this.stateService.reachableSubjects$.pipe(
+      map(subjects => subjects.map(subject => subject.name)),
+      map(subjects => creds.map(cred => ({...cred, reachable: subjects.includes(cred.subject)})))
+    )
   }
 }

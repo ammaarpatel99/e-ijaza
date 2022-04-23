@@ -1,4 +1,4 @@
-import {from, lastValueFrom, Observable, OperatorFunction} from "rxjs";
+import {from, lastValueFrom, OperatorFunction} from "rxjs";
 
 export function asyncTimout(timout: number) {
   return new Promise(resolve => setTimeout(resolve, timout))

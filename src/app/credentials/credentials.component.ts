@@ -3,8 +3,8 @@ import {StateService} from "../services/state/state.service";
 import {ApiService} from "../services/api/api.service";
 import {LoadingService} from "../services/loading/loading.service";
 import {FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {AsyncSubject, combineLatest, of, takeUntil, tap} from "rxjs";
-import {map} from "rxjs/operators";
+import {AsyncSubject, combineLatest, takeUntil, tap} from "rxjs";
+import {map, shareReplay} from "rxjs/operators";
 
 @Component({
   selector: 'app-credentials',
@@ -22,16 +22,7 @@ export class CredentialsComponent implements OnInit, OnDestroy {
     subject: new FormControl('', Validators.required)
   })
 
-  readonly issuableSubjects$ = combineLatest([
-    this.did.valueChanges,
-    this.stateService.reachableSubjects$.pipe(map(subjects => subjects.map(subject => subject.name))),
-    this.stateService.issuedCredentials$
-  ]).pipe(
-    map(([did, subjects, creds]) => {
-      const issuedSubjects = creds.filter(cred => cred.did === did).map(cred => cred.subject)
-      return subjects.filter(subject => !issuedSubjects.includes(subject))
-    })
-  )
+  readonly issuableSubjects$ = this._issuableSubjects$()
 
   constructor(
     private readonly stateService: StateService,
@@ -61,9 +52,22 @@ export class CredentialsComponent implements OnInit, OnDestroy {
   }
 
   issueCredential() {
-    this.api.issueCredential(of({did: this.did.value, subject: this.subject.value})).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.issueCredential$({did: this.did.value, subject: this.subject.value}).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 
+  private _issuableSubjects$() {
+    return combineLatest([
+      this.did.valueChanges,
+      this.stateService.reachableSubjects$.pipe(map(subjects => subjects.map(subject => subject.name))),
+      this.stateService.issuedCredentials$
+    ]).pipe(
+      map(([did, subjects, creds]) => {
+        const issuedSubjects = creds.filter(cred => cred.did === did).map(cred => cred.subject)
+        return subjects.filter(subject => !issuedSubjects.includes(subject))
+      }),
+      shareReplay(1)
+    )
+  }
 }

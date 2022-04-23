@@ -6,7 +6,6 @@ import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {LoadingService} from "../../services/loading/loading.service";
 import {ApiService} from "../../services/api/api.service";
-import {of} from "rxjs";
 import {IncomingProofsDataSource} from "./incoming-proofs-datasource";
 
 @Component({
@@ -36,8 +35,8 @@ export class IncomingProofsComponent implements AfterViewInit {
   }
 
   respondToRequest(proofRequest: API.IncomingProofRequest, sendProof: boolean) {
-    this.api.respondToIncomingProofRequest(of({...proofRequest, reveal: sendProof})).pipe(
-      this.loadingService.rxjsOperator()
+    this.api.respondToIncomingProofRequest$({...proofRequest, reveal: sendProof}).pipe(
+      this.loadingService.wrapObservable()
     ).subscribe()
   }
 }

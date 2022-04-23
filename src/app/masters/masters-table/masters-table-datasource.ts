@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import {MatPaginator} from '@angular/material/paginator';
-import {map, startWith, switchMapTo} from 'rxjs/operators';
-import {Observable, OperatorFunction, switchMap} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {Observable, switchMap} from 'rxjs';
 import {API} from "@project-types";
 import {StateService} from "../../services/state/state.service";
 import {Immutable} from "@project-utils";
@@ -21,18 +21,6 @@ export class MastersTableDataSource extends DataSource<Immutable<MasterTableItem
     map(data => data.length)
   )
 
-  private readonly addRemovableSubjects: OperatorFunction<Immutable<API.Master[]>, Immutable<MasterTableItem[]>> =
-    source => source.pipe(
-      switchMap(data => {
-        return this.stateService.reachableFromMasterCreds$.pipe(
-          map(subjects => data.map(master => {
-            const removableSubjects = master.subjects.filter(subject => subjects.includes(subject))
-            return {...master, removableSubjects}
-          }))
-        )
-      })
-    )
-
   constructor(
     private readonly stateService: StateService
   ) {
@@ -48,9 +36,9 @@ export class MastersTableDataSource extends DataSource<Immutable<MasterTableItem
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMapTo(this.stateService.masters$),
-        map(data => this.getPagedData(data)),
-        this.addRemovableSubjects
+        switchMap(() => this.stateService.masters$),
+        switchMap(data => this.addRemovableSubjects$(data)),
+        map(data => this.getPagedData(data))
       )
     } else {
       throw Error('Please set the paginator on the data source before connecting.');
@@ -67,12 +55,21 @@ export class MastersTableDataSource extends DataSource<Immutable<MasterTableItem
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<API.Master[]>): Immutable<API.Master[]> {
+  private getPagedData<T extends API.Master>(data: Immutable<T[]>): Immutable<T[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);
     } else {
       return data;
     }
+  }
+
+  private addRemovableSubjects$(creds: Immutable<API.Master[]>) {
+    return this.stateService.reachableFromMasterCreds$.pipe(
+      map(subjects => creds.map(master => {
+        const removableSubjects = master.subjects.filter(subject => subjects.includes(subject))
+        return {...master, removableSubjects} as MasterTableItem
+      }))
+    )
   }
 }

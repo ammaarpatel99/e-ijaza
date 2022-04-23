@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import {map, startWith, switchMapTo} from 'rxjs/operators';
-import {Observable, OperatorFunction, switchMap} from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {Observable, switchMap} from 'rxjs';
 import {API} from "@project-types";
 import {Immutable} from "@project-utils";
 import {StateService} from "../../services/state/state.service";
@@ -22,23 +22,6 @@ export class SubjectsTableDataSource extends DataSource<Immutable<API.Subject>> 
     map(data => data.length)
   )
 
-  private readonly addAdditionalData: OperatorFunction<Immutable<API.Subject[]>, Immutable<SubjectsTableItem[]>> =
-    source => source.pipe(
-      switchMap(data => {
-        return this.stateService.reachableFromMasterCreds$.pipe(
-          map(subjects => data.map(subject => {
-            let removableSubjects: Immutable<string[]> = []
-            let removableComponentSets: Immutable<string[][]> = []
-            if (subjects.includes(subject.name)) {
-              removableSubjects = subject.children.filter(childSubject => subjects.includes(childSubject))
-              removableComponentSets = subject.componentSets
-            }
-            return {...subject, removableSubjects, removableComponentSets}
-          }))
-        )
-      })
-    )
-
   constructor(
     private readonly stateService: StateService
   ) {
@@ -54,9 +37,9 @@ export class SubjectsTableDataSource extends DataSource<Immutable<API.Subject>> 
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMapTo(this.stateService.subjects$),
-        map(data => this.getPagedData(data)),
-        this.addAdditionalData
+        switchMap(() => this.stateService.subjects$),
+        switchMap(data => this.addAdditionalData$(data)),
+        map(data => this.getPagedData(data))
       )
     } else {
       throw Error('Please set the paginator on the data source before connecting.');
@@ -73,12 +56,26 @@ export class SubjectsTableDataSource extends DataSource<Immutable<API.Subject>> 
    * Paginate the data (client-side). If you're using server-side pagination,
    * this would be replaced by requesting the appropriate data from the server.
    */
-  private getPagedData(data: Immutable<API.Subject[]>): Immutable<API.Subject[]> {
+  private getPagedData<T extends API.Subject>(data: Immutable<T[]>): Immutable<T[]> {
     if (this.paginator) {
       const startIndex = this.paginator.pageIndex * this.paginator.pageSize;
       return data.slice(startIndex, this.paginator.pageSize);
     } else {
       return data;
     }
+  }
+
+  private addAdditionalData$(data: Immutable<API.Subject[]>) {
+    return this.stateService.reachableFromMasterCreds$.pipe(
+      map((subjects): Immutable<SubjectsTableItem[]> => data.map(subject => {
+        let removableSubjects: Immutable<string[]> = []
+        let removableComponentSets: Immutable<string[][]> = []
+        if (subjects.includes(subject.name)) {
+          removableSubjects = subject.children.filter(childSubject => subjects.includes(childSubject))
+          removableComponentSets = subject.componentSets
+        }
+        return {...subject, removableSubjects, removableComponentSets}
+      }))
+    )
   }
 }

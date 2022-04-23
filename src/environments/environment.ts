@@ -2,7 +2,10 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
+import {settings} from './settings'
+
 export const environment = {
+  ...settings,
   production: false
 };
 

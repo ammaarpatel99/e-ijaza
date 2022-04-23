@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import {map, startWith, switchMapTo} from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import {map, startWith} from 'rxjs/operators';
+import {Observable, switchMap} from 'rxjs';
 import {StateService} from "../../services/state/state.service";
 import {Immutable} from "@project-utils";
 import {API} from "@project-types";
@@ -32,7 +32,7 @@ export class HeldCredentialsTableDataSource extends DataSource<Immutable<API.Hel
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMapTo(this.stateService.heldCredentials$),
+        switchMap(() => this.stateService.heldCredentials$),
         map(data => this.getPagedData(data))
       )
     } else {
