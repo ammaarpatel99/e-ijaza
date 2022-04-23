@@ -4,16 +4,17 @@ import {
   catchError,
   debounceTime,
   filter,
-  first,
   forkJoin,
   from,
-  last, mergeMap, Observable,
+  last,
+  mergeMap,
+  Observable,
   ReplaySubject,
   switchMap,
   withLatestFrom
 } from "rxjs";
 import {
-  connectViaPublicDID$,
+  connectToController$,
   deleteCredential,
   getHeldCredentials,
   getIssuedCredentials,
@@ -25,10 +26,29 @@ import {map} from "rxjs/operators";
 import {mastersPublicSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
+import {environment} from "../../environments/environment";
 
 export class ShareMastersProtocol {
   static readonly instance = new ShareMastersProtocol()
   private constructor() { }
+
+  private static stateToSchema(state: Immutable<Server.ControllerMasters>): Immutable<Schemas.MastersPublicSchema> {
+    const data = [...state]
+      .map(([did, subjectData]) => {
+        const subjectNames = [...subjectData].map(([name]) => name)
+        return [did, subjectNames] as [typeof did, typeof subjectNames]
+      })
+    return {credentials: Object.fromEntries(data)}
+  }
+
+  private static schemaToState(schema: Immutable<Schemas.MastersPublicSchema>): Immutable<Server.Masters> {
+    const data = Object.entries(schema.credentials)
+      .map(([did, subjects]) => {
+        const set = new Set(subjects)
+        return [did, set] as [typeof did, typeof set]
+      })
+    return new Map(data)
+  }
 
   // CONTROLLER
 
@@ -50,11 +70,11 @@ export class ShareMastersProtocol {
       )),
       map(results => results.results!),
       map(results => results.filter(cred => cred.schema_id === mastersPublicSchema.schemaID)),
-      map(results => results.map(cred => ({
+      map(results => results.map((cred): Server.CredentialInfo => ({
         connection_id: cred.connection_id!,
         rev_reg_id: cred.revoc_reg_id!,
         cred_rev_id: cred.revocation_id!
-      } as Server.CredentialInfo))),
+      }))),
       map(results => results.forEach(cred => this.issued.add(cred)))
     )
   }
@@ -81,6 +101,18 @@ export class ShareMastersProtocol {
     )
   }
 
+  private revokeSharedOnUpdate() {
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+      debounceTime(environment.timeToUpdateShared),
+      mergeMap(() => this.revokeIssued$()),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
   private handleRequests() {
     const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
@@ -90,11 +122,7 @@ export class ShareMastersProtocol {
       map(cred => cred.credential_exchange_id!),
       withLatestFrom(State.instance.controllerMasters$),
       map(([cred_ex_id, masters]) => {
-        const data = [...masters].map(([did, subjectData]) =>
-          [did, [...subjectData].map(([subject, _]) => subject)] as [string, string[]]
-        )
-        const obj = Object.fromEntries(data)
-        return [cred_ex_id, {credentials: obj}] as [string, Schemas.MastersPublicSchema]
+        return [cred_ex_id, ShareMastersProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
       }),
       mergeMap(([cred_ex_id, data]) =>
         from(offerCredentialFromProposal({cred_ex_id}, {
@@ -122,24 +150,12 @@ export class ShareMastersProtocol {
     obs$.subscribe()
   }
 
-  private revokeSharedOnUpdate() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
-      debounceTime(1000),
-      mergeMap(() => this.revokeIssued$()),
-      catchError(e => {
-        console.error(e)
-        return obs$
-      })
-    )
-    obs$.subscribe()
-  }
-
   // USER
 
   userInitialise$() {
     return voidObs$.pipe(
       map(() => this.watchRevocations()),
-      switchMap(this.refreshData$)
+      switchMap(() => this.refreshData$())
     )
   }
 
@@ -148,9 +164,7 @@ export class ShareMastersProtocol {
 
   private refreshData$() {
     return this.clearHeldCredentials$().pipe(
-      switchMap(() => State.instance.controllerDID$),
-      first(),
-      switchMap(controllerDID => connectViaPublicDID$({their_public_did: controllerDID})),
+      switchMap(() => connectToController$()),
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
@@ -166,12 +180,7 @@ export class ShareMastersProtocol {
       last(),
       map(res => JSON.parse(res.credential!.attrs!['credentials']) as Schemas.MastersPublicSchema['credentials']),
       map(res => {
-        const data = Object.entries(res).map(([did, subjects]) => {
-          const set = new Set(subjects)
-          return [did, set] as [typeof did, typeof set]
-        })
-        const map = new Map(data)
-        this._userState$.next(map)
+        this._userState$.next(ShareMastersProtocol.schemaToState({credentials: res}))
       })
     )
   }

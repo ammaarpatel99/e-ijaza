@@ -12,71 +12,11 @@ import {mastersInternalSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
+import {environment} from "../../environments/environment";
 
 export class MasterCredsStoreProtocol {
   static readonly instance = new MasterCredsStoreProtocol()
   private constructor() { }
-
-  initialise$() {
-    return voidObs$.pipe(
-      map(() => this.watchState())
-    )
-  }
-
-  getFromStore$() {
-    return this.getStored$().pipe(
-      map(creds => creds.results?.shift()),
-      map(store => {
-        if (!store) return new Map()
-        const credentials = JSON.parse(store.attrs!['credentials']) as Schemas.MastersInternalSchema['credentials']
-        return MasterCredsStoreProtocol.schemaToState({credentials})
-      })
-    )
-  }
-
-  private watchState() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
-      debounceTime(1000),
-      mergeMap(state => this.update$(state)),
-      catchError(e => {
-        console.error(e)
-        return obs$
-      })
-    )
-    obs$.subscribe()
-  }
-
-  private update$(masterState: Immutable<Server.ControllerMasters>) {
-    return this.deleteStored$().pipe(
-      switchMap(() => connectToSelf$()),
-      switchMap(connections =>
-        this.storeData$(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
-          .pipe(map(() => connections))
-      ),
-      switchMap(connections => deleteSelfConnections$(connections))
-    )
-  }
-
-  private getStored$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${mastersInternalSchema.schemaID}"}`})
-      ))
-    )
-  }
-
-  private deleteStored$() {
-    return this.getStored$().pipe(
-      map(res => res.results),
-      map(creds => creds?.map(
-        cred => from(deleteCredential({credential_id: cred.referent!}))
-      )),
-      switchMap(arr => {
-        if (!arr) return voidObs$
-        return forkJoin(arr).pipe(map(() => undefined as void))
-      })
-    )
-  }
 
   private static stateToSchema(state: Immutable<Server.ControllerMasters>): Schemas.MastersInternalSchema {
     const data = [...state]
@@ -101,6 +41,66 @@ export class MasterCredsStoreProtocol {
     return new Map(data)
   }
 
+  controllerInitialise$() {
+    return voidObs$.pipe(
+      map(() => this.watchState()),
+      switchMap(() => this.getFromStore$())
+    )
+  }
+
+  private getFromStore$() {
+    return this.getStored$().pipe(
+      map(creds => creds.results?.shift()),
+      map(store => {
+        if (!store) return new Map()
+        const credentials = JSON.parse(store.attrs!['credentials']) as Schemas.MastersInternalSchema['credentials']
+        return MasterCredsStoreProtocol.schemaToState({credentials})
+      })
+    )
+  }
+
+  private getStored$() {
+    return voidObs$.pipe(
+      switchMap(() => from(
+        getHeldCredentials({wql: `{"schema_id": "${mastersInternalSchema.schemaID}"}`})
+      ))
+    )
+  }
+
+  private watchState() {
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+      debounceTime(environment.timeToUpdateStored),
+      mergeMap(state => this.update$(state)),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private update$(masterState: Immutable<Server.ControllerMasters>) {
+    return this.deleteStored$().pipe(
+      switchMap(() => connectToSelf$()),
+      switchMap(connections =>
+        this.storeData$(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
+          .pipe(map(() => connections))
+      ),
+      switchMap(connections => deleteSelfConnections$(connections))
+    )
+  }
+
+  private deleteStored$() {
+    return this.getStored$().pipe(
+      map(res => res.results || []),
+      map(creds => creds.map(
+        cred => from(deleteCredential({credential_id: cred.referent!}))
+      )),
+      switchMap(arr => forkJoin(arr)),
+      map(() => undefined as void)
+    )
+  }
+
   private storeData$(data: Schemas.MastersInternalSchema, connection_id: string) {
     return voidObs$.pipe(
       switchMap(() => from(issueCredential({
@@ -117,8 +117,8 @@ export class MasterCredsStoreProtocol {
       }))),
       switchMap(({credential_exchange_id}) =>
         WebhookMonitor.instance.monitorCredential$(credential_exchange_id!)
-          .pipe(last())
       ),
+      last(),
       map(() => undefined as void)
     )
   }

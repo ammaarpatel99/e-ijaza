@@ -1,4 +1,4 @@
-import {CredentialIssueProtocol, MasterCredsStoreProtocol} from '../aries-based-protocols'
+import {CredentialIssueProtocol, MasterCredsStoreProtocol, ShareMastersProtocol} from '../aries-based-protocols'
 import {catchError, first, forkJoin, mergeMap, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
@@ -9,18 +9,19 @@ export class MasterCredentialsManager {
   static readonly instance = new MasterCredentialsManager()
   private constructor() { }
 
-  private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerMasters>>(1)
-  readonly state$ = this._state$.asObservable()
+  private readonly _controllerState$ = new ReplaySubject<Immutable<Server.ControllerMasters>>(1)
+  readonly controllerState$ = this._controllerState$.asObservable()
 
-  initialise$() {
-    return MasterCredsStoreProtocol.instance.getFromStore$().pipe(
-      map(state => this._state$.next(state)),
+  controllerInitialise() {
+    return ShareMastersProtocol.instance.controllerInitialise$().pipe(
+      switchMap(() => MasterCredsStoreProtocol.instance.controllerInitialise$()),
+      map(state => this._controllerState$.next(state)),
       map(() => this.watchSubjectOntology())
     )
   }
 
   addMaster$(did: string, subject: string) {
-    return this.state$.pipe(
+    return this.controllerState$.pipe(
       first(),
       map(state => {
         if (!!state.get(did)?.get(subject))
@@ -44,13 +45,13 @@ export class MasterCredentialsManager {
           newState.set(did, subjectMap)
         }
         subjectMap.set(subject, credInfo)
-        this._state$.next(newState)
+        this._controllerState$.next(newState)
       })
     )
   }
 
   removeMaster$(did: string, subject: string) {
-    return this.state$.pipe(
+    return this.controllerState$.pipe(
       first(),
       switchMap(state => {
         const credInfo = state.get(did)?.get(subject)
@@ -67,15 +68,15 @@ export class MasterCredentialsManager {
         let subjectMap = newState.get(did)
         if (!subjectMap) return
         subjectMap.delete(subject)
-        this._state$.next(newState)
+        this._controllerState$.next(newState)
       })
     )
   }
 
   private watchSubjectOntology() {
     const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
-      map(data => new Set(...data.keys())),
-      withLatestFrom(this._state$),
+      map(data => new Set(data.keys())),
+      withLatestFrom(this._controllerState$),
       mergeMap(([subjects, masters]) => {
         const revokeRequests = [...masters]
           .flatMap(([did, data]) => [...data]
@@ -107,7 +108,7 @@ export class MasterCredentialsManager {
           [...newState].forEach(([did, data]) => {
             if (data.size === 0) newState.delete(did)
           })
-          this._state$.next(newState)
+          this._controllerState$.next(newState)
         }
       }),
       catchError(e => {

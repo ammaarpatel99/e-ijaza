@@ -84,20 +84,27 @@ export class StateManager {
 
   private initialise() {
     const state = State.instance
+
     state.initialisationState$.subscribe(data => this.initState = data)
+
     state.did$.subscribe(data => this.did = data)
+
     state.appType$.subscribe(data => this.appType = data)
+
     state.controllerMasters$.subscribe(data => this._masters = {
       timestamp: Date.now(),
-      data: [...data].map(([did, subjectsMap]) => {
-        const subjects = [...subjectsMap].map(([subject]) => subject)
-        return {did, subjects}
-      })
+      data: [...data]
+        .map(([did, subjects]) => {
+          const subjectNames = [...subjects].map(([name]) => name)
+          return {did, subjects: subjectNames}
+        })
     })
+
     state.userMasters$.subscribe(data => this._masters = {
       timestamp: Date.now(),
-      data: [...data].map(([did, subjectsSet]) => ({did, subjects: [...subjectsSet]}))
+      data: [...data].map(([did, subjects]) => ({did, subjects: [...subjects]}))
     })
+
     state.subjectOntology$.subscribe(data => this._subjects = {
       timestamp: Date.now(),
       data: [...data].map(([subject, data]) => ({

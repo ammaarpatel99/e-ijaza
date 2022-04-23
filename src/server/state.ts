@@ -47,7 +47,7 @@ export class State {
       )
 
   readonly controllerMasters$ =
-    MasterCredentialsManager.instance.state$
+    MasterCredentialsManager.instance.controllerState$
 
   readonly userMasters$ =
     ShareMastersProtocol.instance.userState$

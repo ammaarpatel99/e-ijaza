@@ -3,7 +3,8 @@ import {initialiseControllerSchemas$, initialiseUserSchemas$} from '../schemas'
 import {Observable, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "../master-credentials";
 import {
-  MasterCredsStoreProtocol, MasterProposalStoreProtocol, MasterVoteProtocol,
+  MasterProposalStoreProtocol,
+  MasterVoteProtocol,
   ShareMastersProtocol,
   ShareSubjectOntologyProtocol,
   SubjectsStoreProtocol
@@ -14,9 +15,7 @@ export function initialiseController$(): Observable<void> {
   return voidObs$.pipe(
     switchMap(() => initialiseControllerSchemas$()),
 
-    switchMap(() => ShareMastersProtocol.instance.controllerInitialise$()),
-    switchMap(() => MasterCredsStoreProtocol.instance.initialise$()),
-    switchMap(() => MasterCredentialsManager.instance.initialise$()),
+    switchMap(() => MasterCredentialsManager.instance.controllerInitialise()),
 
     switchMap(() => ShareSubjectOntologyProtocol.instance.controllerInitialise$()),
     switchMap(() => SubjectsStoreProtocol.instance.initialise$()),
