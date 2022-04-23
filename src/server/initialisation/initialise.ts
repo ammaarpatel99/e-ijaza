@@ -6,10 +6,9 @@ import {
   MasterProposalStoreProtocol,
   MasterVoteProtocol,
   MastersShareProtocol,
-  ShareSubjectOntologyProtocol,
-  OntologyStoreProtocol
+  OntologyShareProtocol
 } from "../aries-based-protocols";
-import {SubjectOntologyManager} from "../subject-ontology";
+import {OntologyManager} from "../subject-ontology";
 
 export function initialiseController$(): Observable<void> {
   return voidObs$.pipe(
@@ -17,9 +16,7 @@ export function initialiseController$(): Observable<void> {
 
     switchMap(() => MasterCredentialsManager.instance.controllerInitialise()),
 
-    switchMap(() => ShareSubjectOntologyProtocol.instance.controllerInitialise$()),
-    switchMap(() => OntologyStoreProtocol.instance.initialise$()),
-    switchMap(() => SubjectOntologyManager.instance.controllerInitialise$()),
+    switchMap(() => OntologyManager.instance.controllerInitialise$()),
 
     switchMap(() => MasterProposalStoreProtocol.instance.initialise$()),
     switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
@@ -33,7 +30,7 @@ export function initialiseUser$() {
 
     switchMap(() => MastersShareProtocol.instance.userInitialise$()),
 
-    switchMap(() => ShareSubjectOntologyProtocol.instance.userInitialise$()),
+    switchMap(() => OntologyShareProtocol.instance.userInitialise$()),
 
     switchMap(() => MasterVoteProtocol.instance.userInitialisation$())
   )

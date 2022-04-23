@@ -16,7 +16,7 @@ import {MasterVoteProtocol, OntologyProposalStoreProtocol, OntologyVoteProtocol}
 import {map} from "rxjs/operators";
 import {State} from "../state";
 import {SubjectOntology} from "./subject-ontology";
-import {SubjectOntologyManager} from "./subject-ontology-manager";
+import {OntologyManager} from "./ontology-manager";
 
 export class OntologyProposalManager {
   static readonly instance = new OntologyProposalManager()
@@ -102,15 +102,15 @@ export class OntologyProposalManager {
   private static actionProposal$(proposal: Immutable<Server.ControllerOntologyProposal>) {
     if (proposal.proposalType === Server.ProposalType.ADD) {
       if (proposal.change.type === Server.SubjectProposalType.CHILD) {
-        return SubjectOntologyManager.instance.addChild$(proposal.subject, proposal.change.child)
+        return OntologyManager.instance.addChild$(proposal.subject, proposal.change.child)
       } else {
-        return SubjectOntologyManager.instance.addComponentSet$(proposal.subject, proposal.change.component_set)
+        return OntologyManager.instance.addComponentSet$(proposal.subject, proposal.change.component_set)
       }
     } else {
       if (proposal.change.type === Server.SubjectProposalType.CHILD) {
-        return SubjectOntologyManager.instance.removeChild$(proposal.subject, proposal.change.child)
+        return OntologyManager.instance.removeChild$(proposal.subject, proposal.change.child)
       } else {
-        return SubjectOntologyManager.instance.removeComponentSet$(proposal.subject, proposal.change.component_set)
+        return OntologyManager.instance.removeComponentSet$(proposal.subject, proposal.change.component_set)
       }
     }
   }

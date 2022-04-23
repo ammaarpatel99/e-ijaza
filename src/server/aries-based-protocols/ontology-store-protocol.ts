@@ -23,6 +23,7 @@ import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
+import {environment} from "../../environments/environment";
 
 interface ChangeData {
   state: Immutable<Server.Subjects>
@@ -35,18 +36,48 @@ export class OntologyStoreProtocol {
   static readonly instance = new OntologyStoreProtocol()
   private constructor() { }
 
+  private static schemasToState(subjectList: Schemas.SubjectsSchema, subjects: Schemas.SubjectSchema[]): Server.Subjects {
+    const foundSubjects = new Set<string>()
+
+    const fullData = subjectList.subjects.map(subjectName => {
+      const subjectData = subjects
+        .filter(subjectData => subjectData.subject.name === subjectName)
+        .map(subjectData => subjectData.subject)
+        .shift()
+      if (!subjectData) throw new Error(`Attempting to form subject data from store but missing ${subjectName}`)
+
+      const children = new Set(subjectData.children)
+      subjectData.children.forEach(child => foundSubjects.add(child))
+
+      const componentSets = new Set(subjectData.componentSets.map(componentSet => new Set(componentSet)))
+      subjectData.componentSets.forEach(set => set.forEach(child => foundSubjects.add(child)))
+
+      const dataObj = {children, componentSets}
+      return [subjectName, dataObj] as [typeof subjectName, typeof dataObj]
+    })
+
+    const map = new Map(fullData) as Server.Subjects
+
+    if (![...foundSubjects].every(subject => map.has(subject))) {
+      throw new Error(`Attempting to load subject ontology from store but store is inconsistent`)
+    }
+
+    return map
+  }
+
   private readonly _changes$ = new ReplaySubject<Immutable<ChangeData>>(1)
   readonly changes$ = this._changes$.asObservable()
 
   private previous: Immutable<Server.Subjects> | undefined
 
-  initialise$() {
+  controllerInitialise$() {
     return voidObs$.pipe(
-      map(() => this.watchState())
+      map(() => this.watchState()),
+      switchMap(() => this.getFromStore$())
     )
   }
 
-  getFromStore$() {
+  private getFromStore$() {
     const subjectListData$ = this.getStoredSubjectsList$().pipe(
       map(creds => creds.shift()),
       map(store => {
@@ -71,40 +102,10 @@ export class OntologyStoreProtocol {
   private clean$(state: Immutable<Server.Subjects>) {
     const arr = [...state.keys()].map(subject => this.storeSubject$(state, subject))
     arr.push(this.storeSubjectList$(state))
-    return this.deleteStoredSubjects$().pipe(
+
+    return forkJoin([this.deleteStoredSubjects$(), this.deleteStoredSubjectsList$()]).pipe(
       switchMap(() => forkJoin(arr))
     )
-  }
-
-  private watchState() {
-    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
-      debounceTime(1000),
-      map(state => {
-        const previous = this.previous || new Map()
-        const subjectsListChanged = ![...previous.keys(), ...state.keys()]
-          .every(key => previous.has(key) && state.has(key))
-        const deleted = [...previous.keys()].filter(subject => !state.has(subject))
-        const edited = [...state]
-          .filter(([subject, data]) => previous.get(subject) !== data)
-          .map(([subject]) => subject)
-        return {deleted, edited, state, subjectsListChanged} as ChangeData
-      }),
-      tap(changeData => this._changes$.next(changeData)),
-      mergeMap(({state, deleted, edited, subjectsListChanged}) => {
-        const arr = [
-          ...deleted.map(subject => this.deleteStoredSubjects$(subject)),
-          ...edited.map(subject => this.storeSubject$(state, subject))
-        ]
-        if (subjectsListChanged) arr.push(this.storeSubjectList$(state))
-        return forkJoin(arr).pipe(map(() => state))
-      }),
-      map(state => {this.previous = state}),
-      catchError(e => {
-        console.error(e)
-        return obs$
-      })
-    )
-    obs$.subscribe()
   }
 
   private getStoredSubjectsList$() {
@@ -133,10 +134,11 @@ export class OntologyStoreProtocol {
       map(result => result.results || []),
       map(creds => {
         if (!subject) return creds
-        return creds.filter(cred =>
-          (JSON.parse(cred.attrs!['subject']) as Schemas.SubjectSchema['subject'])
-            .name === subject
-        )
+        return creds
+          .filter(cred => {
+            const data = (JSON.parse(cred.attrs!['subject']) as Schemas.SubjectSchema['subject'])
+            return data.name === subject
+          })
       })
     )
   }
@@ -148,6 +150,39 @@ export class OntologyStoreProtocol {
       ))),
       switchMap(creds => forkJoin(creds || []))
     )
+  }
+
+  private watchState() {
+    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
+      debounceTime(environment.timeToUpdateStored),
+      map(state => this.findChanges(state)),
+      tap(changeData => this._changes$.next(changeData)),
+      mergeMap(({state, deleted, edited, subjectsListChanged}) => {
+        const arr = [
+          ...deleted.map(subject => this.deleteStoredSubjects$(subject)),
+          ...edited.map(subject => this.storeSubject$(state, subject))
+        ]
+        if (subjectsListChanged) arr.push(this.storeSubjectList$(state))
+        return forkJoin(arr).pipe(map(() => state))
+      }),
+      map(state => {this.previous = state}),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private findChanges(state: Immutable<Server.Subjects>): ChangeData {
+    const previous = this.previous || new Map()
+    const subjectsListChanged = ![...previous.keys(), ...state.keys()]
+      .every(key => previous.has(key) && state.has(key))
+    const deleted = [...previous.keys()].filter(subject => !state.has(subject))
+    const edited = [...state]
+      .filter(([subject, data]) => previous.get(subject) !== data)
+      .map(([subject]) => subject)
+    return {deleted, edited, state, subjectsListChanged}
   }
 
   private storeSubjectList$(state: Immutable<Server.Subjects>) {
@@ -181,13 +216,13 @@ export class OntologyStoreProtocol {
         if (data) return data
         throw Error(`Can't store non existent subject`)
       }),
-      map(data => ({
+      map((data): Schemas.SubjectSchema => ({
         subject: {
           name: subject,
           children: [...data.children],
           componentSets: [...data.componentSets].map(set => [...set])
         }
-      } as Schemas.SubjectSchema))
+      }))
     )
     return this.deleteStoredSubjects$(subject).pipe(
       switchMap(() => connectToSelf$()),
@@ -210,27 +245,5 @@ export class OntologyStoreProtocol {
       ))),
       switchMap(connections => deleteSelfConnections$(connections))
     )
-  }
-
-  private static schemasToState(subjectList: Schemas.SubjectsSchema, subjects: Schemas.SubjectSchema[]) {
-    const usedSubjects = new Set<string>()
-     const fullData = subjectList.subjects.map(subjectName => {
-       const data = subjects
-         .filter(subjectData => subjectData.subject.name === subjectName)
-         .map(subjectData => subjectData.subject)
-         .shift()
-       if (!data) throw new Error(`Attempting to form subject data from store but missing ${subjectName}`)
-       const children = new Set(data.children)
-       data.children.forEach(child => usedSubjects.add(child))
-       const componentSets = new Set(data.componentSets.map(componentSet => new Set(componentSet)))
-       data.componentSets.forEach(set => set.forEach(child => usedSubjects.add(child)))
-       const dataObj = {children, componentSets}
-       return [subjectName, dataObj] as [typeof subjectName, typeof dataObj]
-    })
-    const map = new Map(fullData) as Server.Subjects
-    if (![...usedSubjects].every(subject => map.has(subject))) {
-      throw new Error(`Attempting to load subject ontology from store but store is incosistent`)
-    }
-    return map
   }
 }

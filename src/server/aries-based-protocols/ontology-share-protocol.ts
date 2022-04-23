@@ -26,11 +26,12 @@ import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {Server, Schemas} from '@project-types'
 import {OntologyStoreProtocol} from "./ontology-store-protocol";
+import {environment} from "../../environments/environment";
 
 type SubjectDataWithOptional = Server.Subjects extends Map<infer K, infer V> ? Map<K, Immutable<V>|null> : never
 
-export class ShareSubjectOntologyProtocol {
-  static readonly instance = new ShareSubjectOntologyProtocol()
+export class OntologyShareProtocol {
+  static readonly instance = new OntologyShareProtocol()
   private constructor() { }
 
   // CONTROLLER
@@ -39,10 +40,7 @@ export class ShareSubjectOntologyProtocol {
   private readonly issuedSubject = new Map<string, Set<Immutable<Server.CredentialInfo>>>()
 
   controllerInitialise$() {
-    return forkJoin([
-      this.getIssuedSubjects$(),
-      this.getIssuedSubjectList$()
-    ]).pipe(
+    return this.getIssued$().pipe(
       map(() => {
         this.handleSubjectListRequests()
         this.handleSubjectRequests()
@@ -51,43 +49,40 @@ export class ShareSubjectOntologyProtocol {
     )
   }
 
-  private getIssuedSubjectList$() {
+  private getIssued$() {
     return voidObs$.pipe(
       switchMap(() => from(
         getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
       )),
       map(results => results.results!),
-      map(results => results.filter(cred => cred.schema_id === subjectsListSchema.schemaID)),
-      map(results => results.map(cred => ({
-        connection_id: cred.connection_id!,
-        rev_reg_id: cred.revoc_reg_id!,
-        cred_rev_id: cred.revocation_id!
-      } as Server.CredentialInfo))),
-      map(results => results.forEach(cred => this.issuedList.add(cred)))
-    )
-  }
-
-  private getIssuedSubjects$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
-      )),
-      map(results => results.results!),
-      map(results => results.filter(cred => cred.schema_id === subjectDataSchema.schemaID)),
-      map(results => results.map(cred => ({
-        connection_id: cred.connection_id!,
-        rev_reg_id: cred.revoc_reg_id!,
-        cred_rev_id: cred.revocation_id!,
-        subject: JSON.parse(cred.credential!.attrs!['subject']).name
-      }))),
-      map(results => results.forEach(cred => {
-        let set = this.issuedSubject.get(cred.subject)
-        if (!set) {
-          set = new Set()
-          this.issuedSubject.set(cred.subject, set)
-        }
-        set.add(cred)
-      }))
+      map(results => {
+        // SUBJECT LISTS
+        results
+          .filter(cred => cred.schema_id === subjectsListSchema.schemaID)
+          .map((cred): Server.CredentialInfo => ({
+            connection_id: cred.connection_id!,
+            rev_reg_id: cred.revoc_reg_id!,
+            cred_rev_id: cred.revocation_id!
+          }))
+          .forEach(cred => this.issuedList.add(cred))
+        // INDIVIDUAL SUBJECTS
+        results
+          .filter(cred => cred.schema_id === subjectDataSchema.schemaID)
+          .map(cred => ({
+            connection_id: cred.connection_id!,
+            rev_reg_id: cred.revoc_reg_id!,
+            cred_rev_id: cred.revocation_id!,
+            subject: JSON.parse(cred.credential!.attrs!['subject']).name
+          }))
+          .forEach(cred => {
+            let set = this.issuedSubject.get(cred.subject)
+            if (!set) {
+              set = new Set()
+              this.issuedSubject.set(cred.subject, set)
+            }
+            set.add(cred)
+          })
+      })
     )
   }
 
@@ -134,21 +129,20 @@ export class ShareSubjectOntologyProtocol {
         cred.credential_proposal_dict?.schema_id === subjectDataSchema.schemaID
         && cred.state === 'proposal_received'
       ),
-      map(cred => [
-        cred.credential_exchange_id!,
-        cred.credential_proposal_dict?.credential_proposal?.attributes
+      map(cred => {
+        const cred_ex_id = cred.credential_exchange_id!
+        const subject = cred.credential_proposal_dict?.credential_proposal?.attributes
           .filter(attr => attr.name === 'subject')
-          .map(attr => attr.value).shift()
-      ] as [string, string | undefined]),
-      map(data => {
-        if (!data[1]) throw new Error(`Request received for subject data but not subject specified`)
-        return data as [string, string]
+          .map(attr => attr.value)
+          .shift()
+        if (!subject) throw new Error(`Request received for subject data but not subject specified`)
+        return [cred_ex_id, subject] as [string, string]
       }),
       withLatestFrom(State.instance.subjectOntology$),
       map(([[cred_ex_id, subject], subjectOntology]) => {
         const subjectData = subjectOntology.get(subject)
         if (!subjectData) throw new Error(`Request received for subject data but subject doesn't exist`)
-        return [cred_ex_id, subject, subjectData] as [typeof cred_ex_id,typeof subject, typeof subjectData]
+        return [cred_ex_id, subject, subjectData] as [typeof cred_ex_id, typeof subject, typeof subjectData]
       }),
       map(([cred_ex_id, subject, subjectData]) => {
         const schema: Schemas.SubjectSchema = {
@@ -199,7 +193,7 @@ export class ShareSubjectOntologyProtocol {
           comment: comment || `edited subject list`
         })).pipe(
           catchError(e => {
-            console.error(`Failed to revoke public master credentials list: ${e}`)
+            console.error(`Failed to revoke subject ontology related credential: ${e}`)
             return voidObs$
           })
         )
@@ -209,10 +203,10 @@ export class ShareSubjectOntologyProtocol {
 
   private revokeSharedOnUpdate() {
     const obs$: Observable<void> = OntologyStoreProtocol.instance.changes$.pipe(
-      bufferTime(1000),
+      bufferTime(environment.timeToUpdateShared),
       map(x => {
         if (x.length === 0) return
-        let data: typeof x[number] = {state: x[x.length - 1].state, edited: [], deleted: [], subjectsListChanged: false}
+        let data: Omit<typeof x[number], 'state'> = {edited: [], deleted: [], subjectsListChanged: false}
         for (const newData of x) {
           if (newData.subjectsListChanged) data = {...data, subjectsListChanged: true}
           const deleted = new Set(data.deleted)
@@ -225,7 +219,7 @@ export class ShareSubjectOntologyProtocol {
       }),
       filter(x => !!x),
       map(x => x!),
-      mergeMap(({deleted,edited,subjectsListChanged}) => {
+      mergeMap(({deleted, edited, subjectsListChanged}) => {
         const arr = [
           ...deleted.map(subject => {
             const set = this.issuedSubject.get(subject) || new Set()
@@ -258,16 +252,20 @@ export class ShareSubjectOntologyProtocol {
   userInitialise$() {
     return voidObs$.pipe(
       map(() => this.watchRevocations()),
-      switchMap(this.refreshData$)
+      switchMap(() => this.refreshData$())
     )
   }
 
   private readonly _userState$ = new ReplaySubject<Immutable<SubjectDataWithOptional>>(1)
-  readonly userState$ = this._userState$.pipe(
-    filter(state => [...state].every(([_, value]) => value !== null)),
-    map(state => state as Server.Subjects),
-    shareReplay(1)
-  )
+  readonly userState$ = this.consistentUserState$()
+
+  private consistentUserState$() {
+    return this._userState$.pipe(
+      filter(state => [...state].every(([_, value]) => value !== null)),
+      map(state => state as Server.Subjects),
+      shareReplay(1)
+    )
+  }
 
   private refreshData$() {
     return forkJoin([this.clearSubjectsList$(), this.clearSubjects$()]).pipe(
@@ -297,16 +295,16 @@ export class ShareSubjectOntologyProtocol {
       first(),
       map(([res, oldState]) => {
         const state = new Map() as SubjectDataWithOptional
-        let changed = false
+        let changed = state.size !== oldState.size
         res.forEach(subject => {
           const data = oldState.get(subject)
-          if (data !== undefined) state.set(subject, data)
-          else {
+          if (data === undefined) {
             state.set(subject, null)
             changed = true
+          } else {
+            state.set(subject, data)
           }
         })
-        if (state.size !== oldState.size) changed = true
         if (changed) this._userState$.next(state)
         return res
       })
@@ -366,10 +364,10 @@ export class ShareSubjectOntologyProtocol {
       map(result => result.results || []),
       map(creds => {
         if (!subject) return creds
-        return creds.filter(cred =>
-          (JSON.parse(cred.attrs!['subject']) as Schemas.SubjectSchema['subject'])
-            .name === subject
-        )
+        return creds.filter(cred => {
+          const data = (JSON.parse(cred.attrs!['subject']) as Schemas.SubjectSchema['subject'])
+          return data.name === subject
+        })
       }),
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})

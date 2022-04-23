@@ -1,27 +1,34 @@
-import {OntologyStoreProtocol} from '../aries-based-protocols'
-import {first, ReplaySubject} from "rxjs";
+import {OntologyShareProtocol, OntologyStoreProtocol} from '../aries-based-protocols'
+import {first, ReplaySubject, switchMap} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
 import {Immutable} from "@project-utils";
 
-export class SubjectOntologyManager {
-  static readonly instance = new SubjectOntologyManager()
+export class OntologyManager {
+  static readonly instance = new OntologyManager()
   private constructor() { }
 
   private readonly _state$ = new ReplaySubject<Immutable<Server.Subjects>>(1)
   readonly state$ = this._state$.asObservable()
 
   controllerInitialise$() {
-    return OntologyStoreProtocol.instance.getFromStore$().pipe(
+    return OntologyShareProtocol.instance.controllerInitialise$().pipe(
+      switchMap(() => OntologyStoreProtocol.instance.controllerInitialise$()),
       map(state => {
         this._state$.next(state)
-        if (!state.get('knowledge')) {
-          const newState = new Map(state)
-          newState.set('knowledge', {children: new Set(), componentSets: new Set()})
-          this._state$.next(newState)
-        }
+        this.ensureOntologyIsNotEmpty()
       })
     )
+  }
+
+  private ensureOntologyIsNotEmpty() {
+    this._state$.subscribe(state => {
+      if (state.size === 0) {
+        const newState: Server.Subjects = new Map()
+        newState.set('knowledge', {children: new Set(), componentSets: new Set()})
+        this._state$.next(newState)
+      }
+    })
   }
 
   addComponentSet$(parent: string, set: ReadonlySet<string>) {

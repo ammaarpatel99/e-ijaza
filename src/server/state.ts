@@ -2,8 +2,8 @@ import {Initialisation} from './initialisation'
 import {map, shareReplay} from "rxjs/operators";
 import {filter, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "./master-credentials";
-import {MastersShareProtocol, ShareSubjectOntologyProtocol} from "./aries-based-protocols";
-import {SubjectOntologyManager, SubjectOntology, OntologyProposalManager} from "./subject-ontology";
+import {MastersShareProtocol, OntologyShareProtocol} from "./aries-based-protocols";
+import {OntologyManager, SubjectOntology, OntologyProposalManager} from "./subject-ontology";
 import {Server} from '@project-types'
 
 export class State {
@@ -55,8 +55,8 @@ export class State {
   readonly subjectOntology$ =
     this.appType$.pipe(
       switchMap(appType => appType === Server.AppType.CONTROLLER
-        ? SubjectOntologyManager.instance.state$
-        : ShareSubjectOntologyProtocol.instance.userState$
+        ? OntologyManager.instance.state$
+        : OntologyShareProtocol.instance.userState$
       ),
       switchMap(state =>
         SubjectOntology.instance.update$(state)
