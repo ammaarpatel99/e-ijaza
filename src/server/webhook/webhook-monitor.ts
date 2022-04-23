@@ -35,11 +35,11 @@ export class WebhookMonitor {
     errored: (data: T) => boolean,
     unmonitored$: Subject<T>
   ) {
+    unmonitored$.next(data)
     const _id = id(data)
     const sub$ = map.get(_id)
-    if (!sub$) {
-      unmonitored$.next(data)
-    } else if (errored(data)) {
+    if (!sub$) return
+    if (errored(data)) {
       sub$.error(data)
     } else {
       sub$.next(data)
