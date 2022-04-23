@@ -14,8 +14,8 @@ import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {environment} from "../../environments/environment";
 
-export class MasterCredsStoreProtocol {
-  static readonly instance = new MasterCredsStoreProtocol()
+export class MastersStoreProtocol {
+  static readonly instance = new MastersStoreProtocol()
   private constructor() { }
 
   private static stateToSchema(state: Immutable<Server.ControllerMasters>): Schemas.MastersInternalSchema {
@@ -54,7 +54,7 @@ export class MasterCredsStoreProtocol {
       map(store => {
         if (!store) return new Map()
         const credentials = JSON.parse(store.attrs!['credentials']) as Schemas.MastersInternalSchema['credentials']
-        return MasterCredsStoreProtocol.schemaToState({credentials})
+        return MastersStoreProtocol.schemaToState({credentials})
       })
     )
   }
@@ -83,7 +83,7 @@ export class MasterCredsStoreProtocol {
     return this.deleteStored$().pipe(
       switchMap(() => connectToSelf$()),
       switchMap(connections =>
-        this.storeData$(MasterCredsStoreProtocol.stateToSchema(masterState), connections[0])
+        this.storeData$(MastersStoreProtocol.stateToSchema(masterState), connections[0])
           .pipe(map(() => connections))
       ),
       switchMap(connections => deleteSelfConnections$(connections))

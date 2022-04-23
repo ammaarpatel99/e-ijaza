@@ -1,4 +1,4 @@
-import {CredentialIssueProtocol, MasterCredsStoreProtocol, MastersShareProtocol} from '../aries-based-protocols'
+import {CredentialIssueProtocol, MastersStoreProtocol, MastersShareProtocol} from '../aries-based-protocols'
 import {catchError, first, forkJoin, mergeMap, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
@@ -14,7 +14,7 @@ export class MasterCredentialsManager {
 
   controllerInitialise() {
     return MastersShareProtocol.instance.controllerInitialise$().pipe(
-      switchMap(() => MasterCredsStoreProtocol.instance.controllerInitialise$()),
+      switchMap(() => MastersStoreProtocol.instance.controllerInitialise$()),
       map(state => this._controllerState$.next(state)),
       map(() => this.watchSubjectOntology())
     )
