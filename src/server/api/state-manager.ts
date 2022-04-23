@@ -1,6 +1,6 @@
 import {Immutable} from "@project-utils";
 import {API} from '@project-types'
-import {State} from '../../state'
+import {State} from '../state'
 
 interface _TimedData<T> {
   timestamp: number
@@ -112,21 +112,21 @@ export class StateManager {
     return data?.data && data.timestamp > timestamp
   }
 
-  getStateUpdate(req: API.State.UpdateReq): API.State.UpdateRes {
+  getStateUpdate({timestamp}: API.State.UpdateReq): API.State.UpdateRes {
     return {
       state: this.initState,
       did: this.did,
       appType: this.appType,
       timestamp: Date.now(),
-      masters: StateManager.hasNewData(this._masters, req.timestamp),
-      masterProposals: StateManager.hasNewData(this._masterProposals, req.timestamp),
-      subjects: StateManager.hasNewData(this._subjects, req.timestamp),
-      subjectProposals: StateManager.hasNewData(this._subjectProposals, req.timestamp),
-      heldCredentials: StateManager.hasNewData(this._heldCredentials, req.timestamp),
-      issuedCredentials: StateManager.hasNewData(this._issuedCredentials, req.timestamp),
-      outgoingProofRequests: StateManager.hasNewData(this._outgoingProofRequests, req.timestamp),
-      incomingProofRequests: StateManager.hasNewData(this._incomingProofRequests, req.timestamp),
-      reachableSubjects: StateManager.hasNewData(this._reachableSubjects, req.timestamp)
+      masters: StateManager.hasNewData(this._masters, timestamp),
+      masterProposals: StateManager.hasNewData(this._masterProposals, timestamp),
+      subjects: StateManager.hasNewData(this._subjects, timestamp),
+      subjectProposals: StateManager.hasNewData(this._subjectProposals, timestamp),
+      heldCredentials: StateManager.hasNewData(this._heldCredentials, timestamp),
+      issuedCredentials: StateManager.hasNewData(this._issuedCredentials, timestamp),
+      outgoingProofRequests: StateManager.hasNewData(this._outgoingProofRequests, timestamp),
+      incomingProofRequests: StateManager.hasNewData(this._incomingProofRequests, timestamp),
+      reachableSubjects: StateManager.hasNewData(this._reachableSubjects, timestamp)
     } as API.State.UpdateRes
   }
 }

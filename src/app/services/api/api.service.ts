@@ -28,25 +28,25 @@ export class ApiService {
   }
 
   submitFullInitialisation$(body: API.FullInitialisationData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/state/fullInitialisation', body).pipe(
       map(() => undefined as void)
     )
   }
 
   registerDID$(body: API.DIDDetails) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/state/did/register', body).pipe(
       map(() => undefined as void)
     )
   }
 
   autoRegisterDID$(body: API.PublicDIDInitialisationData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/state/did/auto', body).pipe(
       map(() => undefined as void)
     )
   }
 
   submitAppInitialisation$(body: API.InitialisationData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/state/initialise', body).pipe(
       map(() => undefined as void)
     )
   }
@@ -126,7 +126,7 @@ export class ApiService {
   }
 
   private _getMasterProposals$(): Observable<API.MasterProposal[]> {
-  return this.http.get<API.MasterProposal[]>('/state/masters/proposals')
+  return this.http.get<API.MasterProposal[]>('/state/masterProposals')
 }
 
   private _getSubjects$(): Observable<API.Subject[]> {
@@ -134,30 +134,30 @@ export class ApiService {
 }
 
   private _getSubjectProposals$(): Observable<API.SubjectProposal[]> {
-  return this.http.get<API.SubjectProposal[]>('/state/subjects/proposals')
+  return this.http.get<API.SubjectProposal[]>('/state/subjectProposals')
 }
 
   private _getHeldCredentials$(): Observable<API.HeldCredential[]> {
-    return this.http.get<API.HeldCredential[]>('/state/subjects/proposals')
+    return this.http.get<API.HeldCredential[]>('/state/heldCredentials')
   }
 
   private _getIssuedCredentials$(): Observable<API.IssuedCredential[]> {
-    return this.http.get<API.IssuedCredential[]>('/state/subjects/proposals')
+    return this.http.get<API.IssuedCredential[]>('/state/issuedCredentials')
   }
 
   private _getOutgoingProofRequests$(): Observable<API.OutgoingProofRequest[]> {
-    return this.http.get<API.OutgoingProofRequest[]>('/state/subjects/proposals')
+    return this.http.get<API.OutgoingProofRequest[]>('/state/proofs/outgoing')
   }
 
   private _getIncomingProofRequests$(): Observable<API.IncomingProofRequest[]> {
-    return this.http.get<API.IncomingProofRequest[]>('/state/subjects/proposals')
+    return this.http.get<API.IncomingProofRequest[]>('/state/proofs/incoming')
   }
 
   private _getReachableSubjects$(): Observable<API.ReachableSubject[]> {
-    return this.http.get<API.ReachableSubject[]>('/state/subjects/proposals')
+    return this.http.get<API.ReachableSubject[]>('/state/reachableSubjects')
   }
 
   private _generateDID$(): Observable<API.DIDDetails> {
-    return this.http.get<API.DIDDetails>('/state/subjects/proposals')
+    return this.http.post<API.DIDDetails>('/state/did/generate', {})
   }
 }

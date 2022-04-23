@@ -1,6 +1,6 @@
 import {voidObs$} from "@project-utils";
 import {initialiseControllerSchemas$, initialiseUserSchemas$} from '../schemas'
-import {switchMap} from "rxjs";
+import {Observable, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "../master-credentials";
 import {
   MasterCredsStoreProtocol, MasterProposalStoreProtocol, MasterVoteProtocol,
@@ -10,7 +10,7 @@ import {
 } from "../aries-based-protocols";
 import {SubjectOntologyManager} from "../subject-ontology";
 
-export function initialiseController$() {
+export function initialiseController$(): Observable<void> {
   return voidObs$.pipe(
     switchMap(() => initialiseControllerSchemas$()),
 
@@ -25,7 +25,7 @@ export function initialiseController$() {
     switchMap(() => MasterProposalStoreProtocol.instance.initialise$()),
     switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
     switchMap(() => MasterProposalsManager.instance.initialise$())
-  )
+  ) as Observable<void>
 }
 
 export function initialiseUser$() {

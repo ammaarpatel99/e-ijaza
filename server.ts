@@ -32,7 +32,7 @@ export function app(): express.Express {
 
   attemptInitialisation$().subscribe(() => {
     // Express Rest API endpoints
-    server.use('/api', apiRouter);
+    server.use('/api', apiRouter)
     server.use('/webhook', webhookRouter)
   })
 

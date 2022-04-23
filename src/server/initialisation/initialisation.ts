@@ -1,4 +1,4 @@
-import {BehaviorSubject, catchError, first, from, of, switchMap, tap} from "rxjs";
+import {BehaviorSubject, catchError, first, from, switchMap, tap} from "rxjs";
 import {Immutable, repeatWithBackoff$, voidObs$} from "@project-utils";
 import {Server, API} from "@project-types";
 import {createDID, getPublicDID, isAlive, setPublicDID} from "../aries-api"
@@ -12,36 +12,26 @@ export class Initialisation {
   static readonly instance = new Initialisation()
   private constructor() { }
 
+  private initialisationDataCache: Immutable<API.InitialisationData> | undefined
   private readonly _initialisationData$ = new BehaviorSubject<Immutable<Server.InitialisationStateData>>({state: Server.InitialisationState.START_STATE})
   readonly initialisationData$ = this._initialisationData$.asObservable()
-  private initialisationDataCache: Immutable<API.InitialisationData> | undefined
 
   fullInitialisation$(data: API.FullInitialisationData) {
-    return of(data).pipe(
-      switchMap(data =>
-        this.initialisationData$.pipe(
-          first(),
-          map(data => {
-            if (data.state !== Server.InitialisationState.START_STATE) {
-              throw new Error(`Attempting to complete full initialisation whilst in incorrect state.`)
-            }
-          }),
-          map(() => data)
-        )
-      ),
-      switchMap(data => {
-        this.initialisationDataCache = data
-        return this.createAriesAgent$(data).pipe(
-          switchMap(() => {
-            if (!data.vonNetworkURL) {
-              this.initialisationDataCache = data
-              return voidObs$
-            }
-            return this._autoRegisterDID$(data.vonNetworkURL).pipe(
-              switchMap(() => this._initialise$(data))
-            )
-          })
-        )
+    return this.initialisationData$.pipe(
+      first(),
+      map(state => {
+        if (state.state !== Server.InitialisationState.START_STATE) {
+          throw new Error(`Attempting to complete full initialisation whilst in incorrect state.`)
+        }
+      }),
+      tap(() => this.initialisationDataCache = data),
+      switchMap(() => this.createAriesAgent$(data)),
+      switchMap(() => {
+        if (!data.vonNetworkURL) {
+          this.initialisationDataCache = data
+          return voidObs$
+        }
+        return this.autoRegisterDID$({vonNetworkURL: data.vonNetworkURL})
       })
     )
   }
@@ -56,50 +46,34 @@ export class Initialisation {
       }),
       switchMap(() => this._connectToAries$()),
       switchMap(() =>
-        this.fetchPublicDID$().pipe(
-          map(() => true),
-          catchError(() => of(false)),
-          switchMap(valid => {
-            if (valid) return this.initialiseIfData$()
-            return voidObs$
-          })
-        )
+        this.fetchPublicDID$()
+        .pipe(catchError(() => voidObs$))
       )
     )
   }
 
-  autoRegisterDID$(vonNetworkURL: string) {
-    return of(vonNetworkURL).pipe(
-      switchMap(vonNetworkURL =>
-        this.initialisationData$.pipe(
-          first(),
-          map(data => {
-            if (data.state !== Server.InitialisationState.ARIES_READY) {
-              throw new Error(`Attempting to auto register public did whilst in incorrect state.`)
-            }
-          }),
-          map(() => vonNetworkURL)
-        )
-      ),
-      switchMap(vonNetworkURL => this._autoRegisterDID$(vonNetworkURL)),
+  autoRegisterDID$({vonNetworkURL}: API.PublicDIDInitialisationData) {
+    return this.initialisationData$.pipe(
+      first(),
+      map(state => {
+        if (state.state !== Server.InitialisationState.ARIES_READY) {
+          throw new Error(`Attempting to auto register public did whilst in incorrect state.`)
+        }
+      }),
+      switchMap(() => this._autoRegisterDID$(vonNetworkURL)),
       switchMap(() => this.initialiseIfData$())
     )
   }
 
-  registerDID$(did: string) {
-    return of(did).pipe(
-      switchMap(did =>
-        this.initialisationData$.pipe(
-          first(),
-          map(data => {
-            if (data.state !== Server.InitialisationState.ARIES_READY) {
-              throw new Error(`Attempting to register public did whilst in incorrect state.`)
-            }
-          }),
-          map(() => did)
-        )
-      ),
-      switchMap(did => this._registerDID$(did)),
+  registerDID$(data: API.DIDDetails) {
+    return this.initialisationData$.pipe(
+      first(),
+      map(data => {
+        if (data.state !== Server.InitialisationState.ARIES_READY) {
+          throw new Error(`Attempting to register public did whilst in incorrect state.`)
+        }
+      }),
+      switchMap(() => this._registerDID$(data.did)),
       switchMap(() => this.initialiseIfData$())
     )
   }
@@ -112,19 +86,14 @@ export class Initialisation {
   }
 
   initialise$(data: API.InitialisationData) {
-    return of(data).pipe(
-      switchMap(data =>
-        this.initialisationData$.pipe(
-          first(),
-          map(data => {
-            if (data.state !== Server.InitialisationState.PUBLIC_DID_REGISTERED) {
-              throw new Error(`Attempting to initialise whilst in incorrect state.`)
-            }
-          }),
-          map(() => data)
-        )
-      ),
-      switchMap(data => this._initialise$(data))
+    return this.initialisationData$.pipe(
+      first(),
+      map(state => {
+        if (state.state !== Server.InitialisationState.PUBLIC_DID_REGISTERED) {
+          throw new Error(`Attempting to initialise whilst in incorrect state.`)
+        }
+      }),
+      switchMap(() => this._initialise$(data))
     )
   }
 
@@ -155,16 +124,13 @@ export class Initialisation {
   }
 
   private _registerDID$(did: string) {
-    return of(did).pipe(
+    return voidObs$.pipe(
       tap({
         next: () => this._initialisationData$.next({state: Server.InitialisationState.REGISTERING_PUBLIC_DID})
       }),
-      switchMap(did =>
-        from(setPublicDID({did}))
-          .pipe(map(() => did))
-      ),
+      switchMap(() => from(setPublicDID({did}))),
       tap({
-        next: did => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),
+        next: () => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),
         error: () => this._initialisationData$.next({state: Server.InitialisationState.ARIES_READY})
       }),
       map(() => undefined as void)
@@ -205,11 +171,11 @@ export class Initialisation {
   }
 
   private createAriesAgent$(data: Omit<API.AriesInitialisationData, 'vonNetworkURL'>) {
-    return of(data).pipe(
+    return voidObs$.pipe(
       tap({
         next: () => this._initialisationData$.next({state: Server.InitialisationState.STARTING_ARIES})
       }),
-      map(data => runAries({
+      map(() => runAries({
         advertisedEndpoint: data.advertisedEndpoint,
         genesisUrl: data.genesisURL,
         tailsServerUrl: data.tailsServerURL,
@@ -246,7 +212,7 @@ export class Initialisation {
   }
 
   private _initialise$(data: API.InitialisationData) {
-    return of(data).pipe(
+    return voidObs$.pipe(
       tap({
         next: () => this._initialisationData$.next({
           state: Server.InitialisationState.INITIALISING,
@@ -255,14 +221,14 @@ export class Initialisation {
           ...data
         })
       }),
-      switchMap(data => (
+      switchMap(() => (
           data.appType === API.AppType.CONTROLLER
           ? initialiseController$()
           : initialiseUser$()
         )
       ),
       tap({
-        next: data => this._initialisationData$.next({
+        next: () => this._initialisationData$.next({
           ...this._initialisationData$.value,
           state: Server.InitialisationState.COMPLETE
         } as InitialisationStateData),
