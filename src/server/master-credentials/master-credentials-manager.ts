@@ -1,4 +1,4 @@
-import {CredentialIssuer, MasterCredsStoreProtocol} from '../aries-based-protocols'
+import {CredentialIssueProtocol, MasterCredsStoreProtocol} from '../aries-based-protocols'
 import {catchError, first, forkJoin, mergeMap, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
@@ -28,7 +28,7 @@ export class MasterCredentialsManager {
         return state
       }),
       switchMap(state =>
-        CredentialIssuer.instance.issue$(did, subject).pipe(
+        CredentialIssueProtocol.instance.issue$(did, subject).pipe(
           map(credInfo => ({state, credInfo}))
         )
       ),
@@ -55,7 +55,7 @@ export class MasterCredentialsManager {
       switchMap(state => {
         const credInfo = state.get(did)?.get(subject)
         if (!credInfo) throw new Error(`Removing master when ${did} is not master in ${subject}`)
-        return CredentialIssuer.instance.revoke$(credInfo)
+        return CredentialIssueProtocol.instance.revoke$(credInfo)
           .pipe(map(() => state))
       }),
       map(state => {
@@ -81,7 +81,7 @@ export class MasterCredentialsManager {
           .flatMap(([did, data]) => [...data]
             .filter(([subject, _]) => !subjects.has(subject))
             .map(([subject, credInfo]) =>
-              CredentialIssuer.instance.revoke$(credInfo)
+              CredentialIssueProtocol.instance.revoke$(credInfo)
                 .pipe(map(() => ({did, subject})))
             )
           )

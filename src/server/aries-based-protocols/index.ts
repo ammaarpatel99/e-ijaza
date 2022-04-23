@@ -1,7 +1,5 @@
 export * from './share-schemas-protocol'
 
-export * from './credential-issuer'
-
 export * from './master-creds-store-protocol'
 export * from './share-masters-protocol'
 
@@ -13,3 +11,6 @@ export * from './share-subject-ontology-protocol'
 
 export * from './ontology-proposal-store-protocol'
 export * from './ontology-vote-protocol'
+
+export * from './credential-issue-protocol'
+export * from './credential-proof-protocol'
