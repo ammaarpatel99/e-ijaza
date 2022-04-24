@@ -82,6 +82,27 @@ export class UserCredentialsManager {
     )
   }
 
+  issue$(data: API.IssuedCredential) {
+    return State.instance.reachableSubjects$.pipe(
+      first(),
+      map(subjects => {
+        if (!subjects.has(data.subject)) throw new Error(`Can't issue in ${data.subject}`)
+      }),
+      switchMap(() => CredentialIssueProtocol.instance.userIssue$(data.did, data.subject))
+    )
+  }
+
+  revoke$(data: API.IssuedCredential) {
+    return this.issuedCredentials$.pipe(
+      first(),
+      switchMap(creds => {
+        const cred = [...creds].filter(cred => cred.theirDID === data.did && cred.subject === data.subject).shift()
+        if (!cred) throw new Error(`Can't revoke credential that isn't issued`)
+        return CredentialIssueProtocol.instance.userRevoke$(cred)
+      })
+    )
+  }
+
   private watchHeldCredentials() {
     const obs$: Observable<void> =CredentialIssueProtocol.instance.heldCredentials$.pipe(
       withLatestFrom(this._heldCredentials$),

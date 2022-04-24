@@ -85,7 +85,7 @@ export class CredentialIssueProtocol {
   }
 
   userIssue$(did: string, subject: string) {
-    this.issue$(did, subject).pipe(
+    return this.issue$(did, subject).pipe(
       map((cred): UserIssuedCredential => ({
         ...cred,
         subject,
@@ -101,7 +101,7 @@ export class CredentialIssueProtocol {
   }
 
   userRevoke$(cred: Immutable<Server.UserIssuedCredential>) {
-    this.revoke$(cred).pipe(
+    return this.revoke$(cred).pipe(
       withLatestFrom(this._issuedCredentials$),
       map(([_, state]) => {
         const newState = new Set(state)

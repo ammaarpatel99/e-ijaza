@@ -58,8 +58,18 @@ router.post('/credential/delete', (req, res, next) => {
   })
 })
 
-// ISSUE CREDENTIAL
-// REVOKE CREDENTIAL
+router.post('/credential/issue', (req, res, next) => {
+  UserCredentialsManager.instance.issue$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
+router.post('/credential/revoke', (req, res, next) => {
+  UserCredentialsManager.instance.revoke$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 
 // CREATE PROOF REQUEST
 // DELETE PROOF REQUEST

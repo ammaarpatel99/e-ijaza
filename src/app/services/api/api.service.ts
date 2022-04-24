@@ -63,6 +63,7 @@ export class ApiService {
     )
   }
 
+  // TODO:
   proposeSubject$(body: API.SubjectProposalData) {
     return this.http.post('/state/update', body).pipe(
       map(() => undefined as void)
@@ -92,29 +93,32 @@ export class ApiService {
   }
 
   revokeIssuedCredential$(body: API.IssuedCredential) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/credential/revoke', body).pipe(
       map(() => undefined as void)
     )
   }
 
   issueCredential$(body: API.IssuedCredential) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/credential/issue', body).pipe(
       map(() => undefined as void)
     )
   }
 
+  // TODO:
   respondToIncomingProofRequest$(body: API.ResponseToIncomingProofRequest) {
     return this.http.post('/state/update', body).pipe(
       map(() => undefined as void)
     )
   }
 
+  // TODO:
   deleteOutgoingProofRequest$(body: API.OutgoingProofRequest) {
     return this.http.post('/state/update', body).pipe(
       map(() => undefined as void)
     )
   }
 
+  // TODO:
   createOutgoingProofRequest$(body: API.NewProofRequest) {
     return this.http.post('/state/update', body).pipe(
       map(() => undefined as void)
