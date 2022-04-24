@@ -13,6 +13,7 @@ import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {OntologyProposalManager} from "../subject-ontology";
+import {environment} from "../../environments/environment";
 
 export class OntologyProposalStoreProtocol {
   static readonly instance = new OntologyProposalStoreProtocol()
@@ -21,13 +22,14 @@ export class OntologyProposalStoreProtocol {
   private previous: Immutable<Server.ControllerOntologyProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
-  initialise$() {
+  controllerInitialise$() {
     return voidObs$.pipe(
-      map(() => this.watchState())
+      map(() => this.watchState()),
+      switchMap(() => this.getFromStore$())
     )
   }
 
-  getFromStore$() {
+  private getFromStore$() {
     return voidObs$.pipe(
       switchMap(() => from(
         getHeldCredentials({wql: `{"schema_id": "${subjectProposalSchema.schemaID}"}`})
@@ -55,7 +57,7 @@ export class OntologyProposalStoreProtocol {
 
   private watchState() {
     const obs$: Observable<void> = State.instance.controllerOntologyProposals$.pipe(
-      debounceTime(1000),
+      debounceTime(environment.timeToUpdateStored),
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {
         const arr = [...deleted, ...edited].map(([id, _]) => {

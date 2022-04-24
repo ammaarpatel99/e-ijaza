@@ -40,7 +40,7 @@ export class StateManager {
     return data
   }
 
-  private _subjectProposals: TimedData<API.SubjectProposalsFetchRes> | undefined
+  private _subjectProposals: TimedData<API.SubjectProposal[]> | undefined
   get subjectProposals() {
     const data = this._subjectProposals?.data
     if (data === undefined) throw new Error(`Requested subject proposals from state (api) but not set`)
@@ -134,6 +134,33 @@ export class StateManager {
         did: proposal.did,
         proposalType: proposal.proposalType,
         subject: proposal.subject
+      }))
+    })
+
+    state.controllerOntologyProposals$.subscribe(data => this._subjectProposals = {
+      timestamp: Date.now(),
+      data: [...data].map(([_, proposal]) => ({
+        subject: proposal.subject,
+        proposalType: proposal.proposalType,
+        change: proposal.change.type === API.SubjectProposalType.CHILD
+          ? {type: API.SubjectProposalType.CHILD, child: proposal.change.child}
+          : {type: API.SubjectProposalType.COMPONENT_SET, componentSet: [...proposal.change.component_set]},
+        votes: {
+          for: [...proposal.votes.values()].map(vote => vote === true).length,
+          against: [...proposal.votes.values()].map(vote => vote === false).length,
+          total: proposal.votes.size
+        }
+      }))
+    })
+
+    state.userOntologyVotes$.subscribe(data => this._subjectProposals = {
+      timestamp: Date.now(),
+      data: [...data].map(([_, proposal]) => ({
+        subject: proposal.subject,
+        proposalType: proposal.proposalType,
+        change: proposal.change.type === API.SubjectProposalType.CHILD
+          ? {type: API.SubjectProposalType.CHILD, child: proposal.change.child}
+          : {type: API.SubjectProposalType.COMPONENT_SET, componentSet: [...proposal.change.component_set]}
       }))
     })
   }

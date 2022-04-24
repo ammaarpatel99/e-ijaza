@@ -1,23 +1,35 @@
 import {Server, Schemas, API} from '@project-types'
 import {
   connectToController$,
-  connectViaPublicDID$,
+  connectViaPublicDID$, deleteCredential,
   getHeldCredentials,
   issueCredential,
   proposeProof,
   revokeCredential$
 } from "../aries-api";
-import {catchError, filter, first, from, last, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
-import {masterVoteSchema, subjectVoteSchema} from "../schemas";
+import {
+  catchError,
+  filter,
+  first,
+  from,
+  last,
+  mergeMap,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  withLatestFrom
+} from "rxjs";
+import {subjectVoteSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Immutable, voidObs$} from "@project-utils";
-import {MasterProposalsManager} from "../master-credentials";
 import {OntologyProposalManager} from "../subject-ontology";
 
 export class OntologyVoteProtocol {
   static readonly instance = new OntologyVoteProtocol()
   private constructor() { }
+
+  private static PROOF_NAME = 'Vote on Ontology Proposal'
 
   // CONTROLLER
 
@@ -47,7 +59,7 @@ export class OntologyVoteProtocol {
       switchMap(connectionID => from(issueCredential({
         connection_id: connectionID,
         auto_remove: false,
-        cred_def_id: masterVoteSchema.credID,
+        cred_def_id: subjectVoteSchema.credID,
         credential_proposal: {
           attributes: [{
             name: 'voteDetails',
@@ -71,7 +83,7 @@ export class OntologyVoteProtocol {
 
   watchVotes() {
     WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === 'Vote on Ontology Proposal'),
+      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === OntologyVoteProtocol.PROOF_NAME),
       map(proof => {
         const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
           .filter(([_, data]) => data.name === 'voteDetails')
@@ -108,11 +120,12 @@ export class OntologyVoteProtocol {
       map(() => {
         this.watchIssuing()
         this.watchRevocations()
-      })
+      }),
+      switchMap(() => this.getVotes$())
     )
   }
 
-  getVotes$() {
+  private getVotes$() {
     return voidObs$.pipe(
       switchMap(() => from(
         getHeldCredentials({wql: `{"schema_id": "${subjectVoteSchema.schemaID}"}`})
@@ -120,7 +133,7 @@ export class OntologyVoteProtocol {
       map(result => result.results || []),
       map(creds => creds.map(({attrs, referent, cred_def_id}) =>({
         credentialID: referent!,
-        cred_def_id,
+        cred_def_id: cred_def_id!,
         ...JSON.parse(attrs!['voteDetails']) as
           Schemas.SubjectProposalVoteSchema['voteDetails']
       }))),
@@ -138,7 +151,8 @@ export class OntologyVoteProtocol {
         const id = OntologyProposalManager.proposalToID(cred)
         return [id, cred] as [typeof id, typeof cred]
       })),
-      map(creds => new Map(creds))
+      map(creds => new Map(creds)),
+      map(data => this._userVotes$.next(data))
     )
   }
 
@@ -180,10 +194,13 @@ export class OntologyVoteProtocol {
       filter(data => data.thread_id.includes(subjectVoteSchema.name)),
       map(data => data.comment),
       withLatestFrom(this._userVotes$),
-      map(([proposalID, votes]) => {
+      mergeMap(([proposalID, votes]) => {
         const map = new Map(votes)
+        const data = map.get(proposalID)
+        if (!data) return voidObs$
         map.delete(proposalID)
         this._userVotes$.next(map)
+        return from(deleteCredential({credential_id: data.credentialID}))
       }),
       catchError(e => {
         console.error(e)
@@ -212,7 +229,7 @@ export class OntologyVoteProtocol {
         connectToController$().pipe(
           switchMap(connectionID => from(proposeProof({
             connection_id: connectionID,
-            comment: 'Vote on Ontology Proposal',
+            comment: OntologyVoteProtocol.PROOF_NAME,
             auto_present: true,
             presentation_proposal: {
               attributes: [{
@@ -229,7 +246,8 @@ export class OntologyVoteProtocol {
           switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
           last()
         )
-      )
+      ),
+      map(() => undefined as void)
     )
   }
 }

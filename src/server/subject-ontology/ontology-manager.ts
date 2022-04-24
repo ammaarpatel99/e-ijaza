@@ -141,22 +141,14 @@ export class OntologyManager {
         newState.set(key, {children, componentSets: value.componentSets} as typeof value)
       }
     })
-    if (!newState.has(child)) {
-      (newState as Server.Subjects)
-        .set(child, {children: new Set(), componentSets: new Set()})
-    }
     return newState as typeof state
   }
 
   private removeSubject(subject: string, state: Immutable<Server.Subjects>) {
-    const subjectData = state.get(subject)
-    let newState = state
-    for (const child of subjectData?.children || []) {
-      newState = this.removeChild(subject, child, null, newState)
-    }
-    for (const set of subjectData?.componentSets || []) {
-      newState = this.removeComponentSet(subject, set, newState)
-    }
+    let newState = new Map()
+    state.forEach((value, key) => {
+      if (key !== subject) newState.set(key, value)
+    })
     return newState
   }
 }

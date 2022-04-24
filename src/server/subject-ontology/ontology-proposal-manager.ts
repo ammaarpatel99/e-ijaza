@@ -12,11 +12,12 @@ import {
 } from "rxjs";
 import {Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {MasterVoteProtocol, OntologyProposalStoreProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
+import {OntologyProposalStoreProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
 import {State} from "../state";
 import {SubjectOntology} from "./subject-ontology";
 import {OntologyManager} from "./ontology-manager";
+import {environment} from "../../environments/environment";
 
 export class OntologyProposalManager {
   static readonly instance = new OntologyProposalManager()
@@ -32,13 +33,14 @@ export class OntologyProposalManager {
   private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerOntologyProposals>>(1)
   readonly state$ = this._state$.asObservable()
 
-  initialise$() {
+  controllerInitialise$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
         this.watchMastersAndOntology()
       }),
-      switchMap(() => OntologyProposalStoreProtocol.instance.getFromStore$()),
+      switchMap(() => OntologyVoteProtocol.instance.controllerInitialisation$()),
+      switchMap(() => OntologyProposalStoreProtocol.instance.controllerInitialise$()),
       map(state => this._state$.next(state))
     )
   }
@@ -118,20 +120,28 @@ export class OntologyProposalManager {
   private getVoters$(subjects: Set<string>) {
     return State.instance.controllerMasters$.pipe(
       map(masters => [...masters].map(([did, subjectMap]) => {
-        const startingSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
-        return SubjectOntology.instance.standardSearch$(startingSubjects, subjects).pipe(
-          map(searcher => {
-            const results = [...subjects].map(subject => !!searcher.getSearchPath(subject) ? did : null)
-            if (results.length > 0 && results.every(did => !!did)) return results[0] as string
-            return null
-          })
+        const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
+        return this.areSubjectsReachable$(subjects, heldSubjects).pipe(
+          map(reached => reached ? did : null)
         )
       })),
       mergeMap(data => forkJoin(data)),
-      map(data =>
-        new Set(data.filter(did => !!did) as string[])
-      )
+      map(data => new Set(data.filter(did => !!did) as string[]))
     )
+  }
+
+  private areSubjectsReachable$(subjects: Set<string>, heldSubjects: Set<string>) {
+    const obs$: Observable<boolean> = SubjectOntology.instance
+      .standardSearch$(heldSubjects, subjects).pipe(
+        switchMap(searcher => {
+          const results = [...subjects].map(subject => searcher.getSearchPath(subject))
+          searcher.deleteSearch()
+          if (results.includes(undefined)) return obs$
+          if (results.includes(null)) return of(false)
+          return of(true)
+        })
+      )
+    return obs$
   }
 
   private updateProposal$(proposal: Immutable<Server.ControllerOntologyProposal>) {
@@ -139,6 +149,7 @@ export class OntologyProposalManager {
     subjects.add(proposal.subject)
     if (proposal.change.type === Server.SubjectProposalType.CHILD) subjects.add(proposal.change.child)
     else proposal.change.component_set.forEach(subject => subjects.add(subject))
+
     return this.getVoters$(subjects).pipe(
       switchMap(voters => {
         const oldVoters = new Set(proposal.votes.keys())
@@ -172,9 +183,9 @@ export class OntologyProposalManager {
   private watchMastersAndOntology() {
     const obs$: Observable<void> = merge([
       State.instance.controllerMasters$,
-      State.instance.subjectOntology$]
-    ).pipe(
-      debounceTime(100),
+      State.instance.subjectOntology$
+    ]).pipe(
+      debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
       map(([_, proposals]) => proposals),
       map(proposals => [...proposals.values()]
@@ -183,7 +194,7 @@ export class OntologyProposalManager {
             .pipe(map(_new => ({old: proposal, new: _new})))
         )
       ),
-      mergeMap(updates => forkJoin(updates)),
+      mergeMap(updates => forkJoin([...updates])),
       withLatestFrom(this._state$),
       switchMap(([updates, state]) => {
         let changed = false
@@ -193,7 +204,7 @@ export class OntologyProposalManager {
           if (update.new === null) return
           changed = true
           if (typeof update.new !== "boolean") {
-            newState.set(OntologyProposalManager.proposalToID(update.old), update.new)
+            newState.set(OntologyProposalManager.proposalToID(update.new), update.new)
             return
           }
           arr.push(this.revokeAllVotes$(update.old))

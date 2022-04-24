@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {MasterVoteProtocol} from "../aries-based-protocols";
+import {MasterVoteProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 
 export const router = Router()
 
@@ -12,7 +12,12 @@ router.post('/master/vote', (req, res, next) => {
 })
 
 // PROPOSE SUBJECT
-// VOTE ON SUBJECT PROPOSAL
+router.post('/ontology/vote', (req, res, next) => {
+  OntologyVoteProtocol.instance.sendVote$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 
 // GET DESCENDANTS
 

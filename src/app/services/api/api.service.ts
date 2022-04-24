@@ -70,7 +70,7 @@ export class ApiService {
   }
 
   voteOnSubjectProposal$(body: API.SubjectProposalVote) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/ontology/vote', body).pipe(
       map(() => undefined as void)
     )
   }

@@ -73,8 +73,6 @@ export interface SubjectProposalVote extends SubjectProposalData {
   vote: boolean
 }
 
-export type SubjectProposalsFetchRes = SubjectProposal[] | SubjectProposalVote[]
-
 
 
 export interface HeldCredentialData {
