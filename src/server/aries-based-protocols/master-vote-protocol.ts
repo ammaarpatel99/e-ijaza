@@ -33,6 +33,7 @@ export class MasterVoteProtocol {
 
   private static PROOF_NAME = 'Vote on Master Proposal'
   private static CREATION_PROOF_NAME = 'Create Master Proposal'
+  private static IS_MASTER_PROOF_NAME = `Is Master For Creating Master Proposal`
 
   // CONTROLLER
 
@@ -136,9 +137,9 @@ export class MasterVoteProtocol {
     return voidObs$.pipe(
       switchMap(() => from(requestProof({
         connection_id: connectionID,
-        comment: MasterVoteProtocol.CREATION_PROOF_NAME,
+        comment: MasterVoteProtocol.IS_MASTER_PROOF_NAME,
         proof_request: {
-          name: MasterVoteProtocol.CREATION_PROOF_NAME,
+          name: MasterVoteProtocol.IS_MASTER_PROOF_NAME,
           version: '1.0',
           non_revoked: {from: Date.now(), to: Date.now()},
           requested_predicates: {},
@@ -314,7 +315,7 @@ export class MasterVoteProtocol {
       switchMap(data => WebhookMonitor.instance.proofs$.pipe(
         filter(proof =>
           proof.state === 'request_received'
-          && proof.presentation_request?.name === MasterVoteProtocol.CREATION_PROOF_NAME
+          && proof.presentation_request?.name === MasterVoteProtocol.IS_MASTER_PROOF_NAME
           && proof.connection_id === data.connectionID
         ),
         takeUntil(voidObs$.pipe(delay(environment.timeToWaitForResponse))),
