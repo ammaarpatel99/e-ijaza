@@ -118,9 +118,6 @@ export class StateService implements OnDestroy {
     const obs$: Observable<void> = voidObs$.pipe(
       delay(environment.webAutoFetchStateInterval),
       switchMap(() => this.fetching.waitForFree$),
-      filter(() =>
-        Date.now() - this.innerTimestamp >= environment.webAutoFetchStateInterval
-      ),
       switchMap(() => {
         if (Date.now() - this.innerTimestamp >= environment.webAutoFetchStateInterval) return this.fetchState$
         return voidObs$
