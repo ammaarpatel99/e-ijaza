@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {MasterVoteProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
+import {SubjectOntology} from "../subject-ontology";
 
 export const router = Router()
 
@@ -19,7 +20,12 @@ router.post('/ontology/vote', (req, res, next) => {
   })
 })
 
-// GET DESCENDANTS
+router.post('/descendants', (req, res, next) => {
+  SubjectOntology.instance.getDescendants$(req.body).subscribe({
+    next: data => res.send([...data]),
+    error: err => next(err)
+  })
+})
 
 // UPDATE HELD CREDENTIAL PUBLIC STATUS
 // DELETE HELD CREDENTIAL

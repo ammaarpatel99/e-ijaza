@@ -218,4 +218,20 @@ export class SubjectOntology {
       this.mutex.wrapAsReading$()
     )
   }
+
+  getDescendants$(subjectName: string) {
+    return voidObs$.pipe(
+      map(() => {
+        const subject = [...this.subjects].filter(subject => subject.name === subjectName).shift()
+        if (!subject) throw new Error(`Finding descendants but subject doesn't exist`)
+        const searchWrapper = this.createSearch({startingSet: new Set([subject]), ignore: this.componentSets}).searchWrapper
+        const descendants = [...this.subjects]
+          .map(subject => subject.name)
+          .filter(name => !!searchWrapper.getSearchPath(name))
+        searchWrapper.deleteSearch()
+        return new Set(descendants)
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
 }
