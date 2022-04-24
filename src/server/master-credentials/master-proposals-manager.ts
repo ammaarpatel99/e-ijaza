@@ -10,7 +10,7 @@ import {
   switchMap,
   withLatestFrom
 } from "rxjs";
-import {Server} from '@project-types'
+import {Server, API} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
 import {MasterProposalStoreProtocol, MasterVoteProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
@@ -40,6 +40,17 @@ export class MasterProposalsManager {
       switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
       switchMap(() => MasterProposalStoreProtocol.instance.controllerInitialise$()),
       map(state => this._state$.next(state))
+    )
+  }
+
+  controllerCreateProposal$(proposal: API.MasterProposalData) {
+    return State.instance.controllerMasters$.pipe(
+      first(),
+      map(masters => {
+        if (masters.size > 0) throw new Error(`controller can't create master`)
+      }),
+      switchMap(() => this.isValidProposal$(proposal)),
+      switchMap(() => this.createProposal$(proposal))
     )
   }
 
@@ -227,10 +238,7 @@ export class MasterProposalsManager {
       mergeMap(({proposal, conn_id}) => {
         if (!proposal) throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
         return this.isValidProposal$(proposal).pipe(
-          map(valid => {
-            if (valid) return {proposal, conn_id}
-            else throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
-          })
+          map(() => ({proposal, conn_id}))
         )
       }),
       switchMap(({proposal, conn_id}) =>
@@ -260,6 +268,9 @@ export class MasterProposalsManager {
           if (!subjects.has(proposal.subject)) return false
         }
         return true
+      }),
+      map(valid => {
+        if (!valid) throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
       })
     )
   }

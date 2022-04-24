@@ -2,11 +2,21 @@ import {Router} from "express";
 import {MasterVoteProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {SubjectOntology} from "../subject-ontology";
 import {UserCredentialsManager} from "../credentials";
+import {State} from "../state";
+import {first, switchMap} from "rxjs";
+import {Server} from '@project-types'
+import {MasterProposalsManager} from "../master-credentials";
 
 export const router = Router()
 
 router.post('/master/propose', (req, res, next) => {
-  MasterVoteProtocol.instance.createProposal$(req.body).subscribe({
+  State.instance.appType$.pipe(
+    first(),
+    switchMap(appType => appType === Server.AppType.USER
+      ? MasterVoteProtocol.instance.createProposal$(req.body)
+      : MasterProposalsManager.instance.controllerCreateProposal$(req.body)
+    )
+  ).subscribe({
     next: () => res.send({}),
     error: err => next(err)
   })
