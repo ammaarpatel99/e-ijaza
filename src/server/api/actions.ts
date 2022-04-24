@@ -1,10 +1,16 @@
 import {Router} from "express";
 import {MasterVoteProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {SubjectOntology} from "../subject-ontology";
+import {UserCredentialsManager} from "../credentials";
 
 export const router = Router()
 
-// PROPOSE MASTER
+router.post('/master/propose', (req, res, next) => {
+  MasterVoteProtocol.instance.createProposal$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 router.post('/master/vote', (req, res, next) => {
   MasterVoteProtocol.instance.sendVote$(req.body).subscribe({
     next: () => res.send({}),
@@ -27,8 +33,20 @@ router.post('/descendants', (req, res, next) => {
   })
 })
 
-// UPDATE HELD CREDENTIAL PUBLIC STATUS
-// DELETE HELD CREDENTIAL
+
+
+router.put('/credential/update', (req, res, next) => {
+  UserCredentialsManager.instance.updatePublicStatus$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
+router.post('/credential/delete', (req, res, next) => {
+  UserCredentialsManager.instance.deleteCred$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 
 // ISSUE CREDENTIAL
 // REVOKE CREDENTIAL

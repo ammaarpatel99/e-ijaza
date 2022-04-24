@@ -4,5 +4,6 @@ export const settings = {
   timeToUpdateShared: 2000,
   controllerName: 'e-Ijaza controller',
   timeToStateUpdate: 200,
-  rootSubject: 'knowledge'
+  rootSubject: 'knowledge',
+  timeToWaitForResponse: 5000
 }

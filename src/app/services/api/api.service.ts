@@ -52,7 +52,7 @@ export class ApiService {
   }
 
   proposeMaster$(body: API.MasterProposalData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/master/propose', body).pipe(
       map(() => undefined as void)
     )
   }
@@ -80,13 +80,13 @@ export class ApiService {
   }
 
   updatePublicOnHeldCredential$(body: API.HeldCredential) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.put('/credential/update', body).pipe(
       map(() => undefined as void)
     )
   }
 
   deleteHeldCredential$(body: API.HeldCredentialData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/credential/delete', body).pipe(
       map(() => undefined as void)
     )
   }

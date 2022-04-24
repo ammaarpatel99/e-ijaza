@@ -67,3 +67,22 @@ export interface ControllerOntologyVote extends OntologyProposal {
   vote: boolean
   voterDID: string
 }
+
+
+export interface UserHeldCredential {
+  credentialID: string
+  subject: string
+  issuerDID: string
+  public: boolean
+}
+
+export type UserHeldCredentials = Set<UserHeldCredential>
+
+export interface UserIssuedCredential extends CredentialInfo {
+  subject: string
+  theirDID: string
+}
+
+export type UserIssuedCredentials = Set<UserIssuedCredential>
+
+export type ReachableSubjects = Map<string, boolean>

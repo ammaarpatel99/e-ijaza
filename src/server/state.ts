@@ -10,6 +10,7 @@ import {
 } from "./aries-based-protocols";
 import {OntologyManager, SubjectOntology, OntologyProposalManager} from "./subject-ontology";
 import {Server} from '@project-types'
+import {UserCredentialsManager} from "./credentials";
 
 export class State {
   static readonly instance = new State()
@@ -81,4 +82,16 @@ export class State {
 
   readonly userOntologyVotes$ =
     OntologyVoteProtocol.instance.userVotes$
+
+  readonly heldCredentials$ =
+    UserCredentialsManager.instance.heldCredentials$
+
+  readonly issuedCredentials$ =
+    UserCredentialsManager.instance.issuedCredentials$
+
+  readonly reachableSubjects$ =
+    UserCredentialsManager.instance.reachableSubjects$
+
+  readonly masterCreds$ =
+    UserCredentialsManager.instance.masterCredentials$
 }

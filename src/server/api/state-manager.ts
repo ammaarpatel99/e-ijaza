@@ -163,6 +163,31 @@ export class StateManager {
           : {type: API.SubjectProposalType.COMPONENT_SET, componentSet: [...proposal.change.component_set]}
       }))
     })
+
+    state.heldCredentials$.subscribe(data => this._heldCredentials = {
+      timestamp: Date.now(),
+      data: [...data].map(cred => ({
+        did: cred.issuerDID,
+        subject: cred.subject,
+        public: cred.public
+      }))
+    })
+
+    state.issuedCredentials$.subscribe(data => this._issuedCredentials = {
+      timestamp: Date.now(),
+      data: [...data].map(cred => ({
+        did: cred.theirDID,
+        subject: cred.subject
+      }))
+    })
+
+    state.reachableSubjects$.subscribe(data => this._reachableSubjects = {
+      timestamp: Date.now(),
+      data: [...data].map(([subject, master]) => ({
+        name: subject,
+        reachableByMasterCredentials: master
+      }))
+    })
   }
 
   private static hasNewData<T>(data: TimedData<T> | undefined, timestamp: number) {

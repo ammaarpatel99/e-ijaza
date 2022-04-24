@@ -29,7 +29,7 @@ export class MasterCredentialsManager {
         return state
       }),
       switchMap(state =>
-        CredentialIssueProtocol.instance.issue$(did, subject).pipe(
+        CredentialIssueProtocol.instance.controllerIssue$(did, subject).pipe(
           map(credInfo => ({state, credInfo}))
         )
       ),
@@ -56,7 +56,7 @@ export class MasterCredentialsManager {
       switchMap(state => {
         const credInfo = state.get(did)?.get(subject)
         if (!credInfo) throw new Error(`Removing master when ${did} is not master in ${subject}`)
-        return CredentialIssueProtocol.instance.revoke$(credInfo)
+        return CredentialIssueProtocol.instance.controllerRevoke$(credInfo)
           .pipe(map(() => state))
       }),
       map(state => {
@@ -82,7 +82,7 @@ export class MasterCredentialsManager {
           .flatMap(([did, data]) => [...data]
             .filter(([subject, _]) => !subjects.has(subject))
             .map(([subject, credInfo]) =>
-              CredentialIssueProtocol.instance.revoke$(credInfo)
+              CredentialIssueProtocol.instance.controllerRevoke$(credInfo)
                 .pipe(map(() => ({did, subject})))
             )
           )

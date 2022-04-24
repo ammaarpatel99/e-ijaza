@@ -234,4 +234,20 @@ export class SubjectOntology {
       this.mutex.wrapAsReading$()
     )
   }
+
+  getAllReachable$(subjectNames: Set<string>) {
+    return voidObs$.pipe(
+      map(() => {
+        const subjects = new Set([...this.subjects].filter(subject => subjectNames.has(subject.name)))
+        if (subjects.size === 0 || subjects.size != subjectNames.size) throw new Error(`Finding all reachable but not all subjects are valid`)
+        const searchWrapper = this.createSearch({startingSet: subjects}).searchWrapper
+        const reachable = [...this.subjects]
+          .map(subject => subject.name)
+          .filter(name => !!searchWrapper.getSearchPath(name))
+        searchWrapper.deleteSearch()
+        return new Set(reachable)
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
 }

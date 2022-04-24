@@ -1,6 +1,6 @@
 import {
   catchError, combineLatestWith,
-  debounceTime,
+  debounceTime, first,
   forkJoin,
   merge,
   mergeMap,
@@ -35,6 +35,7 @@ export class MasterProposalsManager {
       map(() => {
         this.watchVotes()
         this.watchMastersAndOntology()
+        this.watchNewProposals()
       }),
       switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
       switchMap(() => MasterProposalStoreProtocol.instance.controllerInitialise$()),
@@ -42,7 +43,7 @@ export class MasterProposalsManager {
     )
   }
 
-  watchVotes() {
+  private watchVotes() {
     const obs$: Observable<void> = MasterVoteProtocol.instance.controllerVotes$.pipe(
       withLatestFrom(this._state$),
       mergeMap(([vote, state]) => {
@@ -85,7 +86,7 @@ export class MasterProposalsManager {
     const totalVotes = _votes.length
     const votesFor = _votes.filter(vote => vote === true).length
     const votesAgainst = _votes.filter(vote => vote === false).length
-    if (votesFor > totalVotes / 2) return true
+    if (votesFor > totalVotes / 2 || totalVotes === 0) return true
     else if (votesAgainst >= totalVotes / 2) return false
     else return null
   }
@@ -219,5 +220,67 @@ export class MasterProposalsManager {
       })
     ) as Observable<void>
     obs$.subscribe()
+  }
+
+  private watchNewProposals() {
+    const obs$: Observable<void> = MasterVoteProtocol.instance.newProposals$.pipe(
+      mergeMap(({proposal, conn_id}) => {
+        if (!proposal) throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
+        return this.isValidProposal$(proposal).pipe(
+          map(valid => {
+            if (valid) return {proposal, conn_id}
+            else throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
+          })
+        )
+      }),
+      switchMap(({proposal, conn_id}) =>
+        MasterVoteProtocol.instance.validateNewProposal$(conn_id).pipe(
+          switchMap(() => this.createProposal$(proposal))
+        )
+      ),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private isValidProposal$(proposal: Server.MasterProposal) {
+    return this._state$.pipe(
+      withLatestFrom(State.instance.controllerMasters$, State.instance.subjectOntology$),
+      first(),
+      map(([state, masters, subjects]) => {
+        const proposalID = MasterProposalsManager.proposalToID(proposal)
+        if (state.has(proposalID)) return false
+        const credExists = masters.get(proposal.did)?.get(proposal.subject)
+        if (proposal.proposalType === Server.ProposalType.REMOVE && !credExists) return false
+        if (proposal.proposalType === Server.ProposalType.ADD) {
+          if (credExists) return false
+          if (!subjects.has(proposal.subject)) return false
+        }
+        return true
+      })
+    )
+  }
+
+  private createProposal$(proposal: Server.MasterProposal) {
+    const _proposal: Server.ControllerMasterProposal = {...proposal, votes: new Map()}
+    return this.updateProposal$(_proposal).pipe(
+      switchMap(result => {
+        if (result === true) return MasterProposalsManager.actionProposal$(_proposal)
+        if (result === false) return voidObs$
+        if (result === null) throw new Error(`impossible state reached in creating master proposal`)
+        return of(result)
+      }),
+      withLatestFrom(this._state$),
+      first(),
+      map(([proposal, state]) => {
+        if (!proposal) return
+        const newState = new Map(state)
+        newState.set(MasterProposalsManager.proposalToID(proposal), proposal)
+        this._state$.next(newState)
+      })
+    )
   }
 }
