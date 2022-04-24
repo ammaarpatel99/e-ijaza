@@ -17,7 +17,7 @@
       <p>Verkey: {{did.verkey}}</p>
     </ng-container>
     <button mat-button [disabled]="!!(loading$ | async)" (click)="generateDID()" >Generate DID</button>
-    <button mat-button *ngIf="did" [disabled]="!!(loading$ | async)" (click)="registeredDID()" >Registered</button>
+    <button mat-button *ngIf="did" [disabled]="!!(loading$ | async)" (click)="registerDID()" >Registered</button>
     <h1>Automatic Registration (only with Von Network)</h1>
     <div class="form">
       <mat-form-field>

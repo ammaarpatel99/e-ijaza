@@ -105,7 +105,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
     ).subscribe()
   }
 
-  registeredDID() {
+  registerDID() {
     const did = this.did
     if (!did) throw new Error(`Can't register did as component holds no did details`)
     this.api.registerDID$(did).pipe(
