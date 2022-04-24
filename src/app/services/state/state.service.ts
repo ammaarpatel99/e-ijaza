@@ -2,7 +2,7 @@ import {Inject, Injectable, OnDestroy, PLATFORM_ID} from '@angular/core';
 import {API} from '@project-types'
 import {Immutable, Mutex, voidObs$} from '@project-utils'
 import {
-  AsyncSubject,
+  AsyncSubject, delay,
   filter,
   first,
   forkJoin,
@@ -115,12 +115,19 @@ export class StateService implements OnDestroy {
   }
 
   private regularlyUpdate() {
-    interval(environment.webAutoFetchStateInterval).pipe(
+    const obs$: Observable<void> = voidObs$.pipe(
+      delay(environment.webAutoFetchStateInterval),
       switchMap(() => this.fetching.waitForFree$),
       filter(() =>
         Date.now() - this.innerTimestamp >= environment.webAutoFetchStateInterval
       ),
-      mergeMap(() => this.fetchState$),
+      switchMap(() => {
+        if (Date.now() - this.innerTimestamp >= environment.webAutoFetchStateInterval) return this.fetchState$
+        return voidObs$
+      }),
+      switchMap(() => obs$)
+    )
+    obs$.pipe(
       takeUntil(this.destroy$)
     ).subscribe()
   }
