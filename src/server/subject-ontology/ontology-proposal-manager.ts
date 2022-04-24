@@ -1,5 +1,5 @@
 import {
-  catchError,
+  catchError, combineLatestWith,
   debounceTime,
   forkJoin,
   merge,
@@ -180,14 +180,51 @@ export class OntologyProposalManager {
     )
   }
 
+  private removeInvalidated$(subjectOntology: Immutable<Server.Subjects>, proposals: Immutable<Server.ControllerOntologyProposals>) {
+    const remainingProposals = new Map();
+    const arr = [...proposals].map(([key, proposal]) => {
+      if (!subjectOntology.has(proposal.subject)) return
+      if (proposal.proposalType === Server.ProposalType.ADD) {
+        if (proposal.change.type === Server.SubjectProposalType.CHILD) {
+          remainingProposals.set(key, proposal)
+        } else {
+          if (![...proposal.change.component_set].every(x => subjectOntology.has(x))) return
+          return SubjectOntology.instance.canAddComponentSet$(proposal.subject, proposal.change.component_set).pipe(
+            map(valid => {if (valid) remainingProposals.set(key, proposal)})
+          )
+        }
+      } else {
+        if (proposal.change.type === Server.SubjectProposalType.CHILD) {
+          if (!subjectOntology.has(proposal.change.child)) return
+          return SubjectOntology.instance.canRemoveChild$(proposal.subject, proposal.change.child).pipe(
+            map(valid => {if (valid) remainingProposals.set(key, proposal)})
+          )
+        } else {
+          const set = proposal.change.component_set
+          if (![...set].every(x => subjectOntology.has(x))) return
+          const sets = [...subjectOntology.get(proposal.subject)?.componentSets || []].filter(_set => {
+            if (set.size !== _set.size) return false
+            return !![...set].every(x => _set.has(x))
+          })
+          if (sets.length > 0) remainingProposals.set(key, proposal)
+        }
+      }
+      return
+    })
+    return forkJoin(arr).pipe(
+      map(() => {
+        if (remainingProposals.size === proposals.size) return proposals
+        else return remainingProposals as typeof proposals
+      })
+    )
+  }
+
   private watchMastersAndOntology() {
-    const obs$: Observable<void> = merge([
-      State.instance.controllerMasters$,
-      State.instance.subjectOntology$
-    ]).pipe(
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+      combineLatestWith(State.instance.subjectOntology$),
       debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
-      map(([_, proposals]) => proposals),
+      switchMap(([[_, subjects], proposals]) => this.removeInvalidated$(subjects, proposals)),
       map(proposals => [...proposals.values()]
         .map(proposal =>
           this.updateProposal$(proposal)
@@ -220,7 +257,7 @@ export class OntologyProposalManager {
         console.error(e)
         return obs$
       })
-    )
+    ) as Observable<void>
     obs$.subscribe()
   }
 }

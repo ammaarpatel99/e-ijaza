@@ -1,5 +1,5 @@
 import {
-  catchError,
+  catchError, combineLatestWith,
   debounceTime,
   forkJoin,
   merge,
@@ -164,14 +164,27 @@ export class MasterProposalsManager {
     )
   }
 
+  private removeInvalidated(masters: Immutable<Server.ControllerMasters>, subjectOntology: Immutable<Server.Subjects>, proposals: Immutable<Server.ControllerMasterProposals>) {
+    const remainingProposals = new Map()
+    proposals.forEach((proposal, key) => {
+      if (!subjectOntology.has(proposal.subject)) return
+      else if (proposal.proposalType === Server.ProposalType.REMOVE) {
+        if (!masters.get(proposal.did)?.has(proposal.subject)) return
+      } else {
+        if (masters.get(proposal.did)?.has(proposal.subject)) return
+      }
+      remainingProposals.set(key, proposal)
+    })
+    if (remainingProposals.size === proposals.size) return proposals
+    else return remainingProposals as typeof proposals
+  }
+
   private watchMastersAndOntology() {
-    const obs$: Observable<void> = merge([
-      State.instance.controllerMasters$,
-      State.instance.subjectOntology$
-    ]).pipe(
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+      combineLatestWith(State.instance.subjectOntology$),
       debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
-      map(([_, proposals]) => proposals),
+      map(([[masters, subjects], proposals]) => this.removeInvalidated(masters, subjects, proposals)),
       map(proposals => [...proposals.values()]
         .map(proposal =>
           this.updateProposal$(proposal)
@@ -204,7 +217,7 @@ export class MasterProposalsManager {
         console.error(e)
         return obs$
       })
-    )
+    ) as Observable<void>
     obs$.subscribe()
   }
 }

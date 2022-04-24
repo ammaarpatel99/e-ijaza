@@ -157,4 +157,60 @@ export class SubjectOntology {
     )
     return {search, searchWrapper}
   }
+
+  canRemoveChild$(parent: string, child: string) {
+    return voidObs$.pipe(
+      map(() => {
+        const _parent = [...this.subjects].filter(subject => subject.name === parent).shift()
+        const _child = [...this.subjects].filter(subject => subject.name === child).shift()
+        const childRelation = [...this.childRelations].filter(relation => relation.child === _child && relation.parent === _parent).shift()
+        if (!childRelation) throw new Error(`Checking removing child but child relation does not exist`)
+        return [...this.componentSets].every(({set}) => {
+          const searchWrapper = this.createSearch(
+            {goals: set, startingSet: new Set([_parent!]), ignore: new Set([childRelation])}
+          ).searchWrapper
+          const res = [...set].every(subject => !!searchWrapper.getSearchPath(subject.name))
+          searchWrapper.deleteSearch()
+          return res
+        })
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
+
+  canAddComponentSet$(parent: string, set: Immutable<Set<string>>) {
+    return voidObs$.pipe(
+      map(() => {
+        const _parent = [...this.subjects].filter(subject => subject.name === parent).shift()
+        const _set = new Set([...set].map(child => [...this.subjects].filter(subject => subject.name === child).shift()))
+        if (!_parent || _set.has(undefined)) throw new Error(`checking adding component set but provided subjects aren't all valid`)
+        const componentSet = [...this.componentSets].filter(relation =>
+          relation.parent === _parent && relation.set.size === _set.size
+          && [...relation.set].every(subject => _set.has(subject))
+        ).shift()
+        if (componentSet) throw new Error(`Checking adding component set but set already exists`);
+        const searchWrapper = this.createSearch({goals: _set as Set<Subject>, startingSet: new Set([_parent])}).searchWrapper
+        const res = [...set].every(subject => !!searchWrapper.getSearchPath(subject))
+        searchWrapper.deleteSearch()
+        return res
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
+
+  lostSubjectsOnRemovedChild$(parent: string, child: string) {
+    return voidObs$.pipe(
+      map(() => {
+        const _parent = [...this.subjects].filter(subject => subject.name === parent).shift()
+        const _child = [...this.subjects].filter(subject => subject.name === child).shift()
+        const childRelation = [...this.childRelations].filter(relation => relation.child === _child && relation.parent === _parent).shift()
+        if (!childRelation) throw new Error(`Checking removing child but child relation does not exist`)
+        const _knowledge = [...this.subjects].filter(subject => subject.name === 'knowledge').shift()
+        if (!_knowledge) throw new Error(`Base subject "knowledge" doesn't exist`)
+        const searchWrapper = this.createSearch({startingSet: new Set([_knowledge]), ignore: new Set([childRelation])}).searchWrapper
+        return [...this.subjects].filter(({name}) => !searchWrapper.getSearchPath(name))
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
 }
