@@ -16,14 +16,14 @@ export class OntologyManager {
       switchMap(() => OntologyStoreProtocol.instance.controllerInitialise$()),
       map(state => {
         this._state$.next(state)
-        this.ensureOntologyIsNotEmpty()
+        this.ensureKnowledgeExists()
       })
     )
   }
 
-  private ensureOntologyIsNotEmpty() {
+  private ensureKnowledgeExists() {
     this._state$.subscribe(state => {
-      if (state.size === 0) {
+      if (!state.has('knowledge')) {
         const newState: Server.Subjects = new Map()
         newState.set('knowledge', {children: new Set(), componentSets: new Set()})
         this._state$.next(newState)
@@ -147,7 +147,13 @@ export class OntologyManager {
   private removeSubject(subject: string, state: Immutable<Server.Subjects>) {
     let newState = new Map()
     state.forEach((value, key) => {
-      if (key !== subject) newState.set(key, value)
+      if (key === subject) return
+      const children = new Set(value.children)
+      children.delete(subject)
+      const componentSets = new Set()
+      value.componentSets.forEach(set => { if (!set.has(subject)) componentSets.add(set) })
+      const data: typeof value = {children, componentSets: componentSets as typeof value.componentSets}
+      newState.set(key, data)
     })
     return newState
   }
