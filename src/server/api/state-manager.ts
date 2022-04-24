@@ -113,6 +113,29 @@ export class StateManager {
         componentSets: [...data.componentSets].map(set => [...set])
       }))
     })
+
+    state.controllerMasterProposals$.subscribe(data => this._masterProposals = {
+      timestamp: Date.now(),
+      data: [...data].map(([_, proposal]) => ({
+        did: proposal.did,
+        proposalType: proposal.proposalType,
+        subject: proposal.subject,
+        votes: {
+          for: [...proposal.votes.values()].map(vote => vote === true).length,
+          against: [...proposal.votes.values()].map(vote => vote === false).length,
+          total: proposal.votes.size
+        }
+      }))
+    })
+
+    state.userMasterVotes$.subscribe(data => this._masterProposals = {
+      timestamp: Date.now(),
+      data: [...data].map(([_, proposal]) => ({
+        did: proposal.did,
+        proposalType: proposal.proposalType,
+        subject: proposal.subject
+      }))
+    })
   }
 
   private static hasNewData<T>(data: TimedData<T> | undefined, timestamp: number) {

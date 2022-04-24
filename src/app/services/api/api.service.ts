@@ -58,7 +58,7 @@ export class ApiService {
   }
 
   voteOnMasterProposal$(body: API.MasterProposalVote) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/master/vote', body).pipe(
       map(() => undefined as void)
     )
   }

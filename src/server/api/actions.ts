@@ -1,9 +1,15 @@
 import {Router} from "express";
+import {MasterVoteProtocol} from "../aries-based-protocols";
 
 export const router = Router()
 
 // PROPOSE MASTER
-// VOTE ON MASTER PROPOSAL
+router.post('/master/vote', (req, res, next) => {
+  MasterVoteProtocol.instance.sendVote$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 
 // PROPOSE SUBJECT
 // VOTE ON SUBJECT PROPOSAL

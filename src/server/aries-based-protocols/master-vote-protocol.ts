@@ -1,13 +1,24 @@
 import {Server, Schemas, API} from '@project-types'
 import {
   connectToController$,
-  connectViaPublicDID$,
+  connectViaPublicDID$, deleteCredential,
   getHeldCredentials,
   issueCredential,
   proposeProof,
   revokeCredential$
 } from "../aries-api";
-import {catchError, filter, first, from, last, Observable, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {
+  catchError,
+  filter,
+  first,
+  from,
+  last,
+  mergeMap,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  withLatestFrom
+} from "rxjs";
 import {masterVoteSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
@@ -66,8 +77,8 @@ export class MasterVoteProtocol {
     return revokeCredential$(credInfo, MasterProposalsManager.proposalToID(proposal))
   }
 
-  watchVotes() {
-    WebhookMonitor.instance.proofs$.pipe(
+  private watchVotes() {
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
       filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === 'Vote on Master Proposal'),
       map(proof => {
         const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
@@ -80,17 +91,20 @@ export class MasterVoteProtocol {
         const voteChoice = JSON.parse(proof.presentation!.requested_proof!.revealed_attrs![voteChoiceID].raw!) as boolean
         return {voteDetails, voteChoice}
       }),
-      map(({voteDetails, voteChoice}) => ({
+      map(({voteDetails, voteChoice}): Server.ControllerMasterVote => ({
         subject: voteDetails.subject,
         vote: voteChoice,
         did: voteDetails.did,
         proposalType: voteDetails.action,
         voterDID: voteDetails.voterDID
-      }) as Server.ControllerMasterVote),
-      map(data => {
-        this._controllerVotes$.next(data)
+      })),
+      map(data => this._controllerVotes$.next(data)),
+      catchError(e => {
+        console.error(e)
+        return obs$
       })
     )
+    obs$.subscribe()
   }
 
   // USER
@@ -103,11 +117,12 @@ export class MasterVoteProtocol {
       map(() => {
         this.watchIssuing()
         this.watchRevocations()
-      })
+      }),
+      switchMap(() => this.getVotes$())
     )
   }
 
-  getVotes$() {
+  private getVotes$() {
     return voidObs$.pipe(
       switchMap(() => from(
         getHeldCredentials({wql: `{"schema_id": "${masterVoteSchema.schemaID}"}`})
@@ -115,18 +130,18 @@ export class MasterVoteProtocol {
       map(result => result.results || []),
       map(creds => creds.map(({attrs, referent, cred_def_id}) =>({
         credentialID: referent!,
-        cred_def_id,
+        cred_def_id: cred_def_id!,
         ...JSON.parse(attrs!['voteDetails']) as
           Schemas.MasterProposalVoteSchema['voteDetails']
       }))),
-      map(creds => creds.map(cred => ({
+      map(creds => creds.map((cred): Server.UserMasterVote => ({
         subject: cred.subject,
         voterDID: cred.voterDID,
         did: cred.did,
         proposalType: cred.action,
         credentialID: cred.credentialID,
         cred_def_id: cred.cred_def_id
-      }) as Server.UserMasterVote)),
+      }))),
       map(creds => creds.map(cred => {
         const id = MasterProposalsManager.proposalToID(cred)
         return [id, cred] as [typeof id, typeof cred]
@@ -144,14 +159,14 @@ export class MasterVoteProtocol {
         ...JSON.parse(credential?.attrs!['voteDetails']!) as
           Schemas.MasterProposalVoteSchema['voteDetails']
       })),
-      map(data => ({
+      map((data): Server.UserMasterVote => ({
         subject: data.subject,
         voterDID: data.voterDID,
         did: data.did,
         proposalType: data.action,
         credentialID: data.credentialID,
         cred_def_id: data.cred_def_id
-      }) as Server.UserMasterVote),
+      })),
       withLatestFrom(this._userVotes$),
       map(([vote, votes]) => {
         const map = new Map(votes)
@@ -171,10 +186,13 @@ export class MasterVoteProtocol {
       filter(data => data.thread_id.includes(masterVoteSchema.name)),
       map(data => data.comment),
       withLatestFrom(this._userVotes$),
-      map(([proposalID, votes]) => {
+      mergeMap(([proposalID, votes]) => {
         const map = new Map(votes)
+        const data = map.get(proposalID)
+        if (!data) return voidObs$
         map.delete(proposalID)
         this._userVotes$.next(map)
+        return from(deleteCredential({credential_id: data.credentialID}))
       }),
       catchError(e => {
         console.error(e)
@@ -214,7 +232,8 @@ export class MasterVoteProtocol {
           switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
           last()
         )
-      )
+      ),
+      map(() => undefined as void)
     )
   }
 }

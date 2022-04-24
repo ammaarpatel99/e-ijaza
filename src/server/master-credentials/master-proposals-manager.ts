@@ -17,6 +17,7 @@ import {map} from "rxjs/operators";
 import {MasterCredentialsManager} from "./master-credentials-manager";
 import {State} from "../state";
 import {SubjectOntology} from "../subject-ontology";
+import {environment} from "../../environments/environment";
 
 export class MasterProposalsManager {
   static readonly instance = new MasterProposalsManager()
@@ -29,18 +30,19 @@ export class MasterProposalsManager {
   private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerMasterProposals>>(1)
   readonly state$ = this._state$.asObservable()
 
-  initialise$() {
+  controllerInitialise$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
         this.watchMastersAndOntology()
       }),
-      switchMap(() => MasterProposalStoreProtocol.instance.getFromStore$()),
+      switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
+      switchMap(() => MasterProposalStoreProtocol.instance.controllerInitialise$()),
       map(state => this._state$.next(state))
     )
   }
 
-  private watchVotes() {
+  watchVotes() {
     const obs$: Observable<void> = MasterVoteProtocol.instance.controllerVotes$.pipe(
       withLatestFrom(this._state$),
       mergeMap(([vote, state]) => {
@@ -63,7 +65,7 @@ export class MasterProposalsManager {
         }
         this._state$.next(newState)
         if (proposalResult === null) return MasterVoteProtocol.instance.revokeVote$(voterData, vote)
-        return this.revokeAllVotes$(proposal).pipe(
+        else return this.revokeAllVotes$(proposal).pipe(
           switchMap(() => {
             if (proposalResult) return MasterProposalsManager.actionProposal$(proposal)
             else return voidObs$
@@ -107,14 +109,28 @@ export class MasterProposalsManager {
   private getVoters$(subject: string) {
     return State.instance.controllerMasters$.pipe(
       map(masters => [...masters].map(([did, subjectMap]) => {
-        const subjects = new Set([...subjectMap].map(([subject, _]) => subject))
-        return SubjectOntology.instance.standardSearch$(subjects, new Set([subject])).pipe(
-          map(searcher => !!searcher.getSearchPath(subject) ? did : null)
+        const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
+        return this.isSubjectReachable$(subject, heldSubjects).pipe(
+          map(reached => reached ? did : null)
         )
       })),
       mergeMap(data => forkJoin(data)),
       map(data => new Set(data.filter(did => !!did) as string[]))
     )
+  }
+
+  private isSubjectReachable$(subject: string, heldSubjects: Set<string>) {
+    const obs$: Observable<boolean> = SubjectOntology.instance
+      .standardSearch$(heldSubjects, new Set([subject])).pipe(
+        switchMap(searcher => {
+          const path = searcher.getSearchPath(subject)
+          searcher.deleteSearch()
+          if (path === undefined) return obs$
+          if (path === null) return of(false)
+          return of(true)
+        })
+      )
+    return obs$
   }
 
   private updateProposal$(proposal: Immutable<Server.ControllerMasterProposal>) {
@@ -151,9 +167,9 @@ export class MasterProposalsManager {
   private watchMastersAndOntology() {
     const obs$: Observable<void> = merge([
       State.instance.controllerMasters$,
-      State.instance.subjectOntology$]
-    ).pipe(
-      debounceTime(100),
+      State.instance.subjectOntology$
+    ]).pipe(
+      debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
       map(([_, proposals]) => proposals),
       map(proposals => [...proposals.values()]
@@ -162,7 +178,7 @@ export class MasterProposalsManager {
             .pipe(map(_new => ({old: proposal, new: _new})))
         )
       ),
-      mergeMap(updates => forkJoin(updates)),
+      mergeMap(updates => forkJoin([...updates])),
       withLatestFrom(this._state$),
       switchMap(([updates, state]) => {
         let changed = false
@@ -172,7 +188,7 @@ export class MasterProposalsManager {
           if (update.new === null) return
           changed = true
           if (typeof update.new !== "boolean") {
-            newState.set(MasterProposalsManager.proposalToID(update.old), update.new)
+            newState.set(MasterProposalsManager.proposalToID(update.new), update.new)
             return
           }
           arr.push(this.revokeAllVotes$(update.old))

@@ -13,6 +13,7 @@ import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {MasterProposalsManager} from "../master-credentials";
+import {environment} from "../../environments/environment";
 
 export class MasterProposalStoreProtocol {
   static readonly instance = new MasterProposalStoreProtocol()
@@ -21,13 +22,14 @@ export class MasterProposalStoreProtocol {
   private previous: Immutable<Server.ControllerMasterProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
-  initialise$() {
+  controllerInitialise$() {
     return voidObs$.pipe(
-      map(() => this.watchState())
+      map(() => this.watchState()),
+      switchMap(() => this.getFromStore$())
     )
   }
 
-  getFromStore$() {
+  private getFromStore$() {
     return voidObs$.pipe(
       switchMap(() => from(
         getHeldCredentials({wql: `{"schema_id": "${masterProposalSchema.schemaID}"}`})
@@ -53,7 +55,7 @@ export class MasterProposalStoreProtocol {
 
   private watchState() {
     const obs$: Observable<void> = State.instance.controllerMasterProposals$.pipe(
-      debounceTime(1000),
+      debounceTime(environment.timeToUpdateStored),
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {
         const arr = [...deleted, ...edited].map(([id, _]) => {
@@ -67,7 +69,7 @@ export class MasterProposalStoreProtocol {
         )
 
         return forkJoin(arr).pipe(
-          switchMap(() => arr2),
+          switchMap(() => forkJoin(arr2)),
           map(() => state)
         )
       }),
@@ -89,7 +91,7 @@ export class MasterProposalStoreProtocol {
     return {state, deleted, edited}
   }
 
-  private static proposalToSchema(proposal: Immutable<Server.ControllerMasterProposal>) {
+  private static proposalToSchema(proposal: Immutable<Server.ControllerMasterProposal>): Schemas.MasterProposalStateSchema {
     return {
       proposal: {
         did: proposal.did,
@@ -97,7 +99,7 @@ export class MasterProposalStoreProtocol {
         subject: proposal.subject,
         votes: Object.fromEntries([...proposal.votes])
       }
-    } as Schemas.MasterProposalStateSchema
+    }
   }
 
   private storeProposal$(proposal: Immutable<Schemas.MasterProposalStateSchema>) {
