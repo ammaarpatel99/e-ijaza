@@ -29,6 +29,8 @@ export class MasterVoteProtocol {
   static readonly instance = new MasterVoteProtocol()
   private constructor() { }
 
+  private static PROOF_NAME = 'Vote on Master Proposal'
+
   // CONTROLLER
 
   private readonly _controllerVotes$ = new ReplaySubject<Immutable<Server.ControllerMasterVote>>(1)
@@ -79,7 +81,7 @@ export class MasterVoteProtocol {
 
   private watchVotes() {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === 'Vote on Master Proposal'),
+      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === MasterVoteProtocol.PROOF_NAME),
       map(proof => {
         const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
           .filter(([_, data]) => data.name === 'voteDetails')
@@ -215,7 +217,7 @@ export class MasterVoteProtocol {
         connectToController$().pipe(
           switchMap(connectionID => from(proposeProof({
             connection_id: connectionID,
-            comment: 'Vote on Master Proposal',
+            comment: MasterVoteProtocol.PROOF_NAME,
             auto_present: true,
             presentation_proposal: {
               attributes: [{
