@@ -49,7 +49,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
     name: new FormControl('', Validators.required)
   })
 
-  readonly vonNetworkURL = new FormControl('http://localhost:9000', Validators.required)
+  readonly vonNetworkURL = new FormControl('http://host.docker.internal:9000', Validators.required)
 
   private _did: API.DIDDetails | undefined
   get did() { return this._did }
