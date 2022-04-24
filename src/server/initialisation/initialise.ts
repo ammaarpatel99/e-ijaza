@@ -14,7 +14,7 @@ export function initialiseController$(): Observable<void> {
   return voidObs$.pipe(
     switchMap(() => initialiseControllerSchemas$()),
 
-    switchMap(() => MasterCredentialsManager.instance.controllerInitialise()),
+    switchMap(() => MasterCredentialsManager.instance.controllerInitialise$()),
 
     switchMap(() => OntologyManager.instance.controllerInitialise$()),
 

@@ -12,7 +12,7 @@ export class MasterCredentialsManager {
   private readonly _controllerState$ = new ReplaySubject<Immutable<Server.ControllerMasters>>(1)
   readonly controllerState$ = this._controllerState$.asObservable()
 
-  controllerInitialise() {
+  controllerInitialise$() {
     return MastersShareProtocol.instance.controllerInitialise$().pipe(
       switchMap(() => MastersStoreProtocol.instance.controllerInitialise$()),
       map(state => this._controllerState$.next(state)),
