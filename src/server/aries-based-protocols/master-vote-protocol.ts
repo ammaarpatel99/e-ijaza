@@ -148,7 +148,8 @@ export class MasterVoteProtocol {
         const id = MasterProposalsManager.proposalToID(cred)
         return [id, cred] as [typeof id, typeof cred]
       })),
-      map(creds => new Map(creds))
+      map(creds => new Map(creds)),
+      map(data => this._userVotes$.next(data))
     )
   }
 
