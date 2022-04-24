@@ -3,5 +3,6 @@ export const settings = {
   timeToUpdateStored: 5000,
   timeToUpdateShared: 2000,
   controllerName: 'e-Ijaza controller',
-  timeToStateUpdate: 200
+  timeToStateUpdate: 200,
+  rootSubject: 'knowledge'
 }

@@ -6,6 +6,7 @@ import {Server} from "@project-types"
 import {map} from "rxjs/operators";
 import {Search} from "./search";
 import {SearchWrapper} from "./search-wrapper";
+import {environment} from "../../environments/environment";
 
 export class SubjectOntology {
   static readonly instance = new SubjectOntology()
@@ -205,10 +206,14 @@ export class SubjectOntology {
         const _child = [...this.subjects].filter(subject => subject.name === child).shift()
         const childRelation = [...this.childRelations].filter(relation => relation.child === _child && relation.parent === _parent).shift()
         if (!childRelation) throw new Error(`Checking removing child but child relation does not exist`)
-        const _knowledge = [...this.subjects].filter(subject => subject.name === 'knowledge').shift()
-        if (!_knowledge) throw new Error(`Base subject "knowledge" doesn't exist`)
-        const searchWrapper = this.createSearch({startingSet: new Set([_knowledge]), ignore: new Set([childRelation])}).searchWrapper
-        return [...this.subjects].filter(({name}) => !searchWrapper.getSearchPath(name))
+        const rootSubject = [...this.subjects].filter(subject => subject.name === environment.rootSubject).shift()
+        if (!rootSubject) throw new Error(`Root subject doesn't exist`)
+        const searchWrapper = this.createSearch({startingSet: new Set([rootSubject]), ignore: new Set([childRelation])}).searchWrapper
+        const toRemove = [...this.subjects]
+          .map(subject => subject.name)
+          .filter(name => name !== environment.rootSubject && !searchWrapper.getSearchPath(name))
+        searchWrapper.deleteSearch()
+        return new Set(toRemove)
       }),
       this.mutex.wrapAsReading$()
     )

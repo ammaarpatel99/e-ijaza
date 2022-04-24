@@ -1,8 +1,10 @@
 import {OntologyShareProtocol, OntologyStoreProtocol} from '../aries-based-protocols'
-import {first, ReplaySubject, switchMap} from "rxjs";
+import {first, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
 import {Immutable} from "@project-utils";
+import {SubjectOntology} from "./subject-ontology";
+import {environment} from "../../environments/environment";
 
 export class OntologyManager {
   static readonly instance = new OntologyManager()
@@ -16,16 +18,16 @@ export class OntologyManager {
       switchMap(() => OntologyStoreProtocol.instance.controllerInitialise$()),
       map(state => {
         this._state$.next(state)
-        this.ensureKnowledgeExists()
+        this.ensureRootSubjectExists()
       })
     )
   }
 
-  private ensureKnowledgeExists() {
+  private ensureRootSubjectExists() {
     this._state$.subscribe(state => {
-      if (!state.has('knowledge')) {
+      if (!state.has(environment.rootSubject)) {
         const newState: Server.Subjects = new Map()
-        newState.set('knowledge', {children: new Set(), componentSets: new Set()})
+        newState.set(environment.rootSubject, {children: new Set(), componentSets: new Set()})
         this._state$.next(newState)
       }
     })
@@ -110,10 +112,11 @@ export class OntologyManager {
     return newState as typeof state
   }
 
-  removeChild$(parent: string, child: string, subjectsToRemove: ReadonlySet<string> | null = null) {
+  removeChild$(parent: string, child: string) {
     return this._state$.pipe(
       first(),
-      map(state => {
+      withLatestFrom(SubjectOntology.instance.lostSubjectsOnRemovedChild$(parent, child)),
+      map(([state, subjectsToRemove]) => {
         const newState = this.removeChild(parent, child, subjectsToRemove, state)
         this._state$.next(newState)
       })
