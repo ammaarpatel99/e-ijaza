@@ -93,7 +93,7 @@ export class OntologyShareProtocol {
         && cred.state === 'proposal_received'
       ),
       map(cred => cred.credential_exchange_id!),
-      withLatestFrom(State.instance.subjectOntology$),
+      withLatestFrom(State.instance._subjectOntology$),
       map(([cred_ex_id, subjectOntology]) =>
         [cred_ex_id, {subjects: [...subjectOntology.keys()]}] as
           [string, Schemas.SubjectsSchema]
@@ -138,7 +138,7 @@ export class OntologyShareProtocol {
         if (!subject) throw new Error(`Request received for subject data but not subject specified`)
         return [cred_ex_id, subject] as [string, string]
       }),
-      withLatestFrom(State.instance.subjectOntology$),
+      withLatestFrom(State.instance._subjectOntology$),
       map(([[cred_ex_id, subject], subjectOntology]) => {
         const subjectData = subjectOntology.get(subject)
         if (!subjectData) throw new Error(`Request received for subject data but subject doesn't exist`)

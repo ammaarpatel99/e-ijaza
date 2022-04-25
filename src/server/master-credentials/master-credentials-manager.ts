@@ -74,7 +74,7 @@ export class MasterCredentialsManager {
   }
 
   private watchSubjectOntology() {
-    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
+    const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
       map(data => new Set(data.keys())),
       withLatestFrom(this._controllerState$),
       mergeMap(([subjects, masters]) => {

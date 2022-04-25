@@ -68,7 +68,7 @@ export class MastersStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
       debounceTime(environment.timeToUpdateStored),
       mergeMap(state => this.update$(state)),
       catchError(e => {

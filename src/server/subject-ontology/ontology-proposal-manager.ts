@@ -118,7 +118,7 @@ export class OntologyProposalManager {
   }
 
   private getVoters$(subjects: Set<string>) {
-    return State.instance.controllerMasters$.pipe(
+    return State.instance._controllerMasters$.pipe(
       map(masters => [...masters].map(([did, subjectMap]) => {
         const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
         return this.areSubjectsReachable$(subjects, heldSubjects).pipe(
@@ -220,8 +220,8 @@ export class OntologyProposalManager {
   }
 
   private watchMastersAndOntology() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
-      combineLatestWith(State.instance.subjectOntology$),
+    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
+      combineLatestWith(State.instance._subjectOntology$),
       debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
       switchMap(([[_, subjects], proposals]) => this.removeInvalidated$(subjects, proposals)),

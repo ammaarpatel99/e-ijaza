@@ -54,7 +54,7 @@ export class MasterProposalStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance.controllerMasterProposals$.pipe(
+    const obs$: Observable<void> = State.instance._controllerMasterProposals$.pipe(
       debounceTime(environment.timeToPushUpdate),
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {

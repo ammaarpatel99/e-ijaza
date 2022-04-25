@@ -102,7 +102,7 @@ export class MastersShareProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
+    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
       debounceTime(environment.timeToUpdateShared),
       mergeMap(() => this.revokeIssued$()),
       catchError(e => {
@@ -120,7 +120,7 @@ export class MastersShareProtocol {
         && cred.state === 'proposal_received'
       ),
       map(cred => cred.credential_exchange_id!),
-      withLatestFrom(State.instance.controllerMasters$),
+      withLatestFrom(State.instance._controllerMasters$),
       map(([cred_ex_id, masters]) => {
         return [cred_ex_id, MastersShareProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
       }),

@@ -8,7 +8,7 @@ import {WebhookMonitor} from "../../webhook";
 export function connectViaPublicDID$ (
   pathOptions: Omit<Aries.paths['/didexchange/create-request']['post']['parameters']['query'], 'my_label'>
 ) {
-  return State.instance.name$.pipe(
+  return State.instance._name$.pipe(
     map(my_label => {
       const options = {...pathOptions, my_label}
       if (!options.their_public_did.startsWith(`did:sov:`)) {

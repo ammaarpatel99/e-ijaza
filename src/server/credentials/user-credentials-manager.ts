@@ -76,7 +76,7 @@ export class UserCredentialsManager {
   }
 
   issue$(data: Immutable<API.IssuedCredential>) {
-    return State.instance.reachableSubjects$.pipe(
+    return State.instance._reachableSubjects$.pipe(
       first(),
       map(subjects => {
         if (!subjects.has(data.subject)) throw new Error(`Can't issue in ${data.subject}`)
@@ -120,8 +120,8 @@ export class UserCredentialsManager {
   }
 
   private watchStates() {
-    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
-      combineLatestWith(State.instance.controllerDID$, this._heldCredentials$, this.issuedCredentials$),
+    const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
+      combineLatestWith(State.instance._controllerDID$, this._heldCredentials$, this.issuedCredentials$),
       mergeMap(([subjects, controllerDID, heldCreds, issuedCreds]) => {
         const deletions = [...heldCreds]
           .filter(cred => !subjects.has(cred.subject))

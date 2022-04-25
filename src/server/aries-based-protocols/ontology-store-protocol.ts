@@ -153,7 +153,7 @@ export class OntologyStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
+    const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
       debounceTime(environment.timeToUpdateStored),
       map(state => this.findChanges(state)),
       tap(changeData => this._changes$.next(changeData)),

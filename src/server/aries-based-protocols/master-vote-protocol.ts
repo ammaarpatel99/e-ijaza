@@ -211,8 +211,8 @@ export class MasterVoteProtocol {
 
   createProposal$(proposal: API.MasterProposalData) {
     this.getMasterCredID$()
-    return State.instance.heldCredentials$.pipe(
-      withLatestFrom(State.instance.controllerDID$),
+    return State.instance._heldCredentials$.pipe(
+      withLatestFrom(State.instance._controllerDID$),
       first(),
       map(([creds, controllerDID]) => {
         const cred = [...creds].filter(cred => cred.issuerDID === controllerDID).shift()
@@ -374,8 +374,8 @@ export class MasterVoteProtocol {
   }
 
   private getMasterCredID$() {
-    return State.instance.heldCredentials$.pipe(
-      withLatestFrom(State.instance.controllerDID$),
+    return State.instance._heldCredentials$.pipe(
+      withLatestFrom(State.instance._controllerDID$),
       first(),
       map(([creds, controllerDID]) =>
         [...creds]

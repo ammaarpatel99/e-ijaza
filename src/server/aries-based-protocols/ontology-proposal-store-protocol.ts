@@ -56,7 +56,7 @@ export class OntologyProposalStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance.controllerOntologyProposals$.pipe(
+    const obs$: Observable<void> = State.instance._controllerOntologyProposals$.pipe(
       debounceTime(environment.timeToUpdateStored),
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {

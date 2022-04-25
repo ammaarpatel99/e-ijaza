@@ -44,7 +44,7 @@ export class MasterProposalsManager {
   }
 
   controllerCreateProposal$(proposal: API.MasterProposalData) {
-    return State.instance.controllerMasters$.pipe(
+    return State.instance._controllerMasters$.pipe(
       first(),
       map(masters => {
         if (masters.size > 0) throw new Error(`controller can't create master`)
@@ -119,7 +119,7 @@ export class MasterProposalsManager {
   }
 
   private getVoters$(subject: string) {
-    return State.instance.controllerMasters$.pipe(
+    return State.instance._controllerMasters$.pipe(
       map(masters => [...masters].map(([did, subjectMap]) => {
         const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
         return this.isSubjectReachable$(subject, heldSubjects).pipe(
@@ -192,8 +192,8 @@ export class MasterProposalsManager {
   }
 
   private watchMastersAndOntology() {
-    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
-      combineLatestWith(State.instance.subjectOntology$),
+    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
+      combineLatestWith(State.instance._subjectOntology$),
       debounceTime(environment.timeToStateUpdate),
       withLatestFrom(this._state$),
       map(([[masters, subjects], proposals]) => this.removeInvalidated(masters, subjects, proposals)),
@@ -256,7 +256,7 @@ export class MasterProposalsManager {
 
   private isValidProposal$(proposal: Server.MasterProposal) {
     return this._state$.pipe(
-      withLatestFrom(State.instance.controllerMasters$, State.instance.subjectOntology$),
+      withLatestFrom(State.instance._controllerMasters$, State.instance._subjectOntology$),
       first(),
       map(([state, masters, subjects]) => {
         const proposalID = MasterProposalsManager.proposalToID(proposal)
