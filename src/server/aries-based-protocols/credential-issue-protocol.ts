@@ -6,7 +6,7 @@ import {
   revokeCredential$
 } from "../aries-api";
 import {
-  catchError,
+  catchError, defer,
   filter,
   forkJoin,
   from,
@@ -22,7 +22,7 @@ import {teachingSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Server, Schemas} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
+import {Immutable} from "@project-utils";
 import {UserIssuedCredential} from "../../types/server";
 import {UserCredentialsManager} from "../credentials";
 
@@ -80,7 +80,10 @@ export class CredentialIssueProtocol {
   userInitialise$() {
     return this.getHeldCredentials$().pipe(
       switchMap(() => this.getIssuedCredentials$()),
-      map(() => this.watchRevocations())
+      map(() => {
+        this.watchRevocations()
+        this.watchReceived()
+      })
     )
   }
 
@@ -116,27 +119,17 @@ export class CredentialIssueProtocol {
   }
 
   private getHeldCredentials$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${teachingSchema.schemaID}"}`})
-      )),
-      map(({results: creds}) => {
-        const currentTime = Date.now().toString()
-        return creds!.map(cred =>
-          from(isCredentialRevoked(
-          {credential_id: cred.referent!},
-          {from: currentTime, to: currentTime}
-          )).pipe(
-            switchMap(({revoked}) => {
-              if (revoked) {
-                return from(deleteCredential({credential_id: cred.referent!}))
-              } else return of(cred)
-            })
-          )
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${teachingSchema.schemaID}"}`})
+    )).pipe(
+      map(({results}) => results || []),
+      map(creds => creds.map(cred =>
+        this.deleteIfRevoked$(cred.referent!).pipe(
+          map(deleted => deleted ? undefined : cred)
         )
-      }),
+      )),
       switchMap(creds => forkJoin(creds)),
-      map(creds => creds.filter(cred => !!cred) as typeof creds extends (infer T)[] ? Exclude<T, void>[] : never),
+      map(creds => creds.filter(cred => !!cred) as typeof creds extends (infer T)[] ? Exclude<T, undefined>[] : never),
       map(creds => creds.map((cred): Server.UserHeldCredential => ({
         credentialID: cred.referent!,
         subject: cred.attrs!['subject']!,
@@ -147,12 +140,24 @@ export class CredentialIssueProtocol {
     )
   }
 
+  private deleteIfRevoked$(credentialID: string) {
+    const now = Date.now().toString()
+    return defer(() => from(
+      isCredentialRevoked({credential_id: credentialID}, {from: now, to: now})
+    )).pipe(
+      switchMap(({revoked}) => {
+        if (!revoked) return of(false)
+        return from(deleteCredential({credential_id: credentialID}))
+      })
+    )
+  }
+
   private getIssuedCredentials$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
-      )),
-      map(({results}) => results!.filter(cred => cred.schema_id === teachingSchema.schemaID)),
+    return defer(() => from(
+      getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
+    )).pipe(
+      map(({results}) => results || []),
+      map(results => results.filter(cred => cred.schema_id === teachingSchema.schemaID)),
       map(creds => creds.map(cred =>
         from(getConnection({conn_id: cred.connection_id!})).pipe(
           map(({their_public_did}) => ({
@@ -160,7 +165,7 @@ export class CredentialIssueProtocol {
             connection_id: cred.connection_id!,
             rev_reg_id: cred.revoc_reg_id!,
             cred_rev_id: cred.revocation_id!,
-            theirDID: their_public_did || ''
+            theirDID: their_public_did || Math.random().toString()
           }))
         )
       )),
@@ -173,6 +178,29 @@ export class CredentialIssueProtocol {
     const obs$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(({thread_id}) => thread_id.includes(teachingSchema.name)),
       mergeMap(() => this.getHeldCredentials$()),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private watchReceived() {
+    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
+      filter(({schema_id, state}) => schema_id === teachingSchema.schemaID && state === 'credential_acked'),
+      map(({credential: cred}): Server.UserHeldCredential => ({
+        credentialID: cred!.referent!,
+        subject: cred!.attrs!['subject']!,
+        issuerDID: cred!.cred_def_id!.split(':')[0],
+        public: false
+      })),
+      withLatestFrom(this._heldCredentials$),
+      map(([cred, state]) => {
+        const newState = new Set(state)
+        newState.add(cred)
+        this._heldCredentials$.next(newState)
+      }),
       catchError(e => {
         console.error(e)
         return obs$

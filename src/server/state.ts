@@ -91,7 +91,4 @@ export class State {
 
   readonly reachableSubjects$ =
     UserCredentialsManager.instance.reachableSubjects$
-
-  readonly masterCreds$ =
-    UserCredentialsManager.instance.masterCredentials$
 }
