@@ -1,1 +1,3 @@
-export const ariesAgentURL = 'http://localhost:4001'
+import {environment} from "../../../environments/environment";
+
+export const ariesAgentURL = environment.ariesAgentURL
