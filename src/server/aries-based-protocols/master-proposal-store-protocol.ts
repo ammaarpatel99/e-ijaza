@@ -1,5 +1,5 @@
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
+import {catchError, forkJoin, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -13,7 +13,6 @@ import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {MasterProposalsManager} from "../master-credentials";
-import {environment} from "../../environments/environment";
 
 export class MasterProposalStoreProtocol {
   static readonly instance = new MasterProposalStoreProtocol()
@@ -22,7 +21,7 @@ export class MasterProposalStoreProtocol {
   private previous: Immutable<Server.ControllerMasterProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
-  controllerInitialise$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => this.watchState()),
       switchMap(() => this.getFromStore$())
@@ -54,8 +53,7 @@ export class MasterProposalStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance._controllerMasterProposals$.pipe(
-      debounceTime(environment.timeToPushUpdate),
+    const obs$: Observable<void> = State.instance.controllerMasterProposals$.pipe(
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {
         const arr = [...deleted, ...edited].map(([id, _]) => {

@@ -8,7 +8,7 @@ import {
   revokeCredential$
 } from "../aries-api";
 import {
-  catchError, delay,
+  catchError,
   filter,
   first,
   from,
@@ -16,7 +16,7 @@ import {
   mergeMap,
   Observable,
   ReplaySubject,
-  switchMap, takeUntil,
+  switchMap,
   withLatestFrom
 } from "rxjs";
 import {masterVoteSchema, teachingSchema} from "../schemas";
@@ -25,26 +25,32 @@ import {map} from "rxjs/operators";
 import {Immutable, voidObs$} from "@project-utils";
 import {MasterProposalsManager} from "../master-credentials";
 import {State} from "../state";
-import {environment} from "../../environments/environment";
+
+interface NewProposal {
+  proposal: API.MasterProposalData
+  conn_id: string
+}
 
 export class MasterVoteProtocol {
   static readonly instance = new MasterVoteProtocol()
   private constructor() { }
 
-  private static PROOF_NAME = 'Vote on Master Proposal'
+  private static VOTE_PROOF_NAME = 'Vote on Master Proposal'
   private static CREATION_PROOF_NAME = 'Create Master Proposal'
   private static IS_MASTER_PROOF_NAME = `Is Master For Creating Master Proposal`
 
   // CONTROLLER
 
   private readonly _controllerVotes$ = new ReplaySubject<Immutable<Server.ControllerMasterVote>>(1)
+  private readonly _newProposals$ = new ReplaySubject<NewProposal>(1)
   readonly controllerVotes$ = this._controllerVotes$.asObservable()
-  readonly newProposals$ = this.receiveNewProposals$();
+  readonly newProposals$ = this._newProposals$.asObservable();
 
-  controllerInitialisation$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
+        this.watchNewProposals()
       })
     )
   }
@@ -86,7 +92,7 @@ export class MasterVoteProtocol {
 
   private watchVotes() {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === MasterVoteProtocol.PROOF_NAME),
+      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === MasterVoteProtocol.VOTE_PROOF_NAME),
       map(proof => {
         const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
           .filter(([_, data]) => data.name === 'voteDetails')
@@ -114,23 +120,26 @@ export class MasterVoteProtocol {
     obs$.subscribe()
   }
 
-  private receiveNewProposals$() {
-    return WebhookMonitor.instance.proofs$.pipe(
+  private watchNewProposals() {
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
       filter(proof =>
         proof.presentation_proposal_dict?.comment === MasterVoteProtocol.CREATION_PROOF_NAME
-        && proof.state === 'proposal_received'
+        && proof.state === 'verified'
       ),
-      mergeMap(({connection_id, presentation_proposal_dict, presentation_exchange_id}) =>
-        from(rejectProof({pres_ex_id: presentation_exchange_id!}, {description: "rejected as part of protocol"}))
-          .pipe(map(() => ({
-            conn_id: connection_id!,
-            proposal: presentation_proposal_dict?.presentation_proposal.attributes
-              .filter(({name}) => name === 'proposal')
-              .map(({value}) => value ? JSON.parse(value) as API.MasterProposalData : undefined)
-              .shift()
-          })))
-      )
+      map(proof => {
+        const conn_id = proof.connection_id!
+        const proposal = JSON.parse(
+          proof.presentation!.requested_proof!.self_attested_attrs!['proposal']
+        ) as API.MasterProposalData
+        const data = {proposal, conn_id}
+        this._newProposals$.next(data)
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
     )
+    obs$.subscribe()
   }
 
   validateNewProposal$(connectionID: string) {
@@ -164,7 +173,7 @@ export class MasterVoteProtocol {
   private readonly _userVotes$ = new ReplaySubject<Immutable<Server.UserMasterVotes>>(1)
   readonly userVotes$ = this._userVotes$.asObservable()
 
-  userInitialisation$() {
+  initialiseUser$() {
     return voidObs$.pipe(
       map(() => {
         this.watchIssuing()
@@ -187,7 +196,7 @@ export class MasterVoteProtocol {
         connectToController$().pipe(
           switchMap(connectionID => from(proposeProof({
             connection_id: connectionID,
-            comment: MasterVoteProtocol.PROOF_NAME,
+            comment: MasterVoteProtocol.VOTE_PROOF_NAME,
             auto_present: true,
             presentation_proposal: {
               attributes: [{
@@ -210,17 +219,12 @@ export class MasterVoteProtocol {
   }
 
   createProposal$(proposal: API.MasterProposalData) {
-    this.getMasterCredID$()
-    return State.instance._heldCredentials$.pipe(
-      withLatestFrom(State.instance._controllerDID$),
-      first(),
-      map(([creds, controllerDID]) => {
-        const cred = [...creds].filter(cred => cred.issuerDID === controllerDID).shift()
+    return this.getMasterCredID$().pipe(
+      switchMap(cred => {
         if (!cred) throw new Error(`Trying to create master proposal but not a master of anything`)
-        return cred
+        return connectToController$()
       }),
-      withLatestFrom(connectToController$()),
-      switchMap(([cred, connectionID]) =>
+      switchMap(connectionID =>
         from(proposeProof({
           auto_present: false,
           connection_id: connectionID,
@@ -231,29 +235,9 @@ export class MasterVoteProtocol {
               {name: 'proposal', value: JSON.stringify(proposal)}
             ]
           }
-        })).pipe(map(() => ({cred, connectionID})))
+        })).pipe(map(() => connectionID))
       ),
-      switchMap(data => WebhookMonitor.instance.proofs$.pipe(
-        filter(proof =>
-          proof.state === 'request_received'
-          && proof.presentation_request?.name === MasterVoteProtocol.IS_MASTER_PROOF_NAME
-          && proof.connection_id === data.connectionID
-        ),
-        takeUntil(voidObs$.pipe(delay(environment.timeToPushUpdate))),
-        first(),
-        switchMap(proof => from(presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
-          self_attested_attributes: {},
-          requested_predicates: {},
-          requested_attributes: {
-            credential: {
-              cred_id: data.cred.credentialID,
-              revealed: true
-            }
-          }
-        })))
-      )),
-      switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
-      last(),
+      switchMap(connectionID => this.watchForIsMaster$(connectionID)),
       map(() => undefined as void)
     )
   }
@@ -374,8 +358,8 @@ export class MasterVoteProtocol {
   }
 
   private getMasterCredID$() {
-    return State.instance._heldCredentials$.pipe(
-      withLatestFrom(State.instance._controllerDID$),
+    return State.instance.heldCredentials$.pipe(
+      withLatestFrom(State.instance.controllerDID$),
       first(),
       map(([creds, controllerDID]) =>
         [...creds]

@@ -1,13 +1,12 @@
 import {
   catchError, combineLatestWith,
-  debounceTime, first,
+  first,
   forkJoin,
-  merge,
   mergeMap,
   Observable,
   of,
   ReplaySubject,
-  switchMap,
+  switchMap, tap,
   withLatestFrom
 } from "rxjs";
 import {Server, API} from '@project-types'
@@ -17,7 +16,6 @@ import {map} from "rxjs/operators";
 import {MasterCredentialsManager} from "./master-credentials-manager";
 import {State} from "../state";
 import {SubjectOntology} from "../subject-ontology";
-import {environment} from "../../environments/environment";
 
 export class MasterProposalsManager {
   static readonly instance = new MasterProposalsManager()
@@ -30,21 +28,21 @@ export class MasterProposalsManager {
   private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerMasterProposals>>(1)
   readonly state$ = this._state$.asObservable()
 
-  controllerInitialise$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
         this.watchMastersAndOntology()
         this.watchNewProposals()
       }),
-      switchMap(() => MasterVoteProtocol.instance.controllerInitialisation$()),
-      switchMap(() => MasterProposalStoreProtocol.instance.controllerInitialise$()),
+      switchMap(() => MasterVoteProtocol.instance.initialiseController$()),
+      switchMap(() => MasterProposalStoreProtocol.instance.initialiseController$()),
       map(state => this._state$.next(state))
     )
   }
 
   controllerCreateProposal$(proposal: API.MasterProposalData) {
-    return State.instance._controllerMasters$.pipe(
+    return State.instance.controllerMasters$.pipe(
       first(),
       map(masters => {
         if (masters.size > 0) throw new Error(`controller can't create master`)
@@ -194,7 +192,7 @@ export class MasterProposalsManager {
   private watchMastersAndOntology() {
     const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
       combineLatestWith(State.instance._subjectOntology$),
-      debounceTime(environment.timeToStateUpdate),
+      tap(() => State.instance.startUpdating()),
       withLatestFrom(this._state$),
       map(([[masters, subjects], proposals]) => this.removeInvalidated(masters, subjects, proposals)),
       map(proposals => [...proposals.values()]
@@ -225,6 +223,7 @@ export class MasterProposalsManager {
         return forkJoin(arr)
       }),
       map(() => undefined as void),
+      tap(() => State.instance.stopUpdating()),
       catchError(e => {
         console.error(e)
         return obs$
@@ -236,7 +235,6 @@ export class MasterProposalsManager {
   private watchNewProposals() {
     const obs$: Observable<void> = MasterVoteProtocol.instance.newProposals$.pipe(
       mergeMap(({proposal, conn_id}) => {
-        if (!proposal) throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
         return this.isValidProposal$(proposal).pipe(
           map(() => ({proposal, conn_id}))
         )
@@ -256,7 +254,7 @@ export class MasterProposalsManager {
 
   private isValidProposal$(proposal: Server.MasterProposal) {
     return this._state$.pipe(
-      withLatestFrom(State.instance._controllerMasters$, State.instance._subjectOntology$),
+      withLatestFrom(State.instance.controllerMasters$, State.instance.subjectOntology$),
       first(),
       map(([state, masters, subjects]) => {
         const proposalID = MasterProposalsManager.proposalToID(proposal)

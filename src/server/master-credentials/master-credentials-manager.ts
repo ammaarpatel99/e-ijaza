@@ -15,8 +15,10 @@ export class MasterCredentialsManager {
   initialiseController$() {
     return MastersShareProtocol.instance.initialiseController$().pipe(
       switchMap(() => MastersStoreProtocol.instance.initialiseController$()),
-      map(state => this._state$.next(state)),
-      map(() => this.watchSubjectOntology())
+      map(state => {
+        this._state$.next(state)
+        this.watchSubjectOntology()
+      })
     )
   }
 
