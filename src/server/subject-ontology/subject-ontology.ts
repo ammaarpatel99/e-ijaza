@@ -101,7 +101,6 @@ export class SubjectOntology {
     const deleted = [...this.componentSets]
       .filter(set => !newSetIDs.has(SubjectOntology.componentSetID(set)))
     deleted.forEach(set => {
-      set.parent.removeComponentSet(set)
       this.componentSets.delete(set)
     })
 
@@ -110,7 +109,6 @@ export class SubjectOntology {
       .filter(set => !currentSetIDs.has(SubjectOntology.componentSetID(set)))
     added.forEach(relation => {
       const newSet = new ComponentSet(relation.parent, relation.set)
-      relation.parent.addComponentSet(newSet)
       this.componentSets.add(newSet)
     })
   }
