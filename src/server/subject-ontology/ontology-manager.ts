@@ -1,7 +1,7 @@
 import {OntologyShareProtocol, OntologyStoreProtocol} from '../aries-based-protocols'
 import {first, mergeMap, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
-import {map} from "rxjs/operators";
+import {map, shareReplay} from "rxjs/operators";
 import {Immutable} from "@project-utils";
 import {SubjectOntology} from "./subject-ontology";
 import {environment} from "../../environments/environment";
@@ -13,7 +13,8 @@ export class OntologyManager {
 
   private readonly _state$ = new ReplaySubject<Immutable<Server.Subjects>>(1)
   readonly state$ = this._state$.pipe(
-    mergeMap(state => SubjectOntology.instance.update$(state))
+    mergeMap(state => SubjectOntology.instance.update$(state)),
+    shareReplay(1)
   )
 
   initialiseController$() {
