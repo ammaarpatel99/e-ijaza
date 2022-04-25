@@ -70,7 +70,7 @@ export class State {
 
   readonly controllerDID$ = this._controllerDID$.pipe(this.waitForNotUpdating)
 
-  readonly _controllerMasters$ = MasterCredentialsManager.instance.controllerState$
+  readonly _controllerMasters$ = MasterCredentialsManager.instance.state$
   readonly controllerMasters$ = this._controllerMasters$.pipe(this.waitForNotUpdating)
 
   readonly _userMasters$ = MastersShareProtocol.instance.userState$

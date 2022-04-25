@@ -2,7 +2,6 @@ import {Server, Schemas} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
 import {
   catchError,
-  debounceTime,
   filter,
   forkJoin,
   from,
@@ -26,7 +25,6 @@ import {map} from "rxjs/operators";
 import {mastersPublicSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-import {environment} from "../../environments/environment";
 
 export class MastersShareProtocol {
   static readonly instance = new MastersShareProtocol()
@@ -54,7 +52,7 @@ export class MastersShareProtocol {
 
   private readonly issued = new Set<Immutable<Server.CredentialInfo>>()
 
-  controllerInitialise$() {
+  initialiseController$() {
     return this.getIssued$().pipe(
       map(() => {
         this.handleRequests()
@@ -102,8 +100,7 @@ export class MastersShareProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
-      debounceTime(environment.timeToUpdateShared),
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
       mergeMap(() => this.revokeIssued$()),
       catchError(e => {
         console.error(e)
@@ -152,7 +149,7 @@ export class MastersShareProtocol {
 
   // USER
 
-  userInitialise$() {
+  initialiseUser$() {
     return voidObs$.pipe(
       map(() => this.watchRevocations()),
       switchMap(() => this.refreshData$())

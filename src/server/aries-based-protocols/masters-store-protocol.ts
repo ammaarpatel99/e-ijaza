@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, mergeMap, Observable, switchMap} from "rxjs";
+import {catchError, forkJoin, from, last, mergeMap, Observable, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -12,7 +12,6 @@ import {mastersInternalSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-import {environment} from "../../environments/environment";
 
 export class MastersStoreProtocol {
   static readonly instance = new MastersStoreProtocol()
@@ -41,7 +40,7 @@ export class MastersStoreProtocol {
     return new Map(data)
   }
 
-  controllerInitialise$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => this.watchState()),
       switchMap(() => this.getFromStore$())
@@ -68,8 +67,7 @@ export class MastersStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
-      debounceTime(environment.timeToUpdateStored),
+    const obs$: Observable<void> = State.instance.controllerMasters$.pipe(
       mergeMap(state => this.update$(state)),
       catchError(e => {
         console.error(e)
