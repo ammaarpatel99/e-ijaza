@@ -19,7 +19,7 @@ export function initialiseController$(): Observable<void> {
     switchMap(() => OntologyManager.instance.controllerInitialise$()),
 
     switchMap(() => MasterProposalsManager.instance.controllerInitialise$())
-  ) as Observable<void>
+  )
 }
 
 export function initialiseUser$() {
