@@ -114,7 +114,10 @@ export class MasterCredentialsManager {
           this._state$.next(newState)
         }
       }),
-      tap(() => State.instance.stopUpdating()),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
+      }),
       catchError(e => {
         console.error(e)
         return obs$

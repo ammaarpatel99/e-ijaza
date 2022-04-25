@@ -223,7 +223,10 @@ export class MasterProposalsManager {
         return forkJoin(arr)
       }),
       map(() => undefined as void),
-      tap(() => State.instance.stopUpdating()),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
+      }),
       catchError(e => {
         console.error(e)
         return obs$
