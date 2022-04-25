@@ -5,9 +5,9 @@ import {MasterCredentialsManager, MasterProposalsManager} from "../master-creden
 import {
   MasterVoteProtocol,
   MastersShareProtocol,
-  OntologyShareProtocol
+  OntologyShareProtocol, OntologyVoteProtocol
 } from "../aries-based-protocols";
-import {OntologyManager} from "../subject-ontology";
+import {OntologyManager, OntologyProposalManager} from "../subject-ontology";
 import {UserCredentialsManager} from "../credentials";
 
 export function initialiseController$(): Observable<void> {
@@ -18,7 +18,9 @@ export function initialiseController$(): Observable<void> {
 
     switchMap(() => OntologyManager.instance.initialiseController$()),
 
-    switchMap(() => MasterProposalsManager.instance.initialiseController$())
+    switchMap(() => MasterProposalsManager.instance.initialiseController$()),
+
+    switchMap(() => OntologyProposalManager.instance.initialiseController$())
   )
 }
 
@@ -31,6 +33,8 @@ export function initialiseUser$() {
     switchMap(() => OntologyShareProtocol.instance.initialiseUser$()),
 
     switchMap(() => MasterVoteProtocol.instance.initialiseUser$()),
+
+    switchMap(() => OntologyVoteProtocol.instance.initialiseUser$()),
 
     switchMap(() => UserCredentialsManager.instance.initialiseUser$())
   )

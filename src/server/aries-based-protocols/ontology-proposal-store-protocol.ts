@@ -1,5 +1,5 @@
 import {Immutable, voidObs$} from "@project-utils";
-import {catchError, debounceTime, forkJoin, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
+import {catchError, forkJoin, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -13,7 +13,6 @@ import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {OntologyProposalManager} from "../subject-ontology";
-import {environment} from "../../environments/environment";
 
 export class OntologyProposalStoreProtocol {
   static readonly instance = new OntologyProposalStoreProtocol()
@@ -22,7 +21,7 @@ export class OntologyProposalStoreProtocol {
   private previous: Immutable<Server.ControllerOntologyProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
-  controllerInitialise$() {
+  initaliseController$() {
     return voidObs$.pipe(
       map(() => this.watchState()),
       switchMap(() => this.getFromStore$())
@@ -56,14 +55,13 @@ export class OntologyProposalStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance._controllerOntologyProposals$.pipe(
-      debounceTime(environment.timeToUpdateStored),
+    const obs$: Observable<void> = State.instance.controllerOntologyProposals$.pipe(
       map(state => this.stateToChanges(state)),
       mergeMap(({state, deleted, edited}) => {
         const arr = [...deleted, ...edited].map(([id, _]) => {
           const credential_id = this.credentialIDs.get(id)
-          if (!credential_id) throw new Error(`deleting stored proposal but no credential id found`)
-          from(deleteCredential({credential_id}))
+          if (!credential_id) throw new Error(`deleting stored subject proposal but no credential id found`)
+          return from(deleteCredential({credential_id}))
         })
         const arr2 = [...edited].map(([id, proposal]) =>
           this.storeProposal$(OntologyProposalStoreProtocol.proposalToSchema(proposal))
@@ -77,7 +75,7 @@ export class OntologyProposalStoreProtocol {
       }),
       map(state => {this.previous = state}),
       catchError(e => {
-        console.log(e)
+        console.error(e)
         return obs$
       })
     )

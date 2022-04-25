@@ -44,7 +44,7 @@ export class MasterVoteProtocol {
   private readonly _controllerVotes$ = new ReplaySubject<Immutable<Server.ControllerMasterVote>>(1)
   private readonly _newProposals$ = new ReplaySubject<NewProposal>(1)
   readonly controllerVotes$ = this._controllerVotes$.asObservable()
-  readonly newProposals$ = this._newProposals$.asObservable();
+  readonly newProposals$ = this._newProposals$.asObservable()
 
   initialiseController$() {
     return voidObs$.pipe(

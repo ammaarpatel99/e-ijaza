@@ -8,7 +8,7 @@ import {
   OntologyShareProtocol,
   OntologyVoteProtocol
 } from "./aries-based-protocols";
-import {OntologyManager, SubjectOntology, OntologyProposalManager} from "./subject-ontology";
+import {OntologyManager, OntologyProposalManager} from "./subject-ontology";
 import {Server} from '@project-types'
 import {UserCredentialsManager} from "./credentials";
 import {Mutex} from "@project-utils";
@@ -18,8 +18,6 @@ export class State {
   private constructor() { }
 
   private readonly mutex = new Mutex()
-
-  readonly updating$ = this.mutex.isHeld$
 
   readonly _initialisationState$ = Initialisation.instance.initialisationData$.pipe(
     map(data => data.state),

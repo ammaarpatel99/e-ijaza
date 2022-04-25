@@ -1,23 +1,21 @@
 import {
   catchError, combineLatestWith,
-  debounceTime,
+  first,
   forkJoin,
-  merge,
   mergeMap,
   Observable,
   of,
   ReplaySubject,
-  switchMap,
+  switchMap, tap,
   withLatestFrom
 } from "rxjs";
 import {Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
-import {OntologyProposalStoreProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
+import {MasterVoteProtocol, OntologyProposalStoreProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
 import {State} from "../state";
 import {SubjectOntology} from "./subject-ontology";
 import {OntologyManager} from "./ontology-manager";
-import {environment} from "../../environments/environment";
 
 export class OntologyProposalManager {
   static readonly instance = new OntologyProposalManager()
@@ -33,14 +31,15 @@ export class OntologyProposalManager {
   private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerOntologyProposals>>(1)
   readonly state$ = this._state$.asObservable()
 
-  controllerInitialise$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
         this.watchMastersAndOntology()
+        this.watchNewProposals()
       }),
-      switchMap(() => OntologyVoteProtocol.instance.controllerInitialisation$()),
-      switchMap(() => OntologyProposalStoreProtocol.instance.controllerInitialise$()),
+      switchMap(() => OntologyVoteProtocol.instance.initialiseController$()),
+      switchMap(() => OntologyProposalStoreProtocol.instance.initaliseController$()),
       map(state => this._state$.next(state))
     )
   }
@@ -186,7 +185,8 @@ export class OntologyProposalManager {
       if (!subjectOntology.has(proposal.subject)) return
       if (proposal.proposalType === Server.ProposalType.ADD) {
         if (proposal.change.type === Server.SubjectProposalType.CHILD) {
-          remainingProposals.set(key, proposal)
+          const exists = subjectOntology.get(proposal.subject)?.children.has(proposal.change.child)
+          if (!exists) remainingProposals.set(key, proposal)
         } else {
           if (![...proposal.change.component_set].every(x => subjectOntology.has(x))) return
           return SubjectOntology.instance.canAddComponentSet$(proposal.subject, proposal.change.component_set).pipe(
@@ -222,7 +222,7 @@ export class OntologyProposalManager {
   private watchMastersAndOntology() {
     const obs$: Observable<void> = State.instance._controllerMasters$.pipe(
       combineLatestWith(State.instance._subjectOntology$),
-      debounceTime(environment.timeToStateUpdate),
+      tap(() => State.instance.startUpdating()),
       withLatestFrom(this._state$),
       switchMap(([[_, subjects], proposals]) => this.removeInvalidated$(subjects, proposals)),
       map(proposals => [...proposals.values()]
@@ -253,11 +253,100 @@ export class OntologyProposalManager {
         return forkJoin(arr)
       }),
       map(() => undefined as void),
+      tap(() => State.instance.stopUpdating()),
       catchError(e => {
         console.error(e)
         return obs$
       })
     ) as Observable<void>
     obs$.subscribe()
+  }
+
+  private watchNewProposals() {
+    const obs$: Observable<void> = OntologyVoteProtocol.instance.newProposals$.pipe(
+      map(({proposal, conn_id}): {proposal: Server.OntologyProposal, conn_id: string} => ({
+        conn_id,
+        proposal: {
+          subject: proposal.subject,
+          proposalType: proposal.proposalType,
+          change: proposal.change.type === Server.SubjectProposalType.CHILD
+            ? {type: Server.SubjectProposalType.CHILD, child: proposal.change.child}
+            : {type: Server.SubjectProposalType.COMPONENT_SET, component_set: new Set(proposal.change.componentSet)}
+        }
+      })),
+      mergeMap(({proposal, conn_id}) => {
+        return this.isValidProposal$(proposal).pipe(
+          map(() => ({proposal, conn_id}))
+        )
+      }),
+      switchMap(({proposal, conn_id}) =>
+        MasterVoteProtocol.instance.validateNewProposal$(conn_id).pipe(
+          switchMap(() => this.createProposal$(proposal))
+        )
+      ),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private isValidProposal$(proposal: Server.OntologyProposal) {
+    return this._state$.pipe(
+      withLatestFrom(State.instance.subjectOntology$),
+      first(),
+      switchMap(([state, subjects]) => {
+        const proposalID = OntologyProposalManager.proposalToID(proposal)
+        if (state.has(proposalID)) return of(false)
+        if (!subjects.has(proposal.subject)) return of(false)
+        if (proposal.proposalType === Server.ProposalType.ADD) {
+          if (proposal.change.type === Server.SubjectProposalType.CHILD) {
+            const exists  = subjects.get(proposal.subject)?.children.has(proposal.change.child)
+            return of(!exists)
+          } else {
+            if (![...proposal.change.component_set].every(x => subjects.has(x))) return of(false)
+            return SubjectOntology.instance.canAddComponentSet$(proposal.subject, proposal.change.component_set)
+          }
+        } else {
+          if (proposal.change.type === Server.SubjectProposalType.CHILD) {
+            if (!subjects.has(proposal.change.child)) return of(false)
+            return SubjectOntology.instance.canRemoveChild$(proposal.subject, proposal.change.child)
+          } else {
+            const set = proposal.change.component_set
+            if (![...set].every(x => subjects.has(x))) return of(false)
+            const sets = [...subjects.get(proposal.subject)?.componentSets || []].filter(_set => {
+              if (set.size !== _set.size) return of(false)
+              return of(!![...set].every(x => _set.has(x)))
+            })
+            if (sets.length > 0) return of(true)
+            return of(false)
+          }
+        }
+      }),
+      map(valid => {
+        if (!valid) throw new Error(`Invalid proposal: ${JSON.stringify(proposal)}`)
+      })
+    )
+  }
+
+  private createProposal$(proposal: Server.OntologyProposal) {
+    const _proposal: Server.ControllerOntologyProposal = {...proposal, votes: new Map()}
+    return this.updateProposal$(_proposal).pipe(
+      switchMap(result => {
+        if (result === true) return OntologyProposalManager.actionProposal$(_proposal)
+        if (result === false) return voidObs$
+        if (result === null) throw new Error(`impossible state reached in creating ontology proposal`)
+        return of(result)
+      }),
+      withLatestFrom(this._state$),
+      first(),
+      map(([proposal, state]) => {
+        if (!proposal) return
+        const newState = new Map(state)
+        newState.set(OntologyProposalManager.proposalToID(proposal), proposal)
+        this._state$.next(newState)
+      })
+    )
   }
 }

@@ -28,7 +28,13 @@ router.post('/master/vote', (req, res, next) => {
   })
 })
 
-// PROPOSE SUBJECT
+
+router.post('/master/propose', (req, res, next) => {
+  MasterVoteProtocol.instance.createProposal$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})
 router.post('/ontology/vote', (req, res, next) => {
   OntologyVoteProtocol.instance.sendVote$(req.body).subscribe({
     next: () => res.send({}),

@@ -3,8 +3,8 @@ import {
   connectToController$,
   connectViaPublicDID$, deleteCredential,
   getHeldCredentials,
-  issueCredential,
-  proposeProof,
+  issueCredential, presentProof,
+  proposeProof, rejectProof, requestProof,
   revokeCredential$
 } from "../aries-api";
 import {
@@ -19,27 +19,38 @@ import {
   switchMap,
   withLatestFrom
 } from "rxjs";
-import {subjectVoteSchema} from "../schemas";
+import {subjectVoteSchema, teachingSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Immutable, voidObs$} from "@project-utils";
 import {OntologyProposalManager} from "../subject-ontology";
+import {State} from "../state";
+
+interface NewProposal {
+  proposal: API.SubjectProposalData
+  conn_id: string
+}
 
 export class OntologyVoteProtocol {
   static readonly instance = new OntologyVoteProtocol()
   private constructor() { }
 
-  private static PROOF_NAME = 'Vote on Ontology Proposal'
+  private static VOTE_PROOF_NAME = 'Vote on Ontology Proposal'
+  private static CREATION_PROOF_NAME = 'Create Ontology Proposal'
+  private static IS_MASTER_PROOF_NAME = `Is Master For Creating Ontology Proposal`
 
   // CONTROLLER
 
   private readonly _controllerVotes$ = new ReplaySubject<Immutable<Server.ControllerOntologyVote>>(1)
+  private readonly _newProposals$ = new ReplaySubject<NewProposal>(1)
   readonly controllerVotes$ = this._controllerVotes$.asObservable()
+  readonly newProposals$ = this._newProposals$.asObservable()
 
-  controllerInitialisation$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => {
         this.watchVotes()
+        this.watchNewProposals()
       })
     )
   }
@@ -82,8 +93,8 @@ export class OntologyVoteProtocol {
   }
 
   watchVotes() {
-    WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === OntologyVoteProtocol.PROOF_NAME),
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
+      filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === OntologyVoteProtocol.VOTE_PROOF_NAME),
       map(proof => {
         const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
           .filter(([_, data]) => data.name === 'voteDetails')
@@ -106,7 +117,60 @@ export class OntologyVoteProtocol {
       })),
       map(data => {
         this._controllerVotes$.next(data)
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
       })
+    )
+    obs$.subscribe()
+  }
+
+  private watchNewProposals() {
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
+      filter(proof =>
+        proof.presentation_proposal_dict?.comment === OntologyVoteProtocol.CREATION_PROOF_NAME
+        && proof.state === 'verified'
+      ),
+      map(proof => {
+        const conn_id = proof.connection_id!
+        const proposal = JSON.parse(
+          proof.presentation!.requested_proof!.self_attested_attrs!['proposal']
+        ) as API.SubjectProposalData
+        const data = {proposal, conn_id}
+        this._newProposals$.next(data)
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  validateNewProposal$(connectionID: string) {
+    return voidObs$.pipe(
+      switchMap(() => from(requestProof({
+        connection_id: connectionID,
+        comment: OntologyVoteProtocol.IS_MASTER_PROOF_NAME,
+        proof_request: {
+          name: OntologyVoteProtocol.IS_MASTER_PROOF_NAME,
+          version: '1.0',
+          non_revoked: {from: Date.now(), to: Date.now()},
+          requested_predicates: {},
+          requested_attributes: {
+            credential: {
+              name: 'subject',
+              restrictions: [{
+                cred_def_id: teachingSchema.credID
+              }]
+            }
+          }
+        }
+      }))),
+      switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+      last(),
+      map(() => undefined as void)
     )
   }
 
@@ -115,13 +179,78 @@ export class OntologyVoteProtocol {
   private readonly _userVotes$ = new ReplaySubject<Immutable<Server.UserOntologyVotes>>(1)
   readonly userVotes$ = this._userVotes$.asObservable()
 
-  userInitialisation$() {
+  initialiseUser$() {
     return voidObs$.pipe(
       map(() => {
         this.watchIssuing()
         this.watchRevocations()
       }),
       switchMap(() => this.getVotes$())
+    )
+  }
+
+  sendVote$(vote: API.SubjectProposalVote) {
+    const id = OntologyProposalManager.proposalToID({
+      subject: vote.subject,
+      proposalType: vote.proposalType,
+      change: vote.change.type === Server.SubjectProposalType.CHILD
+        ? {type: Server.SubjectProposalType.CHILD, child: vote.change.child}
+        : {type: Server.SubjectProposalType.COMPONENT_SET, component_set: new Set(vote.change.componentSet)}
+    })
+    return this._userVotes$.pipe(
+      first(),
+      map(votes => {
+        const _vote = votes.get(id)
+        if (!_vote) throw new Error(`Voting using invalid vote`)
+        return {credentialID: _vote.credentialID, cred_def_id: _vote.cred_def_id, voteChoice: vote.vote}
+      }),
+      switchMap(data =>
+        connectToController$().pipe(
+          switchMap(connectionID => from(proposeProof({
+            connection_id: connectionID,
+            comment: OntologyVoteProtocol.VOTE_PROOF_NAME,
+            auto_present: true,
+            presentation_proposal: {
+              attributes: [{
+                name: 'voteDetails',
+                referent: data.credentialID,
+                cred_def_id: data.cred_def_id
+              }, {
+                name: 'voteChoice',
+                value: JSON.stringify(data.voteChoice)
+              }],
+              predicates: []
+            }
+          }))),
+          switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+          last()
+        )
+      ),
+      map(() => undefined as void)
+    )
+  }
+
+  createProposal$(proposal: API.SubjectProposalData) {
+    return this.getMasterCredID$().pipe(
+      switchMap(cred => {
+        if (!cred) throw new Error(`Trying to create subject proposal but not a master of anything`)
+        return connectToController$()
+      }),
+      switchMap(connectionID =>
+        from(proposeProof({
+          auto_present: false,
+          connection_id: connectionID,
+          comment: OntologyVoteProtocol.CREATION_PROOF_NAME,
+          presentation_proposal: {
+            predicates: [],
+            attributes: [
+              {name: 'proposal', value: JSON.stringify(proposal)}
+            ]
+          }
+        })).pipe(map(() => connectionID))
+      ),
+      switchMap(connectionID => this.watchForIsMaster$(connectionID)),
+      map(() => undefined as void)
     )
   }
 
@@ -137,7 +266,7 @@ export class OntologyVoteProtocol {
         ...JSON.parse(attrs!['voteDetails']) as
           Schemas.SubjectProposalVoteSchema['voteDetails']
       }))),
-      map((creds): Server.UserOntologyVote[] => creds.map(cred => ({
+      map(creds => creds.map((cred): Server.UserOntologyVote => ({
         subject: cred.subject,
         voterDID: cred.voterDID,
         proposalType: cred.action,
@@ -210,44 +339,50 @@ export class OntologyVoteProtocol {
     obs$.subscribe()
   }
 
-  sendVote$(vote: API.SubjectProposalVote) {
-    const id = OntologyProposalManager.proposalToID({
-      subject: vote.subject,
-      proposalType: vote.proposalType,
-      change: vote.change.type === Server.SubjectProposalType.CHILD
-        ? {type: Server.SubjectProposalType.CHILD, child: vote.change.child}
-        : {type: Server.SubjectProposalType.COMPONENT_SET, component_set: new Set(vote.change.componentSet)}
-    })
-    return this._userVotes$.pipe(
-      first(),
-      map(votes => {
-        const _vote = votes.get(id)
-        if (!_vote) throw new Error(`Voting using invalid vote`)
-        return {credentialID: _vote.credentialID, cred_def_id: _vote.cred_def_id, voteChoice: vote.vote}
-      }),
-      switchMap(data =>
-        connectToController$().pipe(
-          switchMap(connectionID => from(proposeProof({
-            connection_id: connectionID,
-            comment: OntologyVoteProtocol.PROOF_NAME,
-            auto_present: true,
-            presentation_proposal: {
-              attributes: [{
-                name: 'voteDetails',
-                referent: data.credentialID,
-                cred_def_id: data.cred_def_id
-              }, {
-                name: 'voteChoice',
-                value: JSON.stringify(data.voteChoice)
-              }],
-              predicates: []
-            }
-          }))),
-          switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
-          last()
-        )
+  private watchForIsMaster$(connectionID: string) {
+    return WebhookMonitor.instance.proofs$.pipe(
+      filter(({state, presentation_request, connection_id}) =>
+        connection_id === connectionID
+        && state === 'request_received'
+        && presentation_request?.name === OntologyVoteProtocol.IS_MASTER_PROOF_NAME
       ),
+      first(),
+      withLatestFrom(this.getMasterCredID$()),
+      switchMap(([{presentation_exchange_id}, masterCredID]) => {
+        if (!masterCredID) {
+          return from(rejectProof({pres_ex_id: presentation_exchange_id!}, {description: "Not a master"}))
+            .pipe(map(() => undefined as void))
+        }
+        return from(presentProof({pres_ex_id: presentation_exchange_id!}, {
+          self_attested_attributes: {},
+          requested_predicates: {},
+          requested_attributes: {
+            credential: {
+              cred_id: masterCredID,
+              revealed: true
+            }
+          }
+        })).pipe(map(({presentation_exchange_id}) => presentation_exchange_id!))
+      }),
+      switchMap(pres_ex_id => {
+        if (!pres_ex_id) return voidObs$
+        return WebhookMonitor.instance.monitorProof$(pres_ex_id)
+      }),
+      last(),
       map(() => undefined as void)
+    )
+  }
+
+  private getMasterCredID$() {
+    return State.instance.heldCredentials$.pipe(
+      withLatestFrom(State.instance.controllerDID$),
+      first(),
+      map(([creds, controllerDID]) =>
+        [...creds]
+          .filter(cred => cred.issuerDID === controllerDID)
+          .map(cred => cred.credentialID)
+          .shift()
+      )
     )
   }
 }
