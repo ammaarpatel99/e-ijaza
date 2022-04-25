@@ -9,35 +9,52 @@ export function runAries(data: {
   tailsServerUrl: string
 }) {
   const logsDir = process.env['LOGS_DIR']
-  const childProcess = spawn('/bin/bash',
-    ['-c', 'aca-py start '  +
+  const childProcess = spawn('/bin/bash', [
+    '-c', 'aca-py start '  +
     '--admin 0.0.0.0 4002 ' +
     '--admin-insecure-mode ' +
-    '--inbound-transport http 0.0.0.0 4001 ' +
-    '--outbound-transport http ' +
-    `--endpoint ${data.advertisedEndpoint} ` +
-    `--genesis-url ${data.genesisUrl} ` +
-    '--wallet-type indy ' +
-    `--wallet-name ${data.walletName} ` +
-    `--wallet-key ${data.walletKey} ` +
-    '--public-invites ' +
+    '--webhook-url http://localhost:4000/webhook ' +
+
     '--auto-accept-invites ' +
     '--auto-accept-requests ' +
     '--auto-respond-messages ' +
+    // '--auto-respond-credential-proposal ' +
     '--auto-respond-credential-offer ' +
     '--auto-respond-credential-request ' +
-    '--auto-store-credential ' +
     '--auto-respond-presentation-proposal ' +
+    '--auto-respond-presentation-request ' +
+    '--auto-store-credential ' +
     '--auto-verify-presentation ' +
+
+    `--endpoint ${data.advertisedEndpoint} ` +
+
     `--tails-server-base-url ${data.tailsServerUrl} ` +
     '--notify-revocation ' +
     '--monitor-revocation-notification ' +
-    '--auto-provision ' +
-    '--webhook-url http://localhost:4000/webhook ' +
-    '--auto-ping-connection ' +
+
+    `--genesis-url ${data.genesisUrl} ` +
+
+    (logsDir ? `--log-file ${logsDir}/aries.log ` : '') +
+    `--log-level debug ` +
+    `--timing ` +
+    (logsDir ? `--timing-log ${logsDir}/aries.timing.log ` : '') +
+    `--trace ` +
     '--preserve-exchange-records ' +
-    `>${logsDir}/aries.log 2>${logsDir}/aries.error.log`])
-  if (! logsDir) {
+
+    '--auto-ping-connection ' +
+    '--public-invites ' +
+
+    '--auto-provision ' +
+
+    '--inbound-transport http 0.0.0.0 4001 ' +
+    '--outbound-transport http ' +
+
+    `--wallet-key ${data.walletKey} ` +
+    `--wallet-name ${data.walletName} ` +
+    '--wallet-type indy ' +
+    (logsDir ? `>${logsDir}/aries.log 2>${logsDir}/aries.error.log` : '')
+  ])
+  if (!logsDir) {
     childProcess.stdout.on('data', data => {
       process.stdout.write(data)
     })
