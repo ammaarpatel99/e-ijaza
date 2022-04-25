@@ -35,8 +35,8 @@ export class UserCredentialsManager {
   readonly reachableSubjects$ = this._reachableSubjects$.asObservable()
   readonly issuedCredentials$ = CredentialIssueProtocol.instance.issuedCredentials$
 
-  userInitialise$() {
-    return CredentialIssueProtocol.instance.userInitialise$().pipe(
+  initialiseUser$() {
+    return CredentialIssueProtocol.instance.initialiseUser$().pipe(
       map(() => {
         this._heldCredentials$.next(new Set())
         this.watchHeldCredentials()

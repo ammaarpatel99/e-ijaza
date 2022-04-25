@@ -32,6 +32,6 @@ export function initialiseUser$() {
 
     switchMap(() => MasterVoteProtocol.instance.userInitialisation$()),
 
-    switchMap(() => UserCredentialsManager.instance.userInitialise$())
+    switchMap(() => UserCredentialsManager.instance.initialiseUser$())
   )
 }

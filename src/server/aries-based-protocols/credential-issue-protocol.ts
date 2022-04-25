@@ -77,7 +77,7 @@ export class CredentialIssueProtocol {
   readonly heldCredentials$ = this._heldCredentials$.asObservable()
   readonly issuedCredentials$ = this._issuedCredentials$.asObservable()
 
-  userInitialise$() {
+  initialiseUser$() {
     return this.getHeldCredentials$().pipe(
       switchMap(() => this.getIssuedCredentials$()),
       map(() => {
@@ -148,6 +148,7 @@ export class CredentialIssueProtocol {
       switchMap(({revoked}) => {
         if (!revoked) return of(false)
         return from(deleteCredential({credential_id: credentialID}))
+          .pipe(map(() => true))
       })
     )
   }
