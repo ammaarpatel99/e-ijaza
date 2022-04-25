@@ -59,7 +59,7 @@ export class MasterProposalStoreProtocol {
         const arr = [...deleted, ...edited].map(([id, _]) => {
           const credential_id = this.credentialIDs.get(id)
           if (!credential_id) throw new Error(`deleting stored proposal but no credential id found`)
-          from(deleteCredential({credential_id}))
+          return from(deleteCredential({credential_id}))
         })
         const arr2 = [...edited].map(([id, proposal]) =>
           this.storeProposal$(MasterProposalStoreProtocol.proposalToSchema(proposal))
