@@ -85,13 +85,13 @@ export class StateManager {
   private initialise() {
     const state = State.instance
 
-    state._initialisationState$.subscribe(data => this.initState = data)
+    state.initialisationState$.subscribe(data => this.initState = data)
 
-    state._did$.subscribe(data => this.did = data)
+    state.did$.subscribe(data => this.did = data)
 
-    state._appType$.subscribe(data => this.appType = data)
+    state.appType$.subscribe(data => this.appType = data)
 
-    state._controllerMasters$.subscribe(data => this._masters = {
+    state.controllerMasters$.subscribe(data => this._masters = {
       timestamp: Date.now(),
       data: [...data]
         .map(([did, subjects]) => {
@@ -100,12 +100,12 @@ export class StateManager {
         })
     })
 
-    state._userMasters$.subscribe(data => this._masters = {
+    state.userMasters$.subscribe(data => this._masters = {
       timestamp: Date.now(),
       data: [...data].map(([did, subjects]) => ({did, subjects: [...subjects]}))
     })
 
-    state._subjectOntology$.subscribe(data => this._subjects = {
+    state.subjectOntology$.subscribe(data => this._subjects = {
       timestamp: Date.now(),
       data: [...data].map(([subject, data]) => ({
         name: subject,
@@ -114,7 +114,7 @@ export class StateManager {
       }))
     })
 
-    state._controllerMasterProposals$.subscribe(data => this._masterProposals = {
+    state.controllerMasterProposals$.subscribe(data => this._masterProposals = {
       timestamp: Date.now(),
       data: [...data].map(([_, proposal]) => ({
         did: proposal.did,
@@ -128,7 +128,7 @@ export class StateManager {
       }))
     })
 
-    state._userMasterVotes$.subscribe(data => this._masterProposals = {
+    state.userMasterVotes$.subscribe(data => this._masterProposals = {
       timestamp: Date.now(),
       data: [...data].map(([_, proposal]) => ({
         did: proposal.did,
@@ -137,7 +137,7 @@ export class StateManager {
       }))
     })
 
-    state._controllerOntologyProposals$.subscribe(data => this._subjectProposals = {
+    state.controllerOntologyProposals$.subscribe(data => this._subjectProposals = {
       timestamp: Date.now(),
       data: [...data].map(([_, proposal]) => ({
         subject: proposal.subject,
@@ -153,7 +153,7 @@ export class StateManager {
       }))
     })
 
-    state._userOntologyVotes$.subscribe(data => this._subjectProposals = {
+    state.userOntologyVotes$.subscribe(data => this._subjectProposals = {
       timestamp: Date.now(),
       data: [...data].map(([_, proposal]) => ({
         subject: proposal.subject,
@@ -164,7 +164,7 @@ export class StateManager {
       }))
     })
 
-    state._heldCredentials$.subscribe(data => this._heldCredentials = {
+    state.heldCredentials$.subscribe(data => this._heldCredentials = {
       timestamp: Date.now(),
       data: [...data].map(cred => ({
         did: cred.issuerDID,
@@ -173,7 +173,7 @@ export class StateManager {
       }))
     })
 
-    state._issuedCredentials$.subscribe(data => this._issuedCredentials = {
+    state.issuedCredentials$.subscribe(data => this._issuedCredentials = {
       timestamp: Date.now(),
       data: [...data].map(cred => ({
         did: cred.theirDID,
@@ -181,7 +181,7 @@ export class StateManager {
       }))
     })
 
-    state._reachableSubjects$.subscribe(data => this._reachableSubjects = {
+    state.reachableSubjects$.subscribe(data => this._reachableSubjects = {
       timestamp: Date.now(),
       data: [...data].map(([subject, master]) => ({
         name: subject,

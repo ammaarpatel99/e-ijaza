@@ -10,7 +10,7 @@ import {MasterProposalsManager} from "../master-credentials";
 export const router = Router()
 
 router.post('/master/propose', (req, res, next) => {
-  State.instance._appType$.pipe(
+  State.instance.appType$.pipe(
     first(),
     switchMap(appType => appType === Server.AppType.USER
       ? MasterVoteProtocol.instance.createProposal$(req.body)
