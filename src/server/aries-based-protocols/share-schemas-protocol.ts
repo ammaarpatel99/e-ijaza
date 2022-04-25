@@ -19,7 +19,7 @@ export class ShareSchemasProtocol {
 
   private static PROOF_NAME = 'Schema Set Up'
 
-  initialiseController() {
+  initialiseController$() {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
       filter(proof => proof.presentation_request?.name === ShareSchemasProtocol.PROOF_NAME && proof.state === 'request_received'),
       mergeMap(proof => from(

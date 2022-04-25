@@ -80,11 +80,7 @@ export class State {
     switchMap(appType => appType === Server.AppType.CONTROLLER
       ? OntologyManager.instance.state$
       : OntologyShareProtocol.instance.userState$
-    ),
-    switchMap(state =>
-      SubjectOntology.instance.update$(state).pipe(map(() => state))
-    ),
-    shareReplay(1)
+    )
   )
 
   readonly subjectOntology$ = this._subjectOntology$.pipe(this.waitForNotUpdating)

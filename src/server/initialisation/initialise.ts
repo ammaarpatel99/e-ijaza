@@ -16,7 +16,7 @@ export function initialiseController$(): Observable<void> {
 
     switchMap(() => MasterCredentialsManager.instance.controllerInitialise$()),
 
-    switchMap(() => OntologyManager.instance.controllerInitialise$()),
+    switchMap(() => OntologyManager.instance.initialiseController$()),
 
     switchMap(() => MasterProposalsManager.instance.controllerInitialise$())
   )
@@ -28,7 +28,7 @@ export function initialiseUser$() {
 
     switchMap(() => MastersShareProtocol.instance.userInitialise$()),
 
-    switchMap(() => OntologyShareProtocol.instance.userInitialise$()),
+    switchMap(() => OntologyShareProtocol.instance.initialiseUser$()),
 
     switchMap(() => MasterVoteProtocol.instance.userInitialisation$()),
 

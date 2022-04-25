@@ -2,7 +2,6 @@ import {Schemas, Server} from '@project-types'
 import {Immutable, voidObs$} from "@project-utils";
 import {
   catchError,
-  debounceTime,
   forkJoin,
   from,
   last,
@@ -23,7 +22,6 @@ import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-import {environment} from "../../environments/environment";
 
 interface ChangeData {
   state: Immutable<Server.Subjects>
@@ -70,7 +68,7 @@ export class OntologyStoreProtocol {
 
   private previous: Immutable<Server.Subjects> | undefined
 
-  controllerInitialise$() {
+  initialiseController$() {
     return voidObs$.pipe(
       map(() => this.watchState()),
       switchMap(() => this.getFromStore$())
@@ -153,8 +151,7 @@ export class OntologyStoreProtocol {
   }
 
   private watchState() {
-    const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
-      debounceTime(environment.timeToUpdateStored),
+    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
       map(state => this.findChanges(state)),
       tap(changeData => this._changes$.next(changeData)),
       mergeMap(({state, deleted, edited, subjectsListChanged}) => {

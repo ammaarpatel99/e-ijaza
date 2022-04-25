@@ -1,5 +1,5 @@
 import {Immutable, voidObs$} from "@project-utils";
-import {bufferTime, map, mergeMap, shareReplay, tap} from "rxjs/operators";
+import {map, mergeMap, shareReplay, tap} from "rxjs/operators";
 import {
   catchError,
   filter,
@@ -26,7 +26,7 @@ import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 import {Server, Schemas} from '@project-types'
 import {OntologyStoreProtocol} from "./ontology-store-protocol";
-import {environment} from "../../environments/environment";
+import {SubjectOntology} from "../subject-ontology";
 
 type SubjectDataWithOptional = Server.Subjects extends Map<infer K, infer V> ? Map<K, Immutable<V>|null> : never
 
@@ -39,7 +39,7 @@ export class OntologyShareProtocol {
   private readonly issuedList = new Set<Immutable<Server.CredentialInfo>>()
   private readonly issuedSubject = new Map<string, Set<Immutable<Server.CredentialInfo>>>()
 
-  controllerInitialise$() {
+  initialiseController$() {
     return this.getIssued$().pipe(
       map(() => {
         this.handleSubjectListRequests()
@@ -203,18 +203,14 @@ export class OntologyShareProtocol {
 
   private revokeSharedOnUpdate() {
     const obs$: Observable<void> = OntologyStoreProtocol.instance.changes$.pipe(
-      bufferTime(environment.timeToUpdateShared),
-      map(x => {
-        if (x.length === 0) return
-        let data: Omit<typeof x[number], 'state'> = {edited: [], deleted: [], subjectsListChanged: false}
-        for (const newData of x) {
-          if (newData.subjectsListChanged) data = {...data, subjectsListChanged: true}
-          const deleted = new Set(data.deleted)
-          const edited = new Set(data.edited)
-          newData.deleted.forEach(subject => {edited.delete(subject); deleted.add(subject)})
-          newData.edited.forEach(subject => {deleted.delete(subject); edited.add(subject)})
-          data = {...data, deleted: [...deleted], edited: [...edited]}
-        }
+      map(changes => {
+        let data: Omit<typeof changes, 'state'> = {edited: [], deleted: [], subjectsListChanged: false}
+        if (changes.subjectsListChanged) data = {...data, subjectsListChanged: true}
+        const deleted = new Set(data.deleted)
+        const edited = new Set(data.edited)
+        changes.deleted.forEach(subject => {edited.delete(subject); deleted.add(subject)})
+        changes.edited.forEach(subject => {deleted.delete(subject); edited.add(subject)})
+        data = {...data, deleted: [...deleted], edited: [...edited]}
         return data
       }),
       filter(x => !!x),
@@ -249,20 +245,21 @@ export class OntologyShareProtocol {
 
   // USER
 
-  userInitialise$() {
+  private readonly _userState$ = new ReplaySubject<Immutable<SubjectDataWithOptional>>(1)
+  readonly userState$ = this.exposedUserState$()
+
+  initialiseUser$() {
     return voidObs$.pipe(
       map(() => this.watchRevocations()),
       switchMap(() => this.refreshData$())
     )
   }
 
-  private readonly _userState$ = new ReplaySubject<Immutable<SubjectDataWithOptional>>(1)
-  readonly userState$ = this.consistentUserState$()
-
-  private consistentUserState$() {
+  private exposedUserState$() {
     return this._userState$.pipe(
       filter(state => [...state].every(([_, value]) => value !== null)),
       map(state => state as Server.Subjects),
+      mergeMap(state => SubjectOntology.instance.update$(state)),
       shareReplay(1)
     )
   }

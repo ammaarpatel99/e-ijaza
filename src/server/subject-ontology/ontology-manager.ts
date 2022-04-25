@@ -1,35 +1,40 @@
 import {OntologyShareProtocol, OntologyStoreProtocol} from '../aries-based-protocols'
-import {first, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {first, mergeMap, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
 import {Immutable} from "@project-utils";
 import {SubjectOntology} from "./subject-ontology";
 import {environment} from "../../environments/environment";
+import {State} from "../state";
 
 export class OntologyManager {
   static readonly instance = new OntologyManager()
   private constructor() { }
 
   private readonly _state$ = new ReplaySubject<Immutable<Server.Subjects>>(1)
-  readonly state$ = this._state$.asObservable()
+  readonly state$ = this._state$.pipe(
+    mergeMap(state => SubjectOntology.instance.update$(state))
+  )
 
-  controllerInitialise$() {
-    return OntologyShareProtocol.instance.controllerInitialise$().pipe(
-      switchMap(() => OntologyStoreProtocol.instance.controllerInitialise$()),
+  initialiseController$() {
+    return OntologyShareProtocol.instance.initialiseController$().pipe(
+      switchMap(() => OntologyStoreProtocol.instance.initialiseController$()),
       map(state => {
-        this._state$.next(state)
         this.ensureRootSubjectExists()
+        this._state$.next(state)
       })
     )
   }
 
   private ensureRootSubjectExists() {
     this._state$.subscribe(state => {
+      State.instance.startUpdating()
       if (!state.has(environment.rootSubject)) {
         const newState: Server.Subjects = new Map()
         newState.set(environment.rootSubject, {children: new Set(), componentSets: new Set()})
         this._state$.next(newState)
       }
+      State.instance.stopUpdating()
     })
   }
 
@@ -113,7 +118,7 @@ export class OntologyManager {
   }
 
   removeChild$(parent: string, child: string) {
-    return this._state$.pipe(
+    return this.state$.pipe(
       first(),
       withLatestFrom(SubjectOntology.instance.lostSubjectsOnRemovedChild$(parent, child)),
       map(([state, subjectsToRemove]) => {

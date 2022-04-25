@@ -26,6 +26,7 @@ export class SubjectOntology {
         this.updateChildRelations(state)
         this.updateComponentSets(state)
         this.clearSearches()
+        return state
       }),
       this.mutex.wrapAsWriting$()
     )
