@@ -73,7 +73,7 @@ export class MasterProposalStoreProtocol {
       }),
       map(state => {this.previous = state}),
       catchError(e => {
-        console.log(e)
+        console.error(e)
         return obs$
       })
     )
