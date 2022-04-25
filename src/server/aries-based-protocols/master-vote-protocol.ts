@@ -174,6 +174,90 @@ export class MasterVoteProtocol {
     )
   }
 
+  sendVote$(vote: API.MasterProposalVote) {
+    const id = MasterProposalsManager.proposalToID(vote)
+    return this._userVotes$.pipe(
+      first(),
+      map(votes => {
+        const _vote = votes.get(id)
+        if (!_vote) throw new Error(`Voting using invalid vote`)
+        return {credentialID: _vote.credentialID, cred_def_id: _vote.cred_def_id, voteChoice: vote.vote}
+      }),
+      switchMap(data =>
+        connectToController$().pipe(
+          switchMap(connectionID => from(proposeProof({
+            connection_id: connectionID,
+            comment: MasterVoteProtocol.PROOF_NAME,
+            auto_present: true,
+            presentation_proposal: {
+              attributes: [{
+                name: 'voteDetails',
+                referent: data.credentialID,
+                cred_def_id: data.cred_def_id
+              }, {
+                name: 'voteChoice',
+                value: JSON.stringify(data.voteChoice)
+              }],
+              predicates: []
+            }
+          }))),
+          switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+          last()
+        )
+      ),
+      map(() => undefined as void)
+    )
+  }
+
+  createProposal$(proposal: API.MasterProposalData) {
+    this.getMasterCredID$()
+    return State.instance.heldCredentials$.pipe(
+      withLatestFrom(State.instance.controllerDID$),
+      first(),
+      map(([creds, controllerDID]) => {
+        const cred = [...creds].filter(cred => cred.issuerDID === controllerDID).shift()
+        if (!cred) throw new Error(`Trying to create master proposal but not a master of anything`)
+        return cred
+      }),
+      withLatestFrom(connectToController$()),
+      switchMap(([cred, connectionID]) =>
+        from(proposeProof({
+          auto_present: false,
+          connection_id: connectionID,
+          comment: MasterVoteProtocol.CREATION_PROOF_NAME,
+          presentation_proposal: {
+            predicates: [],
+            attributes: [
+              {name: 'proposal', value: JSON.stringify(proposal)}
+            ]
+          }
+        })).pipe(map(() => ({cred, connectionID})))
+      ),
+      switchMap(data => WebhookMonitor.instance.proofs$.pipe(
+        filter(proof =>
+          proof.state === 'request_received'
+          && proof.presentation_request?.name === MasterVoteProtocol.IS_MASTER_PROOF_NAME
+          && proof.connection_id === data.connectionID
+        ),
+        takeUntil(voidObs$.pipe(delay(environment.timeToPushUpdate))),
+        first(),
+        switchMap(proof => from(presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
+          self_attested_attributes: {},
+          requested_predicates: {},
+          requested_attributes: {
+            credential: {
+              cred_id: data.cred.credentialID,
+              revealed: true
+            }
+          }
+        })))
+      )),
+      switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+      last(),
+      map(() => undefined as void)
+    )
+  }
+
   private getVotes$() {
     return voidObs$.pipe(
       switchMap(() => from(
@@ -255,85 +339,50 @@ export class MasterVoteProtocol {
     obs$.subscribe()
   }
 
-  sendVote$(vote: API.MasterProposalVote) {
-    const id = MasterProposalsManager.proposalToID(vote)
-    return this._userVotes$.pipe(
-      first(),
-      map(votes => {
-        const _vote = votes.get(id)
-        if (!_vote) throw new Error(`Voting using invalid vote`)
-        return {credentialID: _vote.credentialID, cred_def_id: _vote.cred_def_id, voteChoice: vote.vote}
-      }),
-      switchMap(data =>
-        connectToController$().pipe(
-          switchMap(connectionID => from(proposeProof({
-            connection_id: connectionID,
-            comment: MasterVoteProtocol.PROOF_NAME,
-            auto_present: true,
-            presentation_proposal: {
-              attributes: [{
-                name: 'voteDetails',
-                referent: data.credentialID,
-                cred_def_id: data.cred_def_id
-              }, {
-                name: 'voteChoice',
-                value: JSON.stringify(data.voteChoice)
-              }],
-              predicates: []
-            }
-          }))),
-          switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
-          last()
-        )
+  private watchForIsMaster$(connectionID: string) {
+    return WebhookMonitor.instance.proofs$.pipe(
+      filter(({state, presentation_request, connection_id}) =>
+        connection_id === connectionID
+        && state === 'request_received'
+        && presentation_request?.name === MasterVoteProtocol.IS_MASTER_PROOF_NAME
       ),
-      map(() => undefined as void)
-    )
-  }
-
-  createProposal$(proposal: API.MasterProposalData) {
-    return State.instance.masterCreds$.pipe(
       first(),
-      map(creds => {
-        const cred = [...creds].shift()
-        if (!cred) throw new Error(`Trying to create master proposal but not a master of anything`)
-        return cred
-      }),
-      withLatestFrom(connectToController$()),
-      switchMap(([cred, connectionID]) =>
-        from(proposeProof({
-          auto_present: false,
-          connection_id: connectionID,
-          comment: MasterVoteProtocol.CREATION_PROOF_NAME,
-          presentation_proposal: {
-            predicates: [],
-            attributes: [
-              {name: 'proposal', value: JSON.stringify(proposal)}
-            ]
-          }
-        })).pipe(map(() => ({cred, connectionID})))
-      ),
-      switchMap(data => WebhookMonitor.instance.proofs$.pipe(
-        filter(proof =>
-          proof.state === 'request_received'
-          && proof.presentation_request?.name === MasterVoteProtocol.IS_MASTER_PROOF_NAME
-          && proof.connection_id === data.connectionID
-        ),
-        takeUntil(voidObs$.pipe(delay(environment.timeToWaitForResponse))),
-        first(),
-        switchMap(proof => from(presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
+      withLatestFrom(this.getMasterCredID$()),
+      switchMap(([{presentation_exchange_id}, masterCredID]) => {
+        if (!masterCredID) {
+          return from(rejectProof({pres_ex_id: presentation_exchange_id!}, {description: "Not a master"}))
+            .pipe(map(() => undefined as void))
+        }
+        return from(presentProof({pres_ex_id: presentation_exchange_id!}, {
           self_attested_attributes: {},
           requested_predicates: {},
           requested_attributes: {
             credential: {
-              cred_id: data.cred.credentialID,
+              cred_id: masterCredID,
               revealed: true
             }
           }
-        })))
-      )),
-      switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+        })).pipe(map(({presentation_exchange_id}) => presentation_exchange_id!))
+      }),
+      switchMap(pres_ex_id => {
+        if (!pres_ex_id) return voidObs$
+        return WebhookMonitor.instance.monitorProof$(pres_ex_id)
+      }),
       last(),
       map(() => undefined as void)
+    )
+  }
+
+  private getMasterCredID$() {
+    return State.instance.heldCredentials$.pipe(
+      withLatestFrom(State.instance.controllerDID$),
+      first(),
+      map(([creds, controllerDID]) =>
+        [...creds]
+          .filter(cred => cred.issuerDID === controllerDID)
+          .map(cred => cred.credentialID)
+          .shift()
+      )
     )
   }
 }
