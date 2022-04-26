@@ -8,7 +8,11 @@ import {environment} from "../../environments/environment";
 import {State} from "../state";
 
 export class OntologyManager {
-  static readonly instance = new OntologyManager()
+  private static _instance: OntologyManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyManager()
+    return this._instance
+  }
   private constructor() { }
 
   private readonly _state$ = new ReplaySubject<Immutable<Server.Subjects>>(1)

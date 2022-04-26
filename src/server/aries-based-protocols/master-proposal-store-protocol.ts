@@ -15,7 +15,11 @@ import {State} from "../state";
 import {MasterProposalsManager} from "../master-credentials";
 
 export class MasterProposalStoreProtocol {
-  static readonly instance = new MasterProposalStoreProtocol()
+  private static _instance: MasterProposalStoreProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new MasterProposalStoreProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private previous: Immutable<Server.ControllerMasterProposals> | undefined

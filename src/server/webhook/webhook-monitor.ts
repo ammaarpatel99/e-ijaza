@@ -7,7 +7,11 @@ type ProofData = Aries.V10PresentationExchange
 
 
 export class WebhookMonitor {
-  static readonly instance = new WebhookMonitor()
+  private static _instance: WebhookMonitor | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new WebhookMonitor()
+    return this._instance
+  }
   private constructor() { }
 
   private readonly _connections$ = new Subject<ConnectionData>()

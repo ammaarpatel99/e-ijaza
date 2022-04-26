@@ -10,7 +10,11 @@ type TimedData<T> = Immutable<_TimedData<T>>
 
 
 export class StateManager {
-  static readonly instance = new StateManager()
+  private static _instance: StateManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new StateManager()
+    return this._instance
+  }
   private constructor() { this.initialise() }
 
   private initState: API.State.InitialisationState = API.State.InitialisationState.START_STATE

@@ -26,7 +26,11 @@ interface IncomingRequest {
 }
 
 export class CredentialProofManager {
-  static readonly instance = new CredentialProofManager()
+  private static _instance: CredentialProofManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new CredentialProofManager()
+    return this._instance
+  }
   private constructor() { }
 
   private static incomingID({did, subject}: {did: string, subject: string}) {

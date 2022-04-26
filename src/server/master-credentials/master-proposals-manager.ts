@@ -18,7 +18,11 @@ import {State} from "../state";
 import {SubjectOntology} from "../subject-ontology";
 
 export class MasterProposalsManager {
-  static readonly instance = new MasterProposalsManager()
+  private static _instance: MasterProposalsManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new MasterProposalsManager()
+    return this._instance
+  }
   private constructor() { }
 
   static proposalToID(proposal: Server.MasterProposal) {

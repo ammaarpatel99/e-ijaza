@@ -18,7 +18,11 @@ import {SubjectOntology} from "./subject-ontology";
 import {OntologyManager} from "./ontology-manager";
 
 export class OntologyProposalManager {
-  static readonly instance = new OntologyProposalManager()
+  private static _instance: OntologyProposalManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyProposalManager()
+    return this._instance
+  }
   private constructor() { }
 
   static proposalToID(proposal: Immutable<Server.OntologyProposal>) {

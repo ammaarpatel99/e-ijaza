@@ -32,7 +32,11 @@ interface NewProposal {
 }
 
 export class MasterVoteProtocol {
-  static readonly instance = new MasterVoteProtocol()
+  private static _instance: MasterVoteProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new MasterVoteProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static VOTE_PROOF_NAME = 'Vote on Master Proposal'

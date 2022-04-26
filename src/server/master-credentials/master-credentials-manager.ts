@@ -6,7 +6,11 @@ import {Immutable} from "@project-utils";
 import {State} from "../state";
 
 export class MasterCredentialsManager {
-  static readonly instance = new MasterCredentialsManager()
+  private static _instance: MasterCredentialsManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new MasterCredentialsManager()
+    return this._instance
+  }
   private constructor() { }
 
   private readonly _state$ = new ReplaySubject<Immutable<Server.ControllerMasters>>(1)

@@ -9,7 +9,11 @@ import {SearchWrapper} from "./search-wrapper";
 import {environment} from "../../environments/environment";
 
 export class SubjectOntology {
-  static readonly instance = new SubjectOntology()
+  private static _instance: SubjectOntology | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new SubjectOntology()
+    return this._instance
+  }
   private constructor() { }
 
 

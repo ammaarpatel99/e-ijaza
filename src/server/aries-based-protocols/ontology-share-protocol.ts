@@ -31,7 +31,11 @@ import {SubjectOntology} from "../subject-ontology";
 type SubjectDataWithOptional = Server.Subjects extends Map<infer K, infer V> ? Map<K, Immutable<V>|null> : never
 
 export class OntologyShareProtocol {
-  static readonly instance = new OntologyShareProtocol()
+  private static _instance: OntologyShareProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyShareProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   // CONTROLLER

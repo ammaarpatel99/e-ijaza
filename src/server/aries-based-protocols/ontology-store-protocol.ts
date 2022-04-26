@@ -31,7 +31,11 @@ interface ChangeData {
 }
 
 export class OntologyStoreProtocol {
-  static readonly instance = new OntologyStoreProtocol()
+  private static _instance: OntologyStoreProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyStoreProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static schemasToState(subjectList: Schemas.SubjectsSchema, subjects: Schemas.SubjectSchema[]): Server.Subjects {

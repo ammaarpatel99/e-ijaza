@@ -18,7 +18,11 @@ import {State} from "../state";
 import {SubjectOntology} from "../subject-ontology";
 
 export class UserCredentialsManager {
-  static readonly instance = new UserCredentialsManager()
+  private static _instance: UserCredentialsManager | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new UserCredentialsManager()
+    return this._instance
+  }
   private constructor() { }
 
   static heldCredentialID(heldCredential: Pick<Immutable<Server.UserHeldCredential>, 'subject' | 'issuerDID'>) {

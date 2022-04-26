@@ -14,7 +14,11 @@ import {CredentialProofManager, UserCredentialsManager} from "./credentials";
 import {Mutex} from "@project-utils";
 
 export class State {
-  static readonly instance = new State()
+  private static _instance: State | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new State()
+    return this._instance
+  }
   private constructor() { }
 
   private readonly mutex = new Mutex()

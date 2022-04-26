@@ -27,7 +27,11 @@ import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
 
 export class MastersShareProtocol {
-  static readonly instance = new MastersShareProtocol()
+  private static _instance: MastersShareProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new MastersShareProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static stateToSchema(state: Immutable<Server.ControllerMasters>): Immutable<Schemas.MastersPublicSchema> {

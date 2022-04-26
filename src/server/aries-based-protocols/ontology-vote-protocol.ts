@@ -32,7 +32,11 @@ interface NewProposal {
 }
 
 export class OntologyVoteProtocol {
-  static readonly instance = new OntologyVoteProtocol()
+  private static _instance: OntologyVoteProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyVoteProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static VOTE_PROOF_NAME = 'Vote on Ontology Proposal'

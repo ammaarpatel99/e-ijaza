@@ -15,7 +15,11 @@ import {State} from "../state";
 import {OntologyProposalManager} from "../subject-ontology";
 
 export class OntologyProposalStoreProtocol {
-  static readonly instance = new OntologyProposalStoreProtocol()
+  private static _instance: OntologyProposalStoreProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new OntologyProposalStoreProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private previous: Immutable<Server.ControllerOntologyProposals> | undefined

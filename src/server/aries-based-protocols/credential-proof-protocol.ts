@@ -33,7 +33,11 @@ interface IncomingRequest {
 }
 
 export class CredentialProofProtocol {
-  static readonly instance = new CredentialProofProtocol()
+  private static _instance: CredentialProofProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new CredentialProofProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static SUBJECTS_PROOF_NAME = 'Authorization - Subjects to Prove Subject'

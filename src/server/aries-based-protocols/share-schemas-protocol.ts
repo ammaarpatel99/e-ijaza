@@ -14,7 +14,11 @@ import {map} from "rxjs/operators";
 
 
 export class ShareSchemasProtocol {
-  static readonly instance = new ShareSchemasProtocol()
+  private static _instance: ShareSchemasProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new ShareSchemasProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private static PROOF_NAME = 'Schema Set Up'

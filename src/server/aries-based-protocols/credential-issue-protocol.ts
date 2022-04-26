@@ -27,7 +27,11 @@ import {UserIssuedCredential} from "../../types/server";
 import {UserCredentialsManager} from "../credentials";
 
 export class CredentialIssueProtocol {
-  static readonly instance = new CredentialIssueProtocol()
+  private static _instance: CredentialIssueProtocol | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new CredentialIssueProtocol()
+    return this._instance
+  }
   private constructor() { }
 
   private issue$(did: string, subject: string) {

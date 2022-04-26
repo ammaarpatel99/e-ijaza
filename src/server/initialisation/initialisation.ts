@@ -10,7 +10,11 @@ import {InitialisationStateData} from "../../types/server";
 import {environment} from "../../environments/environment";
 
 export class Initialisation {
-  static readonly instance = new Initialisation()
+  private static _instance: Initialisation | undefined
+  static get instance() {
+    if (!this._instance) this._instance = new Initialisation()
+    return this._instance
+  }
   private constructor() { }
 
   private initialisationDataCache: Immutable<API.InitialisationData> | undefined
