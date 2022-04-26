@@ -1,7 +1,0 @@
-export enum ConfigState {
-  NOT_CONFIGURED = 0,
-  ARIES_NOT_CONNECTED = 1,
-  PUBLIC_DID_NOT_REGISTERED = 2,
-  CONFIGURING = 3,
-  COMPLETE = 4
-}
