@@ -14,7 +14,7 @@ import {
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Immutable, voidObs$} from "@project-utils";
-import {teachingSchema} from "../../server-old2/schemas";
+import {teachingSchema} from "../schemas";
 import {SubjectOntology} from "../subject-ontology";
 
 interface SubjectToProve {
