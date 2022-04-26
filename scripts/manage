@@ -54,7 +54,7 @@ if [ "$1" = "von-network" ] || [ "$1" = "net" ]; then
   elif [ "$2" = "remove" ]; then
     ./temp/von-network/manage rm
   else
-    echo "Usage: $0 $1 build|start|stop|remove|restart"
+    echo "Usage: $0 $1 build|start|stop|remove"
     exit 1
   fi
 
@@ -69,7 +69,7 @@ elif [ "$1" = "indy-tails-server" ] || [ "$1" = "tails" ]; then
   elif [ "$2" = "remove" ]; then
     ./temp/indy-tails-server/docker/manage rm
   else
-    echo "Usage: $0 $1 build|start|stop|remove|restart"
+    echo "Usage: $0 $1 build|start|stop|remove"
     exit 1
   fi
 
@@ -86,11 +86,11 @@ elif [ "$1" = "application" ] || [ "$1" = "app" ]; then
     fi
     CONTAINER_NAME=$5
     if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = "--dev" ]; then
-      CONTAINER_NAME=$(env LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 16 | head -n 1)
-      CONTAINER_NAME="e_ijaza_app_${CONTAINER_NAME}"
       if  [ "$CONTAINER_NAME" = "--dev" ]; then
         DEV_PORT=$6
       fi
+      CONTAINER_NAME=$(env LC_ALL=C tr -dc 'a-zA-Z0-9' < /dev/urandom | fold -w 16 | head -n 1)
+      CONTAINER_NAME="e_ijaza_app_${CONTAINER_NAME}"
     elif [ "$6" = "--dev" ]; then
       DEV_PORT=$7
     fi
