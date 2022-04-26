@@ -29,7 +29,7 @@ export class State {
     shareReplay(1)
   )
 
-  readonly initialisationState$ = this._initialisationState$.pipe(this.waitForNotUpdating)
+  readonly initialisationState$ = this._initialisationState$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _did$ = Initialisation.instance.initialisationData$.pipe(
     map(data => 'did' in data ? data.did : undefined),
@@ -40,7 +40,7 @@ export class State {
   )
 
 
-  readonly did$ = this._did$.pipe(this.waitForNotUpdating)
+  readonly did$ = this._did$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _name$ = Initialisation.instance.initialisationData$.pipe(
     map(data => 'name' in data ? data.name : undefined),
@@ -50,7 +50,7 @@ export class State {
     shareReplay(1)
   )
 
-  readonly name$ = this._name$.pipe(this.waitForNotUpdating)
+  readonly name$ = this._name$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _appType$ = Initialisation.instance.initialisationData$.pipe(
     map(data => "appType" in data ? data.appType : undefined),
@@ -60,7 +60,7 @@ export class State {
     shareReplay(1)
   )
 
-  readonly appType$ = this._appType$.pipe(this.waitForNotUpdating)
+  readonly appType$ = this._appType$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _controllerDID$ = Initialisation.instance.initialisationData$.pipe(
     map(data => "controllerDID" in data ? data.controllerDID : undefined),
@@ -70,13 +70,13 @@ export class State {
     shareReplay(1)
   )
 
-  readonly controllerDID$ = this._controllerDID$.pipe(this.waitForNotUpdating)
+  readonly controllerDID$ = this._controllerDID$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _controllerMasters$ = MasterCredentialsManager.instance.state$
-  readonly controllerMasters$ = this._controllerMasters$.pipe(this.waitForNotUpdating)
+  readonly controllerMasters$ = this._controllerMasters$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _userMasters$ = MastersShareProtocol.instance.userState$
-  readonly userMasters$ = this._userMasters$.pipe(this.waitForNotUpdating)
+  readonly userMasters$ = this._userMasters$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _subjectOntology$ = this._appType$.pipe(
     switchMap(appType => appType === Server.AppType.CONTROLLER
@@ -85,34 +85,34 @@ export class State {
     )
   )
 
-  readonly subjectOntology$ = this._subjectOntology$.pipe(this.waitForNotUpdating)
+  readonly subjectOntology$ = this._subjectOntology$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _controllerMasterProposals$ = MasterProposalsManager.instance.state$
-  readonly controllerMasterProposals$ = this._controllerMasterProposals$.pipe(this.waitForNotUpdating)
+  readonly controllerMasterProposals$ = this._controllerMasterProposals$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _userMasterVotes$ = MasterVoteProtocol.instance.userVotes$
-  readonly userMasterVotes$ = this._userMasterVotes$.pipe(this.waitForNotUpdating)
+  readonly userMasterVotes$ = this._userMasterVotes$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _controllerOntologyProposals$ = OntologyProposalManager.instance.state$
-  readonly controllerOntologyProposals$ = this._controllerOntologyProposals$.pipe(this.waitForNotUpdating)
+  readonly controllerOntologyProposals$ = this._controllerOntologyProposals$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _userOntologyVotes$ = OntologyVoteProtocol.instance.userVotes$
-  readonly userOntologyVotes$ = this._userOntologyVotes$.pipe(this.waitForNotUpdating)
+  readonly userOntologyVotes$ = this._userOntologyVotes$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _heldCredentials$ = UserCredentialsManager.instance.heldCredentials$
-  readonly heldCredentials$ = this._heldCredentials$.pipe(this.waitForNotUpdating)
+  readonly heldCredentials$ = this._heldCredentials$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _issuedCredentials$ = UserCredentialsManager.instance.issuedCredentials$
-  readonly issuedCredentials$ = this._issuedCredentials$.pipe(this.waitForNotUpdating)
+  readonly issuedCredentials$ = this._issuedCredentials$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _reachableSubjects$ = UserCredentialsManager.instance.reachableSubjects$
-  readonly reachableSubjects$ = this._reachableSubjects$.pipe(this.waitForNotUpdating)
+  readonly reachableSubjects$ = this._reachableSubjects$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _outgoingProofs$ = CredentialProofManager.instance.outgoingProofs$
-  readonly outgoingProofs$ = this._outgoingProofs$.pipe(this.waitForNotUpdating)
+  readonly outgoingProofs$ = this._outgoingProofs$.pipe(this.waitForNotUpdating.bind(this))
 
   readonly _incomingProofs$ = CredentialProofManager.instance.incomingProofs$
-  readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating)
+  readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating.bind(this))
 
   startUpdating() { this.mutex.hold() }
   stopUpdating() {this.mutex.release() }

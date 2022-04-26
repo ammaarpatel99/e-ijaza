@@ -37,7 +37,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
     genesisURL: new FormControl('', Validators.required),
     tailsServerURL: new FormControl('', Validators.required),
     autoRegisterPublicDID: new FormControl(false),
-    vonNetworkURL: new FormControl('http://localhost:9000')
+    vonNetworkURL: new FormControl('http://host.docker.internal:9000')
   })
 
   get appType() { return this.initialisationForm.get('appType') as FormControl }
