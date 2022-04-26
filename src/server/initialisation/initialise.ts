@@ -8,7 +8,7 @@ import {
   OntologyShareProtocol, OntologyVoteProtocol
 } from "../aries-based-protocols";
 import {OntologyManager, OntologyProposalManager} from "../subject-ontology";
-import {UserCredentialsManager} from "../credentials";
+import {CredentialProofManager, UserCredentialsManager} from "../credentials";
 
 export function initialiseController$(): Observable<void> {
   return voidObs$.pipe(
@@ -36,6 +36,8 @@ export function initialiseUser$() {
 
     switchMap(() => OntologyVoteProtocol.instance.initialiseUser$()),
 
-    switchMap(() => UserCredentialsManager.instance.initialiseUser$())
+    switchMap(() => UserCredentialsManager.instance.initialiseUser$()),
+
+    switchMap(() => CredentialProofManager.instance.initialiseUser$())
   )
 }

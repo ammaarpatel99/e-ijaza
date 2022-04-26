@@ -10,7 +10,7 @@ import {
 } from "./aries-based-protocols";
 import {OntologyManager, OntologyProposalManager} from "./subject-ontology";
 import {Server} from '@project-types'
-import {UserCredentialsManager} from "./credentials";
+import {CredentialProofManager, UserCredentialsManager} from "./credentials";
 import {Mutex} from "@project-utils";
 
 export class State {
@@ -103,6 +103,12 @@ export class State {
 
   readonly _reachableSubjects$ = UserCredentialsManager.instance.reachableSubjects$
   readonly reachableSubjects$ = this._reachableSubjects$.pipe(this.waitForNotUpdating)
+
+  readonly _outgoingProofs$ = CredentialProofManager.instance.outgoingProofs$
+  readonly outgoingProofs$ = this._outgoingProofs$.pipe(this.waitForNotUpdating)
+
+  readonly _incomingProofs$ = CredentialProofManager.instance.incomingProofs$
+  readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating)
 
   startUpdating() { this.mutex.hold() }
   stopUpdating() {this.mutex.release() }

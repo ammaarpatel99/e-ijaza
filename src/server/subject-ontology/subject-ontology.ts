@@ -249,4 +249,41 @@ export class SubjectOntology {
       this.mutex.wrapAsReading$()
     )
   }
+
+  canReachFromSubjects$(subjectNames: Set<string>, target: string) {
+    return voidObs$.pipe(
+      map(() => {
+        const subjects = new Set([...this.subjects].filter(subject => subjectNames.has(subject.name)))
+        const subject = [...this.subjects].filter(subject => subject.name === target).shift()
+        if (subjects.size !== subjectNames.size || !subject) {
+          throw new Error(`Checking if subject can be reached but input is invalid`)
+        }
+        const {search, searchWrapper} = this.createSearch({startingSet: subjects, goals: new Set([subject])})
+        const reached = subject.getSearchPath(search) !== undefined
+        searchWrapper.deleteSearch()
+        return reached
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
+
+  getRequiredCredentials$(credentials: Set<string>, target: string) {
+    return voidObs$.pipe(
+      map(() => {
+        const subjects = new Set([...this.subjects].filter(subject => credentials.has(subject.name)))
+        const subject = [...this.subjects].filter(subject => subject.name === target).shift()
+        if (subjects.size !== credentials.size || !subject) {
+          throw new Error(`Checking if subject can be reached but input is invalid`)
+        }
+        const {search, searchWrapper} = this.createSearch({startingSet: subjects, goals: new Set([subject])})
+        const path = subject.getSearchPath(search)
+        const requiredCredentials = !path ? undefined : [...path]
+          .map(subject => subject.name)
+          .filter(subject => credentials.has(subject))
+        searchWrapper.deleteSearch()
+        return requiredCredentials
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
 }

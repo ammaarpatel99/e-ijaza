@@ -188,6 +188,16 @@ export class StateManager {
         reachableByMasterCredentials: master
       }))
     })
+
+    state.outgoingProofs$.subscribe(data => this._outgoingProofRequests = {
+      timestamp: Date.now(),
+      data
+    })
+
+    state.incomingProofs$.subscribe(data => this._incomingProofRequests = {
+      timestamp: Date.now(),
+      data
+    })
   }
 
   private static hasNewData<T>(data: TimedData<T> | undefined, timestamp: number) {

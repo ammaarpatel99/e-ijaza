@@ -1,7 +1,7 @@
 import {Router} from "express";
 import {MasterVoteProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {SubjectOntology} from "../subject-ontology";
-import {UserCredentialsManager} from "../credentials";
+import {CredentialProofManager, UserCredentialsManager} from "../credentials";
 import {State} from "../state";
 import {first, switchMap} from "rxjs";
 import {Server} from '@project-types'
@@ -29,8 +29,8 @@ router.post('/master/vote', (req, res, next) => {
 })
 
 
-router.post('/master/propose', (req, res, next) => {
-  MasterVoteProtocol.instance.createProposal$(req.body).subscribe({
+router.post('/ontology/propose', (req, res, next) => {
+  OntologyVoteProtocol.instance.createProposal$(req.body).subscribe({
     next: () => res.send({}),
     error: err => next(err)
   })
@@ -77,7 +77,18 @@ router.post('/credential/revoke', (req, res, next) => {
   })
 })
 
-// CREATE PROOF REQUEST
-// DELETE PROOF REQUEST
+router.post('/proof/create', (req, res, next) => {
+  CredentialProofManager.instance.makeProofRequest(req.body)
+  res.send({})
+})
+router.post('/proof/delete', (req, res, next) => {
+  CredentialProofManager.instance.deleteOutgoingProofRequest(req.body)
+  res.send({})
+})
 
-// RESPOND TO PROOF REQUEST
+router.post('/proof/respond', (req, res, next) => {
+  CredentialProofManager.instance.respondToRequest$(req.body).subscribe({
+    next: () => res.send({}),
+    error: err => next(err)
+  })
+})

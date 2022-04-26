@@ -63,9 +63,8 @@ export class ApiService {
     )
   }
 
-  // TODO:
   proposeSubject$(body: API.SubjectProposalData) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/ontology/propose', body).pipe(
       map(() => undefined as void)
     )
   }
@@ -104,23 +103,20 @@ export class ApiService {
     )
   }
 
-  // TODO:
   respondToIncomingProofRequest$(body: API.ResponseToIncomingProofRequest) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/proof/respond', body).pipe(
       map(() => undefined as void)
     )
   }
 
-  // TODO:
   deleteOutgoingProofRequest$(body: API.OutgoingProofRequest) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/proof/delete', body).pipe(
       map(() => undefined as void)
     )
   }
 
-  // TODO:
   createOutgoingProofRequest$(body: API.NewProofRequest) {
-    return this.http.post('/state/update', body).pipe(
+    return this.http.post('/proof/create', body).pipe(
       map(() => undefined as void)
     )
   }
