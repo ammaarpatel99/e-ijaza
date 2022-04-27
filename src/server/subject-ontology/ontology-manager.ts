@@ -1,5 +1,5 @@
 import {OntologyShareProtocol, OntologyStoreProtocol} from '../aries-based-protocols'
-import {first, mergeMap, ReplaySubject, switchMap, withLatestFrom} from "rxjs";
+import {catchError, first, mergeMap, Observable, ReplaySubject, switchMap, tap, withLatestFrom} from "rxjs";
 import {Server} from '@project-types'
 import {map, shareReplay} from "rxjs/operators";
 import {Immutable} from "@project-utils";
@@ -22,25 +22,32 @@ export class OntologyManager {
   )
 
   initialiseController$() {
-    return OntologyShareProtocol.instance.initialiseController$().pipe(
-      switchMap(() => OntologyStoreProtocol.instance.initialiseController$()),
+    return OntologyStoreProtocol.instance.initialiseController$().pipe(
       map(state => {
-        this.ensureRootSubjectExists()
         this._state$.next(state)
-      })
+        this.watchState()
+      }),
+      switchMap(() => OntologyStoreProtocol.instance.initialiseController$())
     )
   }
 
-  private ensureRootSubjectExists() {
-    this._state$.subscribe(state => {
-      State.instance.startUpdating()
-      if (!state.has(environment.rootSubject)) {
-        const newState: Server.Subjects = new Map()
-        newState.set(environment.rootSubject, {children: new Set(), componentSets: new Set()})
-        this._state$.next(newState)
-      }
-      State.instance.stopUpdating()
-    })
+  private watchState() {
+    const obs$: Observable<void> = this._state$.pipe(
+      tap(() => State.instance.startUpdating()),
+      map(state => {
+        if (!state.has(environment.rootSubject)) {
+          const newState: Server.Subjects = new Map()
+          newState.set(environment.rootSubject, {children: new Set(), componentSets: new Set()})
+          this._state$.next(newState)
+        }
+      }),
+      tap(() => State.instance.stopUpdating()),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
   }
 
   addComponentSet$(parent: string, set: ReadonlySet<string>) {
@@ -59,8 +66,8 @@ export class OntologyManager {
       if (key !== parent) newState.set(key, value)
       else {
         const componentSets = new Set<Immutable<Set<string>>>()
-        componentSets.add(new Set(set))
         value.componentSets.forEach(set => componentSets.add(set))
+        componentSets.add(new Set(set))
         newState.set(key, {children: value.children, componentSets} as typeof value)
       }
     })

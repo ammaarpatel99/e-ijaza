@@ -1,6 +1,6 @@
 import {CredentialProofProtocol} from "../aries-based-protocols";
 import {map, switchMap} from "rxjs/operators";
-import {Observable, ReplaySubject, withLatestFrom} from "rxjs";
+import {BehaviorSubject, Observable, ReplaySubject, withLatestFrom} from "rxjs";
 import {State} from "../state";
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 
@@ -13,13 +13,23 @@ export interface Proof {
 
 export class CredentialProof {
   private readonly proof: Proof
-  private readonly _proof$ = new ReplaySubject<Immutable<Proof>>(1)
-  readonly proof$ = this._proof$.asObservable()
+  private readonly subscription
+  private readonly _proof$
+  readonly proof$
 
   constructor(readonly did: string, readonly subject: string) {
     this.proof = {did, subject, result: null, proof: null}
-    this.update()
-    this.prove$(this.proof)
+    this._proof$ = new BehaviorSubject(this.deepCopy(this.proof))
+    this.proof$ = this._proof$.asObservable()
+    this.subscription = this.prove$(this.proof).subscribe()
+  }
+
+  delete() {
+    if (this.proof.result === null) {
+      this.proof.result = false
+    }
+    this.subscription.unsubscribe()
+    this._proof$.complete()
   }
 
   private deepCopy(proof: Proof = this.proof): Proof {
@@ -68,7 +78,7 @@ export class CredentialProof {
   private prove$(proof: Proof): Observable<void> {
     const obs$ = CredentialProofProtocol.instance.requestProof$(proof.did, proof.subject).pipe(
       withLatestFrom(State.instance.controllerDID$),
-      map(([result, controllerDID]) => {
+      switchMap(([result, controllerDID]) => {
         if (result === undefined) {
           proof.proof = false
           proof.result = false

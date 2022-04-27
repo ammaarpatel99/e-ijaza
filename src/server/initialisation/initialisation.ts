@@ -1,4 +1,4 @@
-import {BehaviorSubject, catchError, first, from, switchMap, tap} from "rxjs";
+import {BehaviorSubject, catchError, defer, first, from, of, switchMap, tap} from "rxjs";
 import {Immutable, repeatWithBackoff$, voidObs$} from "@project-utils";
 import {Server, API} from "@project-types";
 import {createDID, getPublicDID, isAlive, setPublicDID} from "../aries-api"
@@ -6,8 +6,8 @@ import {map} from "rxjs/operators";
 import {runAries} from "./run-aries";
 import axios from "axios";
 import {initialiseController$, initialiseUser$} from './initialise'
-import {InitialisationStateData} from "../../types/server";
 import {environment} from "../../environments/environment";
+import {initialiseAPIStateTracker$} from '../api'
 
 export class Initialisation {
   private static _instance: Initialisation | undefined
@@ -15,14 +15,16 @@ export class Initialisation {
     if (!this._instance) this._instance = new Initialisation()
     return this._instance
   }
-  private constructor() { }
+  private constructor() {
+    initialiseAPIStateTracker$().subscribe()
+  }
 
   private initialisationDataCache: Immutable<API.InitialisationData> | undefined
   private readonly _initialisationData$ = new BehaviorSubject<Immutable<Server.InitialisationStateData>>({state: Server.InitialisationState.START_STATE})
   readonly initialisationData$ = this._initialisationData$.asObservable()
 
   fullInitialisation$(data: API.FullInitialisationData) {
-    return this.initialisationData$.pipe(
+    return this._initialisationData$.pipe(
       first(),
       map(state => {
         if (state.state !== Server.InitialisationState.START_STATE) {
@@ -41,7 +43,7 @@ export class Initialisation {
   }
 
   connectToAries$() {
-    return this.initialisationData$.pipe(
+    return this._initialisationData$.pipe(
       first(),
       map(data => {
         if (data.state !== Server.InitialisationState.START_STATE) {
@@ -51,13 +53,17 @@ export class Initialisation {
       switchMap(() => this._connectToAries$()),
       switchMap(() =>
         this.fetchPublicDID$()
-        .pipe(catchError(() => voidObs$))
+          .pipe(catchError(e => {
+            console.error(e)
+            console.error(`This has occured after connecting to aries, and just means no public did is set yet`)
+            return voidObs$
+          }))
       )
     )
   }
 
   autoRegisterDID$({vonNetworkURL}: API.PublicDIDInitialisationData) {
-    return this.initialisationData$.pipe(
+    return this._initialisationData$.pipe(
       first(),
       map(state => {
         if (state.state !== Server.InitialisationState.ARIES_READY) {
@@ -70,7 +76,7 @@ export class Initialisation {
   }
 
   registerDID$(data: API.DIDDetails) {
-    return this.initialisationData$.pipe(
+    return this._initialisationData$.pipe(
       first(),
       map(data => {
         if (data.state !== Server.InitialisationState.ARIES_READY) {
@@ -83,14 +89,13 @@ export class Initialisation {
   }
 
   generateDID$() {
-    return voidObs$.pipe(
-      switchMap(() => from(createDID({}))),
+    return defer(() => from(createDID({}))).pipe(
       map(res => ({did: res.result?.did!, verkey: res.result?.verkey!}))
     )
   }
 
   initialise$(data: API.InitialisationData) {
-    return this.initialisationData$.pipe(
+    return this._initialisationData$.pipe(
       first(),
       map(state => {
         if (state.state !== Server.InitialisationState.PUBLIC_DID_REGISTERED) {
@@ -102,8 +107,7 @@ export class Initialisation {
   }
 
   private initialiseIfData$() {
-    return voidObs$.pipe(
-      map(() => this.initialisationDataCache),
+    return defer(() => of(this.initialisationDataCache)).pipe(
       switchMap(data => data ? this._initialise$(data) : voidObs$)
     )
   }
@@ -163,8 +167,7 @@ export class Initialisation {
   }
 
   private waitForAries$() {
-    return voidObs$.pipe(
-      switchMap(() => from(isAlive())),
+    return defer(() => from(isAlive())).pipe(
       map(result => ({success: result.alive || false})),
       repeatWithBackoff$<undefined>({
         initialTimeout: 1000,
@@ -238,7 +241,7 @@ export class Initialisation {
         next: () => this._initialisationData$.next({
           ...this._initialisationData$.value,
           state: Server.InitialisationState.COMPLETE
-        } as InitialisationStateData),
+        } as Server.InitialisationStateData),
         error: () => this._initialisationData$.next({
           state: Server.InitialisationState.PUBLIC_DID_REGISTERED,
           did: (this._initialisationData$.value as {did: string}).did

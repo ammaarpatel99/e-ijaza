@@ -1,13 +1,13 @@
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
-import {map, mergeMap, shareReplay, tap} from "rxjs/operators";
+import {map, mergeMap, shareReplay, startWith, tap} from "rxjs/operators";
 import {
   catchError,
+  defer,
   filter,
   first,
   from,
   last,
-  Observable,
-  ReplaySubject,
+  Observable, pairwise, ReplaySubject,
   switchMap,
   withLatestFrom
 } from "rxjs";
@@ -23,7 +23,7 @@ import {
 import {subjectDataSchema, subjectsListSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-import {Server, Schemas} from '@project-types'
+import {Schemas, Server} from '@project-types'
 import {OntologyStoreProtocol} from "./ontology-store-protocol";
 import {SubjectOntology} from "../subject-ontology";
 
@@ -46,18 +46,17 @@ export class OntologyShareProtocol {
     return this.getIssued$().pipe(
       map(() => {
         this.handleSubjectListRequests()
-        this.handleSubjectRequests()
+        this.handleSubjectDataRequests()
         this.revokeSharedOnUpdate()
       })
     )
   }
 
   private getIssued$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
-      )),
-      map(results => results.results!),
+    return defer(() => from(
+      getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
+    )).pipe(
+      map(results => results.results || []),
       map(results => {
         // SUBJECT LISTS
         results
@@ -68,6 +67,7 @@ export class OntologyShareProtocol {
             cred_rev_id: cred.revocation_id!
           }))
           .forEach(cred => this.issuedList.add(cred))
+
         // INDIVIDUAL SUBJECTS
         results
           .filter(cred => cred.schema_id === subjectDataSchema.schemaID)
@@ -90,13 +90,13 @@ export class OntologyShareProtocol {
   }
 
   private handleSubjectListRequests() {
-    const obs$ = WebhookMonitor.instance.credentials$.pipe(
+    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === subjectsListSchema.schemaID
         && cred.state === 'proposal_received'
       ),
       map(cred => cred.credential_exchange_id!),
-      withLatestFrom(State.instance._subjectOntology$),
+      withLatestFrom(State.instance.subjectOntology$),
       map(([cred_ex_id, subjectOntology]) =>
         [cred_ex_id, {subjects: [...subjectOntology.keys()]}] as
           [string, Schemas.SubjectsSchema]
@@ -114,19 +114,24 @@ export class OntologyShareProtocol {
           }
         })).pipe(map(() => cred_ex_id))
       ),
-      switchMap(cred_ex_id =>
-        WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(last())
-      )
-    )
-    obs$.pipe(
+      switchMap(cred_ex_id => WebhookMonitor.instance.monitorCredential$(cred_ex_id)),
+      last(),
+      map(({connection_id, revoc_reg_id, revocation_id}) => {
+        this.issuedList.add({
+          connection_id: connection_id!,
+          rev_reg_id: revoc_reg_id!,
+          cred_rev_id: revocation_id!
+        });
+      }),
       catchError(e => {
         console.error(e)
         return obs$
       })
-    ).subscribe()
+    )
+    obs$.subscribe()
   }
 
-  private handleSubjectRequests() {
+  private handleSubjectDataRequests() {
     const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
       filter(cred =>
         cred.credential_proposal_dict?.schema_id === subjectDataSchema.schemaID
@@ -141,7 +146,7 @@ export class OntologyShareProtocol {
         if (!subject) throw new Error(`Request received for subject data but not subject specified`)
         return [cred_ex_id, subject] as [string, string]
       }),
-      withLatestFrom(State.instance._subjectOntology$),
+      withLatestFrom(State.instance.subjectOntology$),
       map(([[cred_ex_id, subject], subjectOntology]) => {
         const subjectData = subjectOntology.get(subject)
         if (!subjectData) throw new Error(`Request received for subject data but subject doesn't exist`)
@@ -168,13 +173,26 @@ export class OntologyShareProtocol {
               }]
             }
           }
-        })).pipe(map(() => cred_ex_id))
+        })).pipe(map(() => ({cred_ex_id, subject: data.subject.name})))
       ),
-      switchMap(cred_ex_id =>
-        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
+      switchMap(({cred_ex_id, subject}) =>
+        WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(
+          map(data => ({...data, subject}))
+        )
       ),
       last(),
-      map(() => undefined as void),
+      map(({connection_id, revoc_reg_id, revocation_id, subject}) => {
+        let set = this.issuedSubject.get(subject)
+        if (!set) {
+          set = new Set()
+          this.issuedSubject.set(subject, set)
+        }
+        set.add({
+          connection_id: connection_id!,
+          rev_reg_id: revoc_reg_id!,
+          cred_rev_id: revocation_id!
+        })
+      }),
       catchError(e => {
         console.error(e)
         return obs$
@@ -205,21 +223,14 @@ export class OntologyShareProtocol {
   }
 
   private revokeSharedOnUpdate() {
-    const obs$: Observable<void> = OntologyStoreProtocol.instance.changes$.pipe(
-      map(changes => {
-        let data: Omit<typeof changes, 'state'> = {edited: [], deleted: [], subjectsListChanged: false}
-        if (changes.subjectsListChanged) data = {...data, subjectsListChanged: true}
-        const deleted = new Set(data.deleted)
-        const edited = new Set(data.edited)
-        changes.deleted.forEach(subject => {edited.delete(subject); deleted.add(subject)})
-        changes.edited.forEach(subject => {deleted.delete(subject); edited.add(subject)})
-        data = {...data, deleted: [...deleted], edited: [...edited]}
-        return data
-      }),
-      filter(x => !!x),
-      map(x => x!),
-      mergeMap(({deleted, edited, subjectsListChanged}) => {
-        const arr = [
+    const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
+      startWith(null),
+      pairwise(),
+      mergeMap(([oldState, state]) => {
+        if (!oldState) return voidObs$
+        const {deleted, edited, subjectsListChanged} =
+          OntologyStoreProtocol.findChanges(state!, oldState)
+        return forkJoin$([
           ...deleted.map(subject => {
             const set = this.issuedSubject.get(subject) || new Set()
             return this.revokeIssued$(set, `deleted:${subject}`)
@@ -228,14 +239,11 @@ export class OntologyShareProtocol {
           ...edited.map(subject => {
             const set = this.issuedSubject.get(subject) || new Set()
             return this.revokeIssued$(set, `edited:${subject}`)
-              .pipe(tap(() => set.clear()))
-          })
-        ]
-        if (subjectsListChanged) arr.push(
-          this.revokeIssued$(this.issuedList)
-            .pipe(tap(() => this.issuedList.clear()))
-        )
-        return forkJoin$(arr)
+              .pipe(tap(() => this.issuedSubject.delete(subject)))
+          }),
+          subjectsListChanged ? this.revokeIssued$(this.issuedList)
+            .pipe(tap(() => this.issuedList.clear())) : voidObs$
+        ])
       }),
       map(() => undefined as void),
       catchError(e => {
@@ -252,9 +260,10 @@ export class OntologyShareProtocol {
   readonly userState$ = this.exposedUserState$()
 
   initialiseUser$() {
-    return voidObs$.pipe(
-      map(() => this.watchRevocations()),
-      switchMap(() => this.refreshData$())
+    return this.refreshData$().pipe(
+      map(() => {
+        this.watchRevocations()
+      })
     )
   }
 
@@ -344,23 +353,21 @@ export class OntologyShareProtocol {
   }
 
   private clearSubjectsList$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
-      )),
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || []),
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin$(creds || []))
+      switchMap(creds => forkJoin$(creds))
     )
   }
 
   private clearSubjects$(subject?: string) {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
-      )),
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || []),
       map(creds => {
         if (!subject) return creds
@@ -372,7 +379,7 @@ export class OntologyShareProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin$(creds || []))
+      switchMap(creds => forkJoin$(creds))
     )
   }
 
@@ -391,7 +398,7 @@ export class OntologyShareProtocol {
 
     const obs2$: Observable<void> = WebhookMonitor.instance.revocations$.pipe(
       filter(data => data.thread_id.includes(subjectDataSchema.name)),
-      switchMap(data => {
+      mergeMap(data => {
         const info = data.comment.split(':')
         if (info.length < 2 || !['deleted', 'edited'].includes(info[0]) || !info[1]) {
           console.error(`Subject revocation has invalid comment: "${data.comment}"`)

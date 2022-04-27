@@ -11,8 +11,8 @@ import {
   subjectVoteSchema,
   Schema
 } from './'
-import {voidObs$} from "@project-utils";
-import {forkJoin, switchMap} from "rxjs";
+import {forkJoin$, voidObs$} from "@project-utils";
+import {switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 
 const schemas: Schema[] = [
@@ -28,23 +28,19 @@ const schemas: Schema[] = [
 ]
 
 export function initialiseControllerSchemas$() {
-  return voidObs$.pipe(
-    switchMap(() => forkJoin(
-      schemas.map(schema => schema.fetchOrSetSchemaID$())
-    )),
-    switchMap(() => forkJoin(
+  return forkJoin$(
+    schemas.map(schema => schema.fetchOrSetSchemaID$())
+  ).pipe(
+    switchMap(() => forkJoin$(
       schemas.map(schema => schema.fetchOrSetCredID$())
     )),
-    map(() => {
-      ShareSchemasProtocol.instance.initialiseController()
-    })
+    switchMap(() => ShareSchemasProtocol.instance.initialiseController$())
   )
 }
 
 export function initialiseUserSchemas$() {
-  return voidObs$.pipe(
-    switchMap(() => ShareSchemasProtocol.instance.getSchemasFromController$()),
-    switchMap(() => forkJoin([
+  return ShareSchemasProtocol.instance.getSchemasFromController$().pipe(
+    switchMap(() => forkJoin$([
       teachingSchema.fetchOrSetCredID$()
     ])),
     map(() => undefined as void)

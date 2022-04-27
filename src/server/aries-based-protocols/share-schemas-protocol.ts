@@ -1,5 +1,5 @@
 import {WebhookMonitor} from "../webhook";
-import {catchError, filter, from, last, mergeMap, Observable, switchMap} from "rxjs";
+import {catchError, defer, filter, from, last, mergeMap, Observable, switchMap} from "rxjs";
 import {connectToController$, deleteConnection, deleteProof, presentProof, requestProof} from "../aries-api";
 import {
   mastersPublicSchema,
@@ -23,30 +23,12 @@ export class ShareSchemasProtocol {
 
   private static PROOF_NAME = 'Schema Set Up'
 
-  initialiseController() {
-    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
-      filter(proof => proof.presentation_request?.name === ShareSchemasProtocol.PROOF_NAME && proof.state === 'request_received'),
-      mergeMap(proof => from(
-        presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
-          requested_attributes: {},
-          requested_predicates: {},
-          self_attested_attributes: {
-            subjectDataSchema: subjectDataSchema.schemaID,
-            subjectsListSchema: subjectsListSchema.schemaID,
-            subjectVoteSchema: subjectVoteSchema.schemaID,
-            mastersPublicSchema: mastersPublicSchema.schemaID,
-            masterVoteSchema: masterVoteSchema.schemaID,
-            teachingSchema: teachingSchema.schemaID
-          }
-        })
-      )),
-      map(() => undefined as void),
-      catchError(e => {
-        console.error(e)
-        return obs$
+  initialiseController$() {
+    return voidObs$.pipe(
+      map(() => {
+        this.watchRequests()
       })
     )
-    obs$.subscribe()
   }
 
   getSchemasFromController$() {
@@ -63,36 +45,64 @@ export class ShareSchemasProtocol {
     )
   }
 
+  private watchRequests() {
+    const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
+      filter(proof => proof.presentation_request?.name === ShareSchemasProtocol.PROOF_NAME && proof.state === 'request_received'),
+      mergeMap(proof => from(
+        presentProof({pres_ex_id: proof.presentation_exchange_id!}, {
+          requested_attributes: {},
+          requested_predicates: {},
+          self_attested_attributes: {
+            subjectDataSchema: subjectDataSchema.schemaID,
+            subjectsListSchema: subjectsListSchema.schemaID,
+            subjectVoteSchema: subjectVoteSchema.schemaID,
+            mastersPublicSchema: mastersPublicSchema.schemaID,
+            masterVoteSchema: masterVoteSchema.schemaID,
+            teachingSchema: teachingSchema.schemaID
+          }
+        })
+      )),
+      switchMap(({connection_id, presentation_exchange_id}) =>
+        this.deleteConnectionAndProof$(connection_id!, presentation_exchange_id!)
+      ),
+      map(() => undefined as void),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
   private proofRequest$(conn_id: string) {
-    return voidObs$.pipe(
-      switchMap(() => from(requestProof({
-        connection_id: `${conn_id}`,
-        proof_request : {
-          name: "Set Up",
-          version: '1.0',
-          requested_attributes: {
-            subjectDataSchema: {
-              name: 'subjectDataSchema'
-            },
-            subjectsListSchema: {
-              name: 'subjectsListSchema'
-            },
-            subjectVoteSchema: {
-              name: 'subjectVoteSchema'
-            },
-            mastersPublicSchema: {
-              name: 'mastersPublicSchema'
-            },
-            masterVoteSchema: {
-              name: 'masterVoteSchema'
-            },
-            teachingSchema: {
-              name: 'teachingSchema'
-            }
+    return defer(() => from(requestProof({
+      connection_id: `${conn_id}`,
+      proof_request : {
+        name: ShareSchemasProtocol.PROOF_NAME,
+        version: '1.0',
+        requested_attributes: {
+          subjectDataSchema: {
+            name: 'subjectDataSchema'
           },
-          requested_predicates: {}
-        }
-      }))),
+          subjectsListSchema: {
+            name: 'subjectsListSchema'
+          },
+          subjectVoteSchema: {
+            name: 'subjectVoteSchema'
+          },
+          mastersPublicSchema: {
+            name: 'mastersPublicSchema'
+          },
+          masterVoteSchema: {
+            name: 'masterVoteSchema'
+          },
+          teachingSchema: {
+            name: 'teachingSchema'
+          }
+        },
+        requested_predicates: {}
+      }
+    }))).pipe(
       map(data => data.presentation_exchange_id!)
     )
   }
@@ -125,8 +135,7 @@ export class ShareSchemasProtocol {
   }
 
   private deleteConnectionAndProof$(conn_id: string, pres_ex_id: string) {
-    return voidObs$.pipe(
-      switchMap(() => from(deleteProof({pres_ex_id}))),
+    return defer(() => from(deleteProof({pres_ex_id}))).pipe(
       switchMap(() => from(deleteConnection({conn_id})))
     )
   }

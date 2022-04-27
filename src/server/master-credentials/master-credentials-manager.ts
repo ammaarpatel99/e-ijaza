@@ -1,17 +1,16 @@
 import {CredentialIssueProtocol, MastersStoreProtocol, MastersShareProtocol} from '../aries-based-protocols'
 import {
-  catchError,
+  catchError, combineLatestWith,
   first,
   mergeMap,
-  Observable,
+  Observable, pairwise,
   ReplaySubject,
   switchMap,
-  tap,
-  withLatestFrom
+  tap
 } from "rxjs";
 import {Server} from '@project-types'
-import {map} from "rxjs/operators";
-import {forkJoin$, Immutable} from "@project-utils";
+import {map, startWith} from "rxjs/operators";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {State} from "../state";
 
 export class MasterCredentialsManager {
@@ -26,12 +25,12 @@ export class MasterCredentialsManager {
   readonly state$ = this._state$.asObservable()
 
   initialiseController$() {
-    return MastersShareProtocol.instance.initialiseController$().pipe(
-      switchMap(() => MastersStoreProtocol.instance.initialiseController$()),
+    return MastersStoreProtocol.instance.initialiseController$().pipe(
       map(state => {
         this._state$.next(state)
-        this.watchSubjectOntology()
-      })
+        this.watchState()
+      }),
+      switchMap(() => MastersShareProtocol.instance.initialiseController$())
     )
   }
 
@@ -41,25 +40,10 @@ export class MasterCredentialsManager {
       map(state => {
         if (!!state.get(did)?.get(subject))
           throw new Error(`Adding master when ${did} already is master in ${subject}`)
-        return state
-      }),
-      switchMap(state =>
-        CredentialIssueProtocol.instance.controllerIssue$(did, subject).pipe(
-          map(credInfo => ({state, credInfo}))
-        )
-      ),
-      map(({credInfo, state}) => {
-        const data = [...state].map(([did, subjects]) => {
-          const map = new Map(subjects)
-          return [did, map] as [typeof did, typeof map]
-        })
-        const newState = new Map(data)
-        let subjectMap = newState.get(did)
-        if (!subjectMap) {
-          subjectMap = new Map()
-          newState.set(did, subjectMap)
-        }
-        subjectMap.set(subject, credInfo)
+        const newState = new Map(state)
+        const oldMap = newState.get(did)
+        const newMap = new Map(oldMap || [])
+        newMap.set(subject, {connection_id: '', cred_rev_id: '', rev_reg_id: ''})
         this._state$.next(newState)
       })
     )
@@ -68,64 +52,91 @@ export class MasterCredentialsManager {
   removeMaster$(did: string, subject: string) {
     return this._state$.pipe(
       first(),
-      switchMap(state => {
+      map(state => {
         const credInfo = state.get(did)?.get(subject)
         if (!credInfo) throw new Error(`Removing master when ${did} is not master in ${subject}`)
-        return CredentialIssueProtocol.instance.controllerRevoke$(credInfo)
-          .pipe(map(() => state))
-      }),
-      map(state => {
-        const data = [...state].map(([did, subjects]) => {
-          const map = new Map(subjects)
-          return [did, map] as [typeof did, typeof map]
-        })
-        const newState = new Map(data)
-        let subjectMap = newState.get(did)
-        if (!subjectMap) return
-        subjectMap.delete(subject)
+        const newState = new Map(state)
+        const oldMap = newState.get(did)
+        const newMap = new Map(oldMap || [])
+        newMap.set(subject, {connection_id: '', cred_rev_id: '', rev_reg_id: ''})
         this._state$.next(newState)
       })
     )
   }
 
-  private watchSubjectOntology() {
-    const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
-      tap(() => State.instance.startUpdating()),
-      map(data => new Set(data.keys())),
-      withLatestFrom(this._state$),
-      mergeMap(([subjects, masters]) => {
-        const revokeRequests = [...masters]
-          .flatMap(([did, data]) => [...data]
-            .filter(([subject, _]) => !subjects.has(subject))
-            .map(([subject, credInfo]) =>
-              CredentialIssueProtocol.instance.controllerRevoke$(credInfo)
-                .pipe(map(() => ({did, subject})))
+  private issueAndRevokeCreds$(state: Immutable<Server.ControllerMasters>, previous: Immutable<Server.ControllerMasters>) {
+    const revoke$ = [...previous]
+      .flatMap(([did, oldCredMap]) => {
+        const newCredMap = state.get(did)
+        return [...oldCredMap]
+          .filter(([subject, _]) => !newCredMap?.has(subject))
+          .map(([_, cred]) => CredentialIssueProtocol.instance.controllerRevoke$(cred))
+      })
+
+    const add$ = [...state]
+      .flatMap(([did, newCredMap]) => {
+        const oldCredMap = previous.get(did)
+        return [...newCredMap]
+          .filter(([subject, _]) => !oldCredMap?.has(subject))
+          .map(([subject, _]) =>
+            CredentialIssueProtocol.instance.controllerIssue$(did, subject).pipe(
+              map(cred => ({did, subject, cred}))
             )
           )
-        return forkJoin$(revokeRequests).pipe(
-          map(revoked => ({masters, revoked}))
-        )
-      }),
-      map(({masters, revoked}) => {
-        const data = [...masters].map(([did, subjects]) => {
-          const map = new Map(subjects)
-          return [did, map] as [typeof did, typeof map]
-        })
-        const newState = new Map(data)
-        let changed = false
-        revoked.forEach(({did, subject}) => {
-          let subjectMap = newState.get(did)
-          if (subjectMap) {
-            subjectMap.delete(subject)
-            changed = true
+      })
+
+    return forkJoin$(revoke$).pipe(
+      switchMap(() => forkJoin$(add$)),
+      map(added => {
+        if (added.length === 0) return
+        const data = [...state].map(([did, credMap]): [typeof did, typeof credMap] => {
+          const toAdd = added.filter(({did: _did}) => did === _did)
+          if (toAdd.length === 0) return [did, credMap]
+          else {
+            const newCredMap = new Map(credMap)
+            toAdd.forEach(({subject, cred}) => newCredMap.set(subject, cred))
+            return [did, newCredMap]
           }
         })
-        if (changed) {
-          [...newState].forEach(([did, data]) => {
-            if (data.size === 0) newState.delete(did)
-          })
-          this._state$.next(newState)
+        return new Map(data) as typeof state
+      })
+    )
+  }
+
+  private removeInvalidated(state: Immutable<Server.ControllerMasters>, subjects: Immutable<Server.Subjects>) {
+    let changed = false
+    const newState = [...state]
+      .map(([did, credMap]) => {
+        let newMap = new Map([...credMap]
+          .filter(([subject, _]) => subjects.has(subject)))
+        const _changed = credMap.size !== newMap.size
+        if (_changed) changed = true
+        return [did, _changed ? newMap : credMap] as [typeof did, typeof credMap]
+      })
+      .filter(([_, credMap]) => credMap.size !== 0)
+    if (changed) return new Map(newState)
+    return
+  }
+
+  private watchState() {
+    const obs$: Observable<void> = this._state$.pipe(
+      startWith(null),
+      pairwise(),
+      combineLatestWith(State.instance._subjectOntology$),
+      tap(() => State.instance.startUpdating()),
+      mergeMap(([[oldState, state], subjects]) => {
+        const newState = this.removeInvalidated(state!, subjects)
+        if (!oldState) {
+          if (newState) this._state$.next(newState)
+          return voidObs$
         }
+        return this.issueAndRevokeCreds$(newState || state!, oldState).pipe(
+          switchMap(_newState => {
+            if (_newState) this._state$.next(_newState)
+            else if (newState) this._state$.next(newState)
+            return voidObs$
+          })
+        )
       }),
       tap({
         next: () => State.instance.stopUpdating(),

@@ -1,5 +1,5 @@
-import {voidObs$} from "@project-utils";
-import {forkJoin, from, last, switchMap} from "rxjs";
+import {forkJoin$, voidObs$} from "@project-utils";
+import {from, last, switchMap} from "rxjs";
 import {createInvitation, deleteConnection, receiveInvitation} from "../connections";
 import {map} from "rxjs/operators";
 import {WebhookMonitor} from "../../webhook";
@@ -26,7 +26,7 @@ export function connectToSelf$() {
 export function deleteSelfConnections$(connections: [string, string]) {
   return voidObs$.pipe(
     switchMap(() =>
-      forkJoin([
+      forkJoin$([
         from(deleteConnection({conn_id: connections[0]})),
         from(deleteConnection({conn_id: connections[1]}))
       ]).pipe(map(() => undefined as void))

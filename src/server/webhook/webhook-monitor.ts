@@ -1,5 +1,5 @@
 import {Aries} from '@project-types'
-import {ReplaySubject, Subject} from "rxjs";
+import {Subject} from "rxjs";
 
 type ConnectionData = Aries.definitions['ConnRecord']
 type CredentialData = Aries.V10CredentialExchange
@@ -23,16 +23,16 @@ export class WebhookMonitor {
   private readonly _revocations$ = new Subject<Aries.RevocationNotification>()
   readonly revocations$ = this._revocations$.asObservable()
 
-  private static monitor$<T>(map: Map<string, ReplaySubject<T>>, id: string) {
+  private static monitor$<T>(map: Map<string, Subject<T>>, id: string) {
     let sub$ = map.get(id)
     if (sub$) return sub$
-    sub$ = new ReplaySubject<T>(1)
+    sub$ = new Subject<T>()
     map.set(id, sub$)
     return sub$
   }
 
   private static process<T>(
-    map: Map<string, ReplaySubject<T>>,
+    map: Map<string, Subject<T>>,
     data: T,
     id: (data: T) => string,
     completed: (data: T) => boolean,
@@ -54,9 +54,9 @@ export class WebhookMonitor {
     }
   }
 
-  private readonly connections = new Map<string, ReplaySubject<ConnectionData>>()
-  private readonly credentials = new Map<string, ReplaySubject<CredentialData>>()
-  private readonly proofs = new Map<string, ReplaySubject<ProofData>>()
+  private readonly connections = new Map<string, Subject<ConnectionData>>()
+  private readonly credentials = new Map<string, Subject<CredentialData>>()
+  private readonly proofs = new Map<string, Subject<ProofData>>()
 
   monitorConnection$(conn_id: string) {
     return WebhookMonitor.monitor$(this.connections, conn_id).asObservable()

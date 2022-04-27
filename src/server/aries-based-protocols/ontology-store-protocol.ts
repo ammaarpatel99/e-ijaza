@@ -1,14 +1,12 @@
 import {Schemas, Server} from '@project-types'
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {
-  catchError,
+  catchError, defer,
   from,
   last,
   mergeMap,
-  Observable,
-  ReplaySubject,
-  switchMap,
-  tap
+  Observable, of, pairwise,
+  switchMap
 } from "rxjs";
 import {
   connectToSelf$,
@@ -18,16 +16,9 @@ import {
   issueCredential
 } from "../aries-api";
 import {subjectDataSchema, subjectsListSchema} from "../schemas";
-import {map} from "rxjs/operators";
+import {map, startWith} from "rxjs/operators";
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
-
-interface ChangeData {
-  state: Immutable<Server.Subjects>
-  deleted: string[]
-  edited: string[]
-  subjectsListChanged: boolean
-}
 
 export class OntologyStoreProtocol {
   private static _instance: OntologyStoreProtocol | undefined
@@ -66,20 +57,27 @@ export class OntologyStoreProtocol {
     return map
   }
 
-  private readonly _changes$ = new ReplaySubject<Immutable<ChangeData>>(1)
-  readonly changes$ = this._changes$.asObservable()
-
-  private previous: Immutable<Server.Subjects> | undefined
+  static findChanges(state: Immutable<Server.Subjects>, previous: Immutable<Server.Subjects>) {
+    const subjectsListChanged = ![...previous.keys(), ...state.keys()]
+      .every(key => previous.has(key) && state.has(key))
+    const deleted = [...previous.keys()].filter(subject => !state.has(subject))
+    const edited = [...state]
+      .filter(([subject, data]) => previous.get(subject) !== data)
+      .map(([subject]) => subject)
+    return {deleted, edited, subjectsListChanged}
+  }
 
   initialiseController$() {
-    return voidObs$.pipe(
-      map(() => this.watchState()),
-      switchMap(() => this.getFromStore$())
+    return this.getFromStore$().pipe(
+      map(data => {
+        this.watchState()
+        return data
+      })
     )
   }
 
   private getFromStore$() {
-    const subjectListData$ = this.getStoredSubjectsList$().pipe(
+    const subjectListData$ = this.getStoredSubjectsLists$().pipe(
       map(creds => creds.shift()),
       map(store => {
         if (!store) return {subjects: []}
@@ -95,42 +93,46 @@ export class OntologyStoreProtocol {
     )
     return forkJoin$([subjectListData$, subjectsData$]).pipe(
       map(([subjectListData, subjectsData]) => OntologyStoreProtocol.schemasToState(subjectListData, subjectsData)),
-      tap(state => this.previous = state),
+      catchError(e => {
+        console.error(e)
+        return of(new Map() as Server.Subjects)
+      }),
       switchMap(state => this.clean$(state).pipe(map(() => state)))
     )
   }
 
   private clean$(state: Immutable<Server.Subjects>) {
-    const arr = [...state.keys()].map(subject => this.storeSubject$(state, subject))
-    arr.push(this.storeSubjectList$(state))
     return forkJoin$([this.deleteStoredSubjects$(), this.deleteStoredSubjectsList$()]).pipe(
-      switchMap(() => forkJoin$(arr))
+      switchMap(() => forkJoin$([
+        ...[...state.keys()].map(subject => this.storeSubject$(state, subject)),
+        this.storeSubjectList$(state)
+      ])),
+      map(() => undefined as void)
     )
   }
 
-  private getStoredSubjectsList$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
-      )),
+  private getStoredSubjectsLists$() {
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${subjectsListSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || [])
     )
   }
 
   private deleteStoredSubjectsList$() {
-    return this.getStoredSubjectsList$().pipe(
+    return this.getStoredSubjectsLists$().pipe(
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin$(creds || []))
+      switchMap(creds => forkJoin$(creds)),
+      map(() => undefined as void)
     )
   }
 
   private getStoredSubjects$(subject?: string) {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
-      )),
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${subjectDataSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || []),
       map(creds => {
         if (!subject) return creds
@@ -148,42 +150,38 @@ export class OntologyStoreProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin$(creds || []))
+      switchMap(creds => forkJoin$(creds))
     )
   }
 
   private watchState() {
     const obs$: Observable<void> = State.instance.subjectOntology$.pipe(
-      map(state => this.findChanges(state)),
-      tap(changeData => this._changes$.next(changeData)),
-      mergeMap(({state, deleted, edited, subjectsListChanged}) => {
-        const arr = [
-          ...deleted.map(subject => this.deleteStoredSubjects$(subject)),
-          ...edited.map(subject => this.storeSubject$(state, subject))
-        ]
-        if (subjectsListChanged) arr.push(this.storeSubjectList$(state))
-        return forkJoin$(arr).pipe(
-          map(() => state)
+      startWith(null),
+      pairwise(),
+      mergeMap(([oldState, state]) => {
+        if (!oldState) return voidObs$
+        const {deleted, edited, subjectsListChanged} = OntologyStoreProtocol.findChanges(state!, oldState)
+        const updateSubjects$ = forkJoin$(
+          deleted.map(subject => this.deleteStoredSubjects$(subject))
+        ).pipe(
+          switchMap(() => forkJoin$(
+            edited.map(subject => this.storeSubject$(state!, subject))
+          ))
+        )
+        const updateSubjectsList$ = !subjectsListChanged ? voidObs$
+          : this.deleteStoredSubjectsList$().pipe(
+            switchMap(() => this.storeSubjectList$(state!))
+          )
+        return forkJoin$([updateSubjectsList$, updateSubjects$]).pipe(
+          map(() => undefined as void)
         )
       }),
-      map(state => {this.previous = state}),
       catchError(e => {
         console.error(e)
         return obs$
       })
     )
     obs$.subscribe()
-  }
-
-  private findChanges(state: Immutable<Server.Subjects>): ChangeData {
-    const previous = this.previous || new Map()
-    const subjectsListChanged = ![...previous.keys(), ...state.keys()]
-      .every(key => previous.has(key) && state.has(key))
-    const deleted = [...previous.keys()].filter(subject => !state.has(subject))
-    const edited = [...state]
-      .filter(([subject, data]) => previous.get(subject) !== data)
-      .map(([subject]) => subject)
-    return {deleted, edited, state, subjectsListChanged}
   }
 
   private storeSubjectList$(state: Immutable<Server.Subjects>) {

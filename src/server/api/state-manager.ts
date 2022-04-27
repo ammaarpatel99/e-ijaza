@@ -1,6 +1,8 @@
 import {Immutable} from "@project-utils";
 import {API} from '@project-types'
 import {State} from '../state'
+import {map} from "rxjs/operators";
+import {defer, of} from "rxjs";
 
 interface _TimedData<T> {
   timestamp: number
@@ -8,6 +10,11 @@ interface _TimedData<T> {
 }
 type TimedData<T> = Immutable<_TimedData<T>>
 
+export function initialiseAPIStateTracker$() {
+  return defer(() => of(StateManager.instance)).pipe(
+    map(() => undefined as void)
+  )
+}
 
 export class StateManager {
   private static _instance: StateManager | undefined

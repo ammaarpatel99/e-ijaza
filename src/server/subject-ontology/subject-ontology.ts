@@ -271,15 +271,33 @@ export class SubjectOntology {
     )
   }
 
+  canReachAllFromSubjects$(subjectNames: Set<string>, targets: ReadonlySet<string>) {
+    return voidObs$.pipe(
+      map(() => {
+        const subjects = new Set([...this.subjects].filter(subject => subjectNames.has(subject.name)))
+        const goals = new Set([...this.subjects].filter(subject => targets.has(subject.name)))
+        if (subjects.size !== subjectNames.size || goals.size !== targets.size) {
+          throw new Error(`Checking if subjects can be reached but input is invalid`)
+        }
+        const {search, searchWrapper} = this.createSearch({startingSet: subjects, goals})
+        const reached = [...goals].every(subject => subject.getSearchPath(search) !== undefined)
+        searchWrapper.deleteSearch()
+        return reached
+      }),
+      this.mutex.wrapAsReading$()
+    )
+  }
+
   getRequiredCredentials$(credentials: Set<string>, target: string) {
     return voidObs$.pipe(
       map(() => {
         const subjects = new Set([...this.subjects].filter(subject => credentials.has(subject.name)))
         const subject = [...this.subjects].filter(subject => subject.name === target).shift()
         if (subjects.size !== credentials.size || !subject) {
-          throw new Error(`Checking if subject can be reached but input is invalid`)
+          throw new Error(`Checking if subject can be reached with credentials but input is invalid`)
         }
-        const {search, searchWrapper} = this.createSearch({startingSet: subjects, goals: new Set([subject])})
+        const {search, searchWrapper} = this.createSearch(
+          {startingSet: subjects, goals: new Set([subject]), closestFirst: true})
         const path = subject.getSearchPath(search)
         const requiredCredentials = !path ? undefined : [...path]
           .map(subject => subject.name)

@@ -1,5 +1,5 @@
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
-import {catchError, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
+import {catchError, defer, from, last, mergeMap, Observable, pairwise, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -8,7 +8,7 @@ import {
   issueCredential
 } from "../aries-api";
 import {subjectProposalSchema} from "../schemas";
-import {map} from "rxjs/operators";
+import {map, startWith} from "rxjs/operators";
 import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
 import {State} from "../state";
@@ -22,21 +22,21 @@ export class OntologyProposalStoreProtocol {
   }
   private constructor() { }
 
-  private previous: Immutable<Server.ControllerOntologyProposals> | undefined
   private readonly credentialIDs = new Map<string, string>()
 
-  initaliseController$() {
-    return voidObs$.pipe(
-      map(() => this.watchState()),
-      switchMap(() => this.getFromStore$())
+  initialiseController$() {
+    return this.getFromStore$().pipe(
+      map(data => {
+        this.watchState()
+        return data
+      })
     )
   }
 
   private getFromStore$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${subjectProposalSchema.schemaID}"}`})
-      )),
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${subjectProposalSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || []),
       map(creds => creds.map(cred => {
         const data = JSON.parse(cred.attrs!['proposal']) as Schemas.SubjectProposalStateSchema['proposal']
@@ -53,31 +53,33 @@ export class OntologyProposalStoreProtocol {
         this.credentialIDs.set(proposalID, cred.referent!)
         return [proposalID, proposal] as [typeof proposalID, typeof proposal]
       })),
-      map(proposals => new Map(proposals)),
-      tap(state => this.previous = state)
+      map(proposals => new Map(proposals))
     )
   }
 
   private watchState() {
     const obs$: Observable<void> = State.instance.controllerOntologyProposals$.pipe(
-      map(state => this.stateToChanges(state)),
-      mergeMap(({state, deleted, edited}) => {
+      startWith(null),
+      pairwise(),
+      mergeMap(([oldState, state]) => {
+        if (!oldState) return voidObs$
+        const {deleted, edited} = this.findChanges(oldState, state!)
         const arr = [...deleted, ...edited].map(([id, _]) => {
           const credential_id = this.credentialIDs.get(id)
-          if (!credential_id) throw new Error(`deleting stored subject proposal but no credential id found`)
-          return from(deleteCredential({credential_id}))
+          if (!credential_id) throw new Error(`deleting stored ontology proposal but no credential id found`)
+          return defer(() => from(deleteCredential({credential_id})))
+            .pipe(map(() => {this.credentialIDs.delete(id)}))
         })
         const arr2 = [...edited].map(([id, proposal]) =>
           this.storeProposal$(OntologyProposalStoreProtocol.proposalToSchema(proposal))
-            .pipe(map(cred_ex_id => this.credentialIDs.set(id, cred_ex_id)))
+            .pipe(map(cred_ex_id => {this.credentialIDs.set(id, cred_ex_id)}))
         )
 
         return forkJoin$(arr).pipe(
           switchMap(() => forkJoin$(arr2)),
-          map(() => state)
+          map(() => undefined as void)
         )
       }),
-      map(state => {this.previous = state}),
       catchError(e => {
         console.error(e)
         return obs$
@@ -86,13 +88,12 @@ export class OntologyProposalStoreProtocol {
     obs$.subscribe()
   }
 
-  private stateToChanges(state: Immutable<Server.ControllerOntologyProposals>) {
-    const previous = this.previous || new Map() as typeof state
+  private findChanges(state: Immutable<Server.ControllerOntologyProposals>, previous: Immutable<Server.ControllerOntologyProposals>) {
     const deleted = new Map([...previous]
       .filter(([id, _]) => !state.has(id)))
     const edited = new Map([...state]
       .filter(([id, data]) => previous.get(id) !== data))
-    return {state, deleted, edited}
+    return {deleted, edited}
   }
 
   private static proposalToSchema(proposal: Immutable<Server.ControllerOntologyProposal>): Schemas.SubjectProposalStateSchema {

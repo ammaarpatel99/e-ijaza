@@ -5,10 +5,10 @@ import {
   from, mergeMap,
   Observable,
   ReplaySubject,
-  switchMap,
+  switchMap, tap,
   withLatestFrom
 } from "rxjs";
-import {forkJoin$, Immutable} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {Server, API} from '@project-types'
 import {CredentialIssueProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
@@ -42,8 +42,9 @@ export class UserCredentialsManager {
     return CredentialIssueProtocol.instance.initialiseUser$().pipe(
       map(() => {
         this._heldCredentials$.next(new Set())
-        this.watchHeldCredentials()
-        this.watchStates()
+        this.watchStateForHeldCreds()
+        this.watchStateForIssuedCreds()
+        this.watchStateForReachable()
       })
     )
   }
@@ -70,10 +71,23 @@ export class UserCredentialsManager {
     const credLocalID = UserCredentialsManager.heldCredentialID({subject: heldCredential.subject, issuerDID: heldCredential.did})
     return this._heldCredentials$.pipe(
       first(),
+      tap(() => State.instance.startUpdating()),
       map(state => {
         const cred = [...state].filter(_cred => credLocalID === UserCredentialsManager.heldCredentialID(_cred)).shift()
         if (!cred) throw new Error(`deleting non-existent cred`)
-        return this.deleteCredentials$([cred])
+        return defer(() => from(
+          deleteCredential({credential_id: cred.credentialID})
+        )).pipe(
+          map(() => {
+            const newState = new Set(state)
+            newState.delete(cred)
+            this._heldCredentials$.next(newState)
+          })
+        )
+      }),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
       })
     )
   }
@@ -99,20 +113,43 @@ export class UserCredentialsManager {
     )
   }
 
-  private watchHeldCredentials() {
-    const obs$: Observable<void> =CredentialIssueProtocol.instance.heldCredentials$.pipe(
+  private watchStateForHeldCreds() {
+    const obs$: Observable<void> = CredentialIssueProtocol.instance.heldCredentials$.pipe(
+      combineLatestWith(State.instance._subjectOntology$),
       withLatestFrom(this._heldCredentials$),
-      map(([state, _oldState]) => {
+      tap(() => State.instance.startUpdating()),
+      mergeMap(([[state, subjects], oldState]) => {
+        let changed = false
         const newState: Server.UserHeldCredentials = new Set()
-        const oldState = [..._oldState]
+        const toDelete: Server.UserHeldCredentials = new Set()
+        const _oldState = [...oldState]
         state.forEach(cred => {
-          const oldCred = oldState
-            .filter(oldCred => UserCredentialsManager.heldCredentialID(oldCred) === UserCredentialsManager.heldCredentialID(cred))
-            .shift()
-          if (oldCred) newState.add(oldCred)
-          else newState.add(cred)
+          if (!subjects.has(cred.subject)) {
+            toDelete.add(cred)
+            changed = true
+          } else {
+            const oldCred = _oldState
+              .filter(oldCred => UserCredentialsManager.heldCredentialID(oldCred) === UserCredentialsManager.heldCredentialID(cred))
+              .shift()
+            if (oldCred) newState.add(oldCred)
+            else {
+              newState.add(cred)
+              changed = true
+            }
+          }
         })
-        this._heldCredentials$.next(newState)
+        if (!changed) return voidObs$
+        return forkJoin$([...toDelete].map(cred => defer(() => from(
+          deleteCredential({credential_id: cred.credentialID})
+        )))).pipe(
+          map(() => {
+            this._heldCredentials$.next(newState)
+          })
+        )
+      }),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
       }),
       catchError(e => {
         console.error(e)
@@ -122,22 +159,38 @@ export class UserCredentialsManager {
     obs$.subscribe()
   }
 
-  private watchStates() {
+  private watchStateForIssuedCreds() {
+    const obs$: Observable<void> = this.issuedCredentials$.pipe(
+      combineLatestWith(State.instance._subjectOntology$),
+      tap(() => State.instance.startUpdating()),
+      mergeMap(([state, subjects]) => {
+        const toRevoke: Server.UserIssuedCredentials = new Set()
+        state.forEach(cred => {
+          if (!subjects.has(cred.subject)) {
+            toRevoke.add(cred)
+          }
+        })
+        return forkJoin$(
+          [...toRevoke].map(cred => CredentialIssueProtocol.instance.userRevoke$(cred))
+        ).pipe(map(() => undefined as void))
+      }),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
+  }
+
+  private watchStateForReachable() {
     const obs$: Observable<void> = State.instance._subjectOntology$.pipe(
-      combineLatestWith(State.instance._controllerDID$, this._heldCredentials$, this.issuedCredentials$),
-      mergeMap(([subjects, controllerDID, heldCreds, issuedCreds]) => {
-        const deletions = [...heldCreds]
-          .filter(cred => !subjects.has(cred.subject))
-          .map(cred => from(deleteCredential({credential_id: cred.credentialID})))
-        const revocations = [...issuedCreds]
-          .filter(cred => !subjects.has(cred.subject))
-          .map(cred => CredentialIssueProtocol.instance.userRevoke$(cred))
-        if (deletions.length !== 0 || revocations.length !== 0) {
-          return forkJoin$([...deletions, ...revocations])
-            .pipe(
-              map(() => null)
-            )
-        }
+      combineLatestWith(State.instance._controllerDID$, this._heldCredentials$),
+      tap(() => State.instance.startUpdating()),
+      mergeMap(([_, controllerDID, heldCreds]) => {
         const heldSubjects = new Set([...heldCreds].map(cred => cred.subject))
         const masterSubjects = new Set([...heldCreds]
           .filter(cred => cred.issuerDID === controllerDID)
@@ -148,13 +201,15 @@ export class UserCredentialsManager {
           SubjectOntology.instance.getAllReachable$(masterSubjects)
         ])
       }),
-      filter(res => res !== null),
-      map(res => res as Exclude<typeof res, null>),
       map(([subjects, masterSubjects]) => {
         const reachableSubjects: Server.ReachableSubjects = new Map()
         subjects.forEach(subject => reachableSubjects.set(subject, false))
         masterSubjects.forEach(subject => reachableSubjects.set(subject, true))
         this._reachableSubjects$.next(reachableSubjects)
+      }),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
       }),
       catchError(e => {
         console.error(e)
@@ -162,20 +217,5 @@ export class UserCredentialsManager {
       })
     )
     obs$.subscribe()
-  }
-
-  private deleteCredentials$(creds: Immutable<Server.UserHeldCredential[]>) {
-    const obsArr = creds.map(cred => defer(() =>
-      from(deleteCredential({credential_id: cred.credentialID}))
-    ))
-    return forkJoin$(obsArr).pipe(
-      switchMap(() => this._heldCredentials$),
-      first(),
-      map(state => {
-        const newState = new Set(state)
-        creds.forEach(cred => newState.delete(cred))
-        this._heldCredentials$.next(newState)
-      })
-    )
   }
 }

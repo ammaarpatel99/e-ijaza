@@ -118,20 +118,16 @@ export class State {
   stopUpdating() {this.mutex.release() }
 
   private waitForNotUpdating<T>(source: Observable<T>): Observable<T> {
-    let storedValue: T | undefined
     return source.pipe(
-      delay(50), // allow other code to take hold of mutex before checking if mutex is held
+      delay(200), // allow other code to take hold of mutex before checking if mutex is held
       combineLatestWith(this.mutex.isHeld$),
       map(([value, isHeld]) => {
         if (!isHeld) return value
-        else {
-          storedValue = value
-          return
-        }
+        return
       }),
-      distinct(),
       filter(value => value !== undefined),
       map(value => value as Exclude<typeof value, undefined>),
+      distinct(),
       shareReplay(1)
     )
   }

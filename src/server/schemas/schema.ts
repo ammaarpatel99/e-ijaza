@@ -6,7 +6,7 @@ import {
 } from '../aries-api'
 import {voidObs$} from "@project-utils";
 import {map, switchMap} from "rxjs/operators";
-import {from} from "rxjs";
+import {defer, from} from "rxjs";
 
 
 export class Schema {
@@ -69,13 +69,12 @@ export class Schema {
   }
 
   private createSchema$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        createSchema(
-          {},
-          {schema_name: this.name, attributes: this.attributes, schema_version: '1.0'}
-        )
-      )),
+    return defer(() => from(
+      createSchema(
+        {},
+        {schema_name: this.name, attributes: this.attributes, schema_version: '1.0'}
+      )
+    )).pipe(
       map(schemaID => {
         this.schemaID = schemaID
       })
@@ -104,13 +103,12 @@ export class Schema {
   }
 
   private createCredDef$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        createCredentialDefinition(
-          {},
-          {schema_id: this.schemaID, tag: this.name, support_revocation: this.revocable}
-        )
-      )),
+    return defer(() => from(
+      createCredentialDefinition(
+        {},
+        {schema_id: this.schemaID, tag: this.name, support_revocation: this.revocable}
+      )
+    )).pipe(
       map(credDefID => {
         this.credID = credDefID
       })

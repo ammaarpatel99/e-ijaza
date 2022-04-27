@@ -8,7 +8,7 @@ import {
   mergeMap,
   Observable,
   of,
-  ReplaySubject,
+  Subject,
   switchMap
 } from "rxjs";
 import {WebhookMonitor} from "../webhook";
@@ -125,7 +125,7 @@ export class CredentialProofProtocol {
 
   // INCOMING
 
-  private readonly _incomingRequest$ = new ReplaySubject<Immutable<IncomingRequest>>(1)
+  private readonly _incomingRequest$ = new Subject<Immutable<IncomingRequest>>()
   readonly incomingRequest$ = this._incomingRequest$.asObservable()
 
   initialiseUser$() {

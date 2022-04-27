@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
-import {forkJoin$, Immutable, voidObs$} from "@project-utils";
-import {catchError, from, last, mergeMap, Observable, switchMap} from "rxjs";
+import {forkJoin$, Immutable} from "@project-utils";
+import {catchError, defer, from, last, mergeMap, Observable, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -45,15 +45,17 @@ export class MastersStoreProtocol {
   }
 
   initialiseController$() {
-    return voidObs$.pipe(
-      map(() => this.watchState()),
-      switchMap(() => this.getFromStore$())
+    return this.getFromStore$().pipe(
+      map(data => {
+        this.watchState()
+        return data
+      })
     )
   }
 
   private getFromStore$() {
     return this.getStored$().pipe(
-      map(creds => creds.results?.shift()),
+      map(creds => creds.shift()),
       map(store => {
         if (!store) return new Map()
         const credentials = JSON.parse(store.attrs!['credentials']) as Schemas.MastersInternalSchema['credentials']
@@ -63,10 +65,10 @@ export class MastersStoreProtocol {
   }
 
   private getStored$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${mastersInternalSchema.schemaID}"}`})
-      ))
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${mastersInternalSchema.schemaID}"}`})
+    )).pipe(
+      map(results => results.results || [])
     )
   }
 
@@ -94,7 +96,6 @@ export class MastersStoreProtocol {
 
   private deleteStored$() {
     return this.getStored$().pipe(
-      map(res => res.results || []),
       map(creds => creds.map(
         cred => from(deleteCredential({credential_id: cred.referent!}))
       )),
@@ -104,19 +105,18 @@ export class MastersStoreProtocol {
   }
 
   private storeData$(data: Schemas.MastersInternalSchema, connection_id: string) {
-    return voidObs$.pipe(
-      switchMap(() => from(issueCredential({
-        connection_id,
-        auto_remove: true,
-        cred_def_id: mastersInternalSchema.credID,
-        credential_proposal: {
-          attributes: [{
-            name: 'credentials',
-            value: JSON.stringify(data.credentials)
-          }]
-        },
-        comment: 'Store of data related to master teaching credentials'
-      }))),
+    return defer(() => from(issueCredential({
+      connection_id,
+      auto_remove: true,
+      cred_def_id: mastersInternalSchema.credID,
+      credential_proposal: {
+        attributes: [{
+          name: 'credentials',
+          value: JSON.stringify(data.credentials)
+        }]
+      },
+      comment: 'Store of data related to master teaching credentials'
+    }))).pipe(
       switchMap(({credential_exchange_id}) =>
         WebhookMonitor.instance.monitorCredential$(credential_exchange_id!)
       ),

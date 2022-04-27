@@ -1,7 +1,7 @@
 import {Server, Schemas} from '@project-types'
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {
-  catchError,
+  catchError, defer,
   filter,
   from,
   last,
@@ -65,19 +65,60 @@ export class MastersShareProtocol {
   }
 
   private getIssued$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
-      )),
-      map(results => results.results!),
-      map(results => results.filter(cred => cred.schema_id === mastersPublicSchema.schemaID)),
-      map(results => results.map((cred): Server.CredentialInfo => ({
-        connection_id: cred.connection_id!,
-        rev_reg_id: cred.revoc_reg_id!,
-        cred_rev_id: cred.revocation_id!
-      }))),
-      map(results => results.forEach(cred => this.issued.add(cred)))
+    return defer(() => from(
+      getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
+    )).pipe(
+      map(results => results.results
+        ?.filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
+        .map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
+          connection_id: connection_id!,
+          rev_reg_id: revoc_reg_id!,
+          cred_rev_id: revocation_id!
+        }))
+        .forEach(cred => this.issued.add(cred))
+      )
     )
+  }
+
+  private handleRequests() {
+    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
+      filter(cred =>
+        cred.credential_proposal_dict?.schema_id === mastersPublicSchema.schemaID
+        && cred.state === 'proposal_received'
+      ),
+      map(cred => cred.credential_exchange_id!),
+      withLatestFrom(State.instance.controllerMasters$),
+      map(([cred_ex_id, masters]) => {
+        return [cred_ex_id, MastersShareProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
+      }),
+      mergeMap(([cred_ex_id, data]) =>
+        from(offerCredentialFromProposal({cred_ex_id}, {
+          counter_proposal: {
+            cred_def_id: mastersPublicSchema.credID,
+            credential_proposal: {
+              attributes: [{
+                name: 'credentials',
+                value: JSON.stringify(data.credentials)
+              }]
+            }
+          }
+        })).pipe(map(() => cred_ex_id))
+      ),
+      switchMap(cred_ex_id => WebhookMonitor.instance.monitorCredential$(cred_ex_id)),
+      last(),
+      map(({connection_id, revoc_reg_id, revocation_id}) => {
+        this.issued.add({
+          connection_id: connection_id!,
+          rev_reg_id: revoc_reg_id!,
+          cred_rev_id: revocation_id!
+        });
+      }),
+      catchError(e => {
+        console.error(e)
+        return obs$
+      })
+    )
+    obs$.subscribe()
   }
 
   private revokeIssued$() {
@@ -113,58 +154,27 @@ export class MastersShareProtocol {
     obs$.subscribe()
   }
 
-  private handleRequests() {
-    const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
-      filter(cred =>
-        cred.credential_proposal_dict?.schema_id === mastersPublicSchema.schemaID
-        && cred.state === 'proposal_received'
-      ),
-      map(cred => cred.credential_exchange_id!),
-      withLatestFrom(State.instance._controllerMasters$),
-      map(([cred_ex_id, masters]) => {
-        return [cred_ex_id, MastersShareProtocol.stateToSchema(masters)] as [string, Schemas.MastersPublicSchema]
-      }),
-      mergeMap(([cred_ex_id, data]) =>
-        from(offerCredentialFromProposal({cred_ex_id}, {
-          counter_proposal: {
-            cred_def_id: mastersPublicSchema.credID,
-            credential_proposal: {
-              attributes: [{
-                name: 'credentials',
-                value: JSON.stringify(data.credentials)
-              }]
-            }
-          }
-        })).pipe(map(() => cred_ex_id))
-      ),
-      switchMap(cred_ex_id =>
-        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
-      ),
-      last(),
-      map(() => undefined as void),
-      catchError(e => {
-        console.error(e)
-        return obs$
-      })
-    )
-    obs$.subscribe()
-  }
-
   // USER
-
-  initialiseUser$() {
-    return voidObs$.pipe(
-      map(() => this.watchRevocations()),
-      switchMap(() => this.refreshData$())
-    )
-  }
 
   private readonly _userState$ = new ReplaySubject<Immutable<Server.Masters>>(1)
   readonly userState$ = this._userState$.asObservable()
 
+  initialiseUser$() {
+    return this.refreshData$().pipe(
+      map(() => {
+        this.watchRevocations()
+      })
+    )
+  }
+
   private refreshData$() {
     return this.clearHeldCredentials$().pipe(
-      switchMap(() => connectToController$()),
+      switchMap(() => this.getMasters$())
+    )
+  }
+
+  private getMasters$() {
+    return connectToController$().pipe(
       switchMap(connection_id => from(proposeCredential({
         connection_id,
         auto_remove: false,
@@ -176,7 +186,7 @@ export class MastersShareProtocol {
           }]
         }
       }))),
-      switchMap(credData => WebhookMonitor.instance.monitorCredential$(credData.credential_exchange_id!)),
+      switchMap(({credential_exchange_id}) => WebhookMonitor.instance.monitorCredential$(credential_exchange_id!)),
       last(),
       map(res => JSON.parse(res.credential!.attrs!['credentials']) as Schemas.MastersPublicSchema['credentials']),
       map(res => {
@@ -186,10 +196,9 @@ export class MastersShareProtocol {
   }
 
   private clearHeldCredentials$() {
-    return voidObs$.pipe(
-      switchMap(() => from(
-        getHeldCredentials({wql: `{"schema_id": "${mastersPublicSchema.schemaID}"}`})
-      )),
+    return defer(() => from(
+      getHeldCredentials({wql: `{"schema_id": "${mastersPublicSchema.schemaID}"}`})
+    )).pipe(
       map(result => result.results || []),
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})

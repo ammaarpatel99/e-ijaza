@@ -1,6 +1,6 @@
 import {Aries} from '@project-types'
 import {requestConnectionAgainstDID} from "../did";
-import {from, last, switchMap} from "rxjs";
+import {first, from, last, switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 import {State} from "../../state";
 import {WebhookMonitor} from "../../webhook";
@@ -9,6 +9,7 @@ export function connectViaPublicDID$ (
   pathOptions: Omit<Aries.paths['/didexchange/create-request']['post']['parameters']['query'], 'my_label'>
 ) {
   return State.instance.name$.pipe(
+    first(),
     map(my_label => {
       const options = {...pathOptions, my_label}
       if (!options.their_public_did.startsWith(`did:sov:`)) {
