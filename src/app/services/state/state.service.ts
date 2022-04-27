@@ -2,7 +2,7 @@ import {Inject, Injectable, OnDestroy, PLATFORM_ID} from '@angular/core';
 import {API} from '@project-types'
 import {forkJoin$, Immutable, Mutex, voidObs$} from '@project-utils'
 import {
-  AsyncSubject, delay,
+  AsyncSubject, BehaviorSubject, delay,
   first,
   Observable,
   ReplaySubject,
@@ -29,32 +29,32 @@ export class StateService implements OnDestroy {
   private readonly _appType$ = new ReplaySubject<Immutable<API.AppType>>(1)
   readonly appType$ = this._appType$.asObservable()
 
-  private readonly _masters$ = new ReplaySubject<Immutable<API.Master[]>>(1)
+  private readonly _masters$ = new BehaviorSubject<Immutable<API.Master[]>>([])
   readonly masters$ = this._masters$.asObservable()
 
-  private readonly _masterProposals$ = new ReplaySubject<Immutable<API.MasterProposal[]>>(1)
+  private readonly _masterProposals$ = new BehaviorSubject<Immutable<API.MasterProposal[]>>([])
   readonly masterProposals$ = this._masterProposals$.asObservable()
 
-  private readonly _subjects$ = new ReplaySubject<Immutable<API.Subject[]>>(1)
+  private readonly _subjects$ = new BehaviorSubject<Immutable<API.Subject[]>>([])
   readonly subjects$ = this._subjects$.asObservable()
   readonly subjectNames$ = this._subjectNames$()
 
-  private readonly _subjectProposals$ = new ReplaySubject<Immutable<API.SubjectProposal[]>>(1)
+  private readonly _subjectProposals$ = new BehaviorSubject<Immutable<API.SubjectProposal[]>>([])
   readonly subjectProposals$ = this._subjectProposals$.asObservable()
 
-  private readonly _heldCredentials$ = new ReplaySubject<Immutable<API.HeldCredential[]>>(1)
+  private readonly _heldCredentials$ = new BehaviorSubject<Immutable<API.HeldCredential[]>>([])
   readonly heldCredentials$ = this._heldCredentials$.asObservable()
 
-  private readonly _issuedCredentials$ = new ReplaySubject<Immutable<API.IssuedCredential[]>>(1)
+  private readonly _issuedCredentials$ = new BehaviorSubject<Immutable<API.IssuedCredential[]>>([])
   readonly issuedCredentials$ = this._issuedCredentials$.asObservable()
 
-  private readonly _outgoingProofRequests$ = new ReplaySubject<Immutable<API.OutgoingProofRequest[]>>(1)
+  private readonly _outgoingProofRequests$ = new BehaviorSubject<Immutable<API.OutgoingProofRequest[]>>([])
   readonly outgoingProofRequests$ = this._outgoingProofRequests$.asObservable()
 
-  private readonly _incomingProofRequests$ = new ReplaySubject<Immutable<API.IncomingProofRequest[]>>(1)
+  private readonly _incomingProofRequests$ = new BehaviorSubject<Immutable<API.IncomingProofRequest[]>>([])
   readonly incomingProofRequests$ = this._incomingProofRequests$.asObservable()
 
-  private readonly _reachableSubjects$ = new ReplaySubject<Immutable<API.ReachableSubject[]>>(1)
+  private readonly _reachableSubjects$ = new BehaviorSubject<Immutable<API.ReachableSubject[]>>([])
   readonly reachableSubjects$ = this._reachableSubjects$.asObservable()
   readonly reachableFromMasterCreds$ = this._reachableFromMasterCreds$()
 
