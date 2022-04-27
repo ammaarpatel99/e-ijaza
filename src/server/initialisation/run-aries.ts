@@ -34,11 +34,11 @@ export function runAries(data: {
 
     `--genesis-url ${data.genesisUrl} ` +
 
-    (logsDir ? `--log-file ${logsDir}/aries.log ` : '') +
-    `--log-level debug ` +
-    `--timing ` +
-    (logsDir ? `--timing-log ${logsDir}/aries.timing.log ` : '') +
-    `--trace ` +
+    // (logsDir ? `--log-file ${logsDir}/aries.log ` : '') +
+    // `--log-level debug ` +
+    // `--timing ` +
+    // (logsDir ? `--timing-log ${logsDir}/aries.timing.log ` : '') +
+    // `--trace ` +
     '--preserve-exchange-records ' +
 
     '--auto-ping-connection ' +

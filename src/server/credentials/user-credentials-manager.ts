@@ -2,14 +2,13 @@ import {
   catchError,
   combineLatestWith, defer, filter,
   first,
-  forkJoin,
   from, mergeMap,
   Observable,
   ReplaySubject,
   switchMap,
   withLatestFrom
 } from "rxjs";
-import {Immutable} from "@project-utils";
+import {forkJoin$, Immutable} from "@project-utils";
 import {Server, API} from '@project-types'
 import {CredentialIssueProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
@@ -134,15 +133,17 @@ export class UserCredentialsManager {
           .filter(cred => !subjects.has(cred.subject))
           .map(cred => CredentialIssueProtocol.instance.userRevoke$(cred))
         if (deletions.length !== 0 || revocations.length !== 0) {
-          return forkJoin([...deletions, ...revocations])
-            .pipe(map(() => null))
+          return forkJoin$([...deletions, ...revocations])
+            .pipe(
+              map(() => null)
+            )
         }
         const heldSubjects = new Set([...heldCreds].map(cred => cred.subject))
         const masterSubjects = new Set([...heldCreds]
           .filter(cred => cred.issuerDID === controllerDID)
           .map(cred => cred.subject)
         )
-        return forkJoin([
+        return forkJoin$([
           SubjectOntology.instance.getAllReachable$(heldSubjects),
           SubjectOntology.instance.getAllReachable$(masterSubjects)
         ])
@@ -167,7 +168,7 @@ export class UserCredentialsManager {
     const obsArr = creds.map(cred => defer(() =>
       from(deleteCredential({credential_id: cred.credentialID}))
     ))
-    return forkJoin(obsArr).pipe(
+    return forkJoin$(obsArr).pipe(
       switchMap(() => this._heldCredentials$),
       first(),
       map(state => {

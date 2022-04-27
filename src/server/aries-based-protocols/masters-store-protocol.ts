@@ -1,6 +1,6 @@
 import {Schemas, Server} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
-import {catchError, forkJoin, from, last, mergeMap, Observable, switchMap} from "rxjs";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
+import {catchError, from, last, mergeMap, Observable, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -98,7 +98,7 @@ export class MastersStoreProtocol {
       map(creds => creds.map(
         cred => from(deleteCredential({credential_id: cred.referent!}))
       )),
-      switchMap(arr => forkJoin(arr)),
+      switchMap(arr => forkJoin$(arr)),
       map(() => undefined as void)
     )
   }

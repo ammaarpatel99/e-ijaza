@@ -33,7 +33,6 @@ export class Initialisation {
       switchMap(() => this.createAriesAgent$(data)),
       switchMap(() => {
         if (!data.vonNetworkURL) {
-          this.initialisationDataCache = data
           return voidObs$
         }
         return this.autoRegisterDID$({vonNetworkURL: data.vonNetworkURL})
@@ -150,7 +149,10 @@ export class Initialisation {
       switchMap(() => this.generateDID$()),
       switchMap(didData =>
         from(axios.post(vonNetworkURL + '/register', {role: 'ENDORSER', alias: null, did: didData.did, verkey: didData.verkey}))
-          .pipe(map(() => didData.did))
+          .pipe(
+            switchMap(() => from(setPublicDID({did: didData.did}))),
+            map(() => didData.did)
+          )
       ),
       tap({
         next: did => this._initialisationData$.next({state: Server.InitialisationState.PUBLIC_DID_REGISTERED, did}),

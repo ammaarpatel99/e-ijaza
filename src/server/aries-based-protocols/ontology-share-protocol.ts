@@ -1,10 +1,9 @@
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {map, mergeMap, shareReplay, tap} from "rxjs/operators";
 import {
   catchError,
   filter,
   first,
-  forkJoin,
   from,
   last,
   Observable,
@@ -187,7 +186,7 @@ export class OntologyShareProtocol {
   private revokeIssued$(credData: Set<Server.CredentialInfo>, comment?: string) {
     return voidObs$.pipe(
       map(() => [...credData]),
-      switchMap(creds => forkJoin(creds.map(cred =>
+      switchMap(creds => forkJoin$(creds.map(cred =>
         from(revokeCredential({
           publish: true,
           notify: true,
@@ -236,7 +235,7 @@ export class OntologyShareProtocol {
           this.revokeIssued$(this.issuedList)
             .pipe(tap(() => this.issuedList.clear()))
         )
-        return forkJoin(arr)
+        return forkJoin$(arr)
       }),
       map(() => undefined as void),
       catchError(e => {
@@ -269,9 +268,9 @@ export class OntologyShareProtocol {
   }
 
   private refreshData$() {
-    return forkJoin([this.clearSubjectsList$(), this.clearSubjects$()]).pipe(
+    return forkJoin$([this.clearSubjectsList$(), this.clearSubjects$()]).pipe(
       switchMap(() => this.getSubjectsList$()),
-      switchMap(subjects => forkJoin(subjects.map(subject => this.getSubject$(subject)))),
+      switchMap(subjects => forkJoin$(subjects.map(subject => this.getSubject$(subject)))),
       map(() => undefined as void)
     )
   }
@@ -353,7 +352,7 @@ export class OntologyShareProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin(creds || []))
+      switchMap(creds => forkJoin$(creds || []))
     )
   }
 
@@ -373,7 +372,7 @@ export class OntologyShareProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin(creds || []))
+      switchMap(creds => forkJoin$(creds || []))
     )
   }
 

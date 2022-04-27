@@ -1,8 +1,7 @@
 import {Schemas, Server} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {
   catchError,
-  forkJoin,
   from,
   last,
   mergeMap,
@@ -94,7 +93,7 @@ export class OntologyStoreProtocol {
         return {subject}
       }))
     )
-    return forkJoin([subjectListData$, subjectsData$]).pipe(
+    return forkJoin$([subjectListData$, subjectsData$]).pipe(
       map(([subjectListData, subjectsData]) => OntologyStoreProtocol.schemasToState(subjectListData, subjectsData)),
       tap(state => this.previous = state),
       switchMap(state => this.clean$(state).pipe(map(() => state)))
@@ -104,9 +103,8 @@ export class OntologyStoreProtocol {
   private clean$(state: Immutable<Server.Subjects>) {
     const arr = [...state.keys()].map(subject => this.storeSubject$(state, subject))
     arr.push(this.storeSubjectList$(state))
-
-    return forkJoin([this.deleteStoredSubjects$(), this.deleteStoredSubjectsList$()]).pipe(
-      switchMap(() => forkJoin(arr))
+    return forkJoin$([this.deleteStoredSubjects$(), this.deleteStoredSubjectsList$()]).pipe(
+      switchMap(() => forkJoin$(arr))
     )
   }
 
@@ -124,7 +122,7 @@ export class OntologyStoreProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin(creds || []))
+      switchMap(creds => forkJoin$(creds || []))
     )
   }
 
@@ -150,7 +148,7 @@ export class OntologyStoreProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin(creds || []))
+      switchMap(creds => forkJoin$(creds || []))
     )
   }
 
@@ -164,7 +162,9 @@ export class OntologyStoreProtocol {
           ...edited.map(subject => this.storeSubject$(state, subject))
         ]
         if (subjectsListChanged) arr.push(this.storeSubjectList$(state))
-        return forkJoin(arr).pipe(map(() => state))
+        return forkJoin$(arr).pipe(
+          map(() => state)
+        )
       }),
       map(state => {this.previous = state}),
       catchError(e => {

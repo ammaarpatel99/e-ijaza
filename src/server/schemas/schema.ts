@@ -105,7 +105,7 @@ export class Schema {
 
   private createCredDef$() {
     return voidObs$.pipe(
-      switchMap(schemaID => from(
+      switchMap(() => from(
         createCredentialDefinition(
           {},
           {schema_id: this.schemaID, tag: this.name, support_revocation: this.revocable}

@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import {map, startWith} from 'rxjs/operators';
-import {Observable, switchMap} from 'rxjs';
+import {combineLatestWith, Observable, switchMap} from 'rxjs';
 import {StateService} from "../../services/state/state.service";
 import {Immutable} from "@project-utils";
 import {API} from "@project-types";
@@ -32,8 +32,8 @@ export class IncomingProofsDataSource extends DataSource<Immutable<API.IncomingP
     if (this.paginator) {
       return this.paginator.page.pipe(
         startWith(null),
-        switchMap(() => this.stateService.incomingProofRequests$),
-        map(data => this.getPagedData(data))
+        combineLatestWith(this.stateService.incomingProofRequests$),
+        map(([_,data]) => this.getPagedData(data))
       )
     } else {
       throw Error('Please set the paginator on the data source before connecting.');

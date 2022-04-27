@@ -36,7 +36,7 @@ export function initialiseControllerSchemas$() {
       schemas.map(schema => schema.fetchOrSetCredID$())
     )),
     map(() => {
-      ShareSchemasProtocol.instance.initialiseController$()
+      ShareSchemasProtocol.instance.initialiseController()
     })
   )
 }

@@ -1,7 +1,6 @@
 import {
-  catchError, combineLatestWith,
+  catchError, combineLatestWith, defaultIfEmpty,
   first,
-  forkJoin,
   mergeMap,
   Observable,
   of,
@@ -10,7 +9,7 @@ import {
   withLatestFrom
 } from "rxjs";
 import {Server} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {MasterVoteProtocol, OntologyProposalStoreProtocol, OntologyVoteProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
 import {State} from "../state";
@@ -38,6 +37,7 @@ export class OntologyProposalManager {
   initialiseController$() {
     return voidObs$.pipe(
       map(() => {
+        this._state$.next(new Map())
         this.watchVotes()
         this.watchMastersAndOntology()
         this.watchNewProposals()
@@ -101,7 +101,9 @@ export class OntologyProposalManager {
       .filter(([_,data]) => typeof data !== 'boolean')
       .map(([_, data ]) => data as Exclude<typeof data, boolean>)
       .map(vote => OntologyVoteProtocol.instance.revokeVote$(vote, proposal))
-    return forkJoin(arr).pipe(map(() => undefined as void))
+    return forkJoin$(arr).pipe(
+      map(() => undefined as void)
+    )
   }
 
   private static actionProposal$(proposal: Immutable<Server.ControllerOntologyProposal>) {
@@ -122,13 +124,14 @@ export class OntologyProposalManager {
 
   private getVoters$(subjects: Set<string>) {
     return State.instance._controllerMasters$.pipe(
+      first(),
       map(masters => [...masters].map(([did, subjectMap]) => {
         const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
         return this.areSubjectsReachable$(subjects, heldSubjects).pipe(
           map(reached => reached ? did : null)
         )
       })),
-      mergeMap(data => forkJoin(data)),
+      mergeMap(data => forkJoin$(data)),
       map(data => new Set(data.filter(did => !!did) as string[]))
     )
   }
@@ -174,8 +177,8 @@ export class OntologyProposalManager {
         const toIssue = added.map(did => OntologyVoteProtocol.instance.issueVote$(did, proposal)
           .pipe(map(data => ({data, did}))))
 
-        return forkJoin(toRevoke).pipe(
-          switchMap(() => forkJoin(toIssue)),
+        return forkJoin$(toRevoke).pipe(
+          switchMap(() => forkJoin$(toIssue)),
           map(voteDetails => voteDetails.forEach(x => votes.set(x.did, x.data))),
           map(() => ({...proposal, votes}))
         )
@@ -186,26 +189,26 @@ export class OntologyProposalManager {
   private removeInvalidated$(subjectOntology: Immutable<Server.Subjects>, proposals: Immutable<Server.ControllerOntologyProposals>) {
     const remainingProposals = new Map();
     const arr = [...proposals].map(([key, proposal]) => {
-      if (!subjectOntology.has(proposal.subject)) return
+      if (!subjectOntology.has(proposal.subject)) return of(undefined)
       if (proposal.proposalType === Server.ProposalType.ADD) {
         if (proposal.change.type === Server.SubjectProposalType.CHILD) {
           const exists = subjectOntology.get(proposal.subject)?.children.has(proposal.change.child)
           if (!exists) remainingProposals.set(key, proposal)
         } else {
-          if (![...proposal.change.component_set].every(x => subjectOntology.has(x))) return
+          if (![...proposal.change.component_set].every(x => subjectOntology.has(x))) return of(undefined)
           return SubjectOntology.instance.canAddComponentSet$(proposal.subject, proposal.change.component_set).pipe(
             map(valid => {if (valid) remainingProposals.set(key, proposal)})
           )
         }
       } else {
         if (proposal.change.type === Server.SubjectProposalType.CHILD) {
-          if (!subjectOntology.has(proposal.change.child)) return
+          if (!subjectOntology.has(proposal.change.child)) return of(undefined)
           return SubjectOntology.instance.canRemoveChild$(proposal.subject, proposal.change.child).pipe(
             map(valid => {if (valid) remainingProposals.set(key, proposal)})
           )
         } else {
           const set = proposal.change.component_set
-          if (![...set].every(x => subjectOntology.has(x))) return
+          if (![...set].every(x => subjectOntology.has(x))) return of(undefined)
           const sets = [...subjectOntology.get(proposal.subject)?.componentSets || []].filter(_set => {
             if (set.size !== _set.size) return false
             return !![...set].every(x => _set.has(x))
@@ -213,9 +216,9 @@ export class OntologyProposalManager {
           if (sets.length > 0) remainingProposals.set(key, proposal)
         }
       }
-      return
+      return of(undefined)
     })
-    return forkJoin(arr).pipe(
+    return forkJoin$(arr).pipe(
       map(() => {
         if (remainingProposals.size === proposals.size) return proposals
         else return remainingProposals as typeof proposals
@@ -228,14 +231,14 @@ export class OntologyProposalManager {
       combineLatestWith(State.instance._subjectOntology$),
       tap(() => State.instance.startUpdating()),
       withLatestFrom(this._state$),
-      switchMap(([[_, subjects], proposals]) => this.removeInvalidated$(subjects, proposals)),
+      mergeMap(([[_, subjects], proposals]) => this.removeInvalidated$(subjects, proposals)),
       map(proposals => [...proposals.values()]
         .map(proposal =>
           this.updateProposal$(proposal)
             .pipe(map(_new => ({old: proposal, new: _new})))
         )
       ),
-      mergeMap(updates => forkJoin([...updates])),
+      switchMap(updates => forkJoin$(updates)),
       withLatestFrom(this._state$),
       switchMap(([updates, state]) => {
         let changed = false
@@ -254,7 +257,7 @@ export class OntologyProposalManager {
           return
         })
         if (changed) this._state$.next(newState)
-        return forkJoin(arr)
+        return forkJoin$(arr)
       }),
       map(() => undefined as void),
       tap({

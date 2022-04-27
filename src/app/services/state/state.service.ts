@@ -1,13 +1,9 @@
 import {Inject, Injectable, OnDestroy, PLATFORM_ID} from '@angular/core';
 import {API} from '@project-types'
-import {Immutable, Mutex, voidObs$} from '@project-utils'
+import {forkJoin$, Immutable, Mutex, voidObs$} from '@project-utils'
 import {
   AsyncSubject, delay,
-  filter,
   first,
-  forkJoin,
-  interval,
-  mergeMap,
   Observable,
   ReplaySubject,
   switchMap,
@@ -108,7 +104,7 @@ export class StateService implements OnDestroy {
     if (updateData.outgoingProofRequests) arr.push(this.fetchOutgoingProofRequests$)
     if (updateData.incomingProofRequests) arr.push(this.fetchIncomingProofRequests$)
     if (updateData.reachableSubjects) arr.push(this.fetchReachableSubjects$)
-    return forkJoin(arr).pipe(
+    return forkJoin$(arr).pipe(
       this.loading.wrapObservable({waitForFree: false}),
       map(() => undefined as void)
     )
@@ -144,23 +140,23 @@ export class StateService implements OnDestroy {
   }
 
   private _fetchState$() {
-    const obs$: Observable<void> =
-      this.api.getStateUpdate$({timestamp: this.serverTimestamp}).pipe(
-        tap(() => this.innerTimestamp = Date.now()),
-        tap(data => {
-          this._initialisationState$.next(data.state)
-          if ("did" in data) this._did$.next(data.did)
-          if ('appType' in data) this._appType$.next(data.appType)
-          if (data.state === API.InitialisationState.COMPLETE) this.serverTimestamp = data.timestamp
-        }),
-        switchMap(data => this.fetchData$(data)),
-        switchMap(() => {
-          if (this.waiting) {
-            this.waiting = false
-            return obs$
-          } else return voidObs$
-        })
-      )
+    const obs$: Observable<void> = voidObs$.pipe(
+      switchMap(() => this.api.getStateUpdate$({timestamp: this.serverTimestamp})),
+      tap(() => this.innerTimestamp = Date.now()),
+      tap(data => {
+        this._initialisationState$.next(data.state)
+        if ("did" in data) this._did$.next(data.did)
+        if ('appType' in data) this._appType$.next(data.appType)
+        if (data.state === API.InitialisationState.COMPLETE) this.serverTimestamp = data.timestamp
+      }),
+      switchMap(data => this.fetchData$(data)),
+      switchMap(() => {
+        if (this.waiting) {
+          this.waiting = false
+          return obs$
+        } else return voidObs$
+      })
+    )
     return obs$.pipe(
       this.fetching.wrapObservable()
     )

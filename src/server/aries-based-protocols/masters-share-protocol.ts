@@ -1,9 +1,8 @@
 import {Server, Schemas} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {
   catchError,
   filter,
-  forkJoin,
   from,
   last,
   mergeMap,
@@ -84,7 +83,7 @@ export class MastersShareProtocol {
   private revokeIssued$() {
     return voidObs$.pipe(
       map(() => [...this.issued]),
-      switchMap(creds => forkJoin(creds.map(cred =>
+      switchMap(creds => forkJoin$(creds.map(cred =>
         from(revokeCredential({
           publish: true,
           notify: true,
@@ -195,7 +194,7 @@ export class MastersShareProtocol {
       map(creds => creds.map(cred => from(
         deleteCredential({credential_id: cred.referent!})
       ))),
-      switchMap(creds => forkJoin(creds)),
+      switchMap(creds => forkJoin$(creds)),
       map(() => undefined as void)
     )
   }

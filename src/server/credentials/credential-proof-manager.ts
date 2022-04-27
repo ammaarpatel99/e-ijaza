@@ -3,7 +3,7 @@ import {CredentialProof} from "./credential-proof";
 import {
   catchError,
   combineLatestWith,
-  first, forkJoin,
+  first,
   mergeMap,
   Observable,
   of,
@@ -12,7 +12,7 @@ import {
   switchMap,
   tap
 } from "rxjs";
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {map} from "rxjs/operators";
 import {State} from "../state";
 import {SubjectOntology} from "../subject-ontology";
@@ -189,7 +189,7 @@ export class CredentialProofManager {
             )
           )
         )
-        return forkJoin(arr)
+        return forkJoin$(arr)
       }),
       map(() => undefined as void),
       tap({

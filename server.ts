@@ -30,11 +30,9 @@ export function app(): express.Express {
   server.set('view engine', 'html');
   server.set('views', distFolder);
 
-  attemptInitialisation$().subscribe(() => {
-    // Express Rest API endpoints
-    server.use('/api', apiRouter)
-    server.use('/webhook', webhookRouter)
-  })
+  // Express Rest API endpoints
+  server.use('/api', apiRouter)
+  server.use('/webhook', webhookRouter)
 
 
   // Serve static files from /browser
@@ -52,7 +50,7 @@ export function app(): express.Express {
 
 function run(): void {
   const port = process.env['PORT'] || 4000;
-
+  attemptInitialisation$().subscribe()
   // Start up the Node server
   app().listen(port, () => {
     console.log(`Node Express server listening on http://localhost:${port}`);

@@ -1,7 +1,6 @@
 import {
   catchError, combineLatestWith,
   first,
-  forkJoin,
   mergeMap,
   Observable,
   of,
@@ -10,7 +9,7 @@ import {
   withLatestFrom
 } from "rxjs";
 import {Server, API} from '@project-types'
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {MasterProposalStoreProtocol, MasterVoteProtocol} from "../aries-based-protocols";
 import {map} from "rxjs/operators";
 import {MasterCredentialsManager} from "./master-credentials-manager";
@@ -35,6 +34,7 @@ export class MasterProposalsManager {
   initialiseController$() {
     return voidObs$.pipe(
       map(() => {
+        this._state$.next(new Map())
         this.watchVotes()
         this.watchMastersAndOntology()
         this.watchNewProposals()
@@ -109,7 +109,9 @@ export class MasterProposalsManager {
       .filter(([_,data]) => typeof data !== 'boolean')
       .map(([_, data ]) => data as Exclude<typeof data, boolean>)
       .map(vote => MasterVoteProtocol.instance.revokeVote$(vote, proposal))
-    return forkJoin(arr).pipe(map(() => undefined as void))
+    return forkJoin$(arr).pipe(
+      map(() => undefined as void)
+    )
   }
 
   private static actionProposal$(proposal: Immutable<Server.ControllerMasterProposal>) {
@@ -122,13 +124,14 @@ export class MasterProposalsManager {
 
   private getVoters$(subject: string) {
     return State.instance._controllerMasters$.pipe(
+      first(),
       map(masters => [...masters].map(([did, subjectMap]) => {
         const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
         return this.isSubjectReachable$(subject, heldSubjects).pipe(
           map(reached => reached ? did : null)
         )
       })),
-      mergeMap(data => forkJoin(data)),
+      mergeMap(data => forkJoin$(data)),
       map(data => new Set(data.filter(did => !!did) as string[]))
     )
   }
@@ -169,8 +172,8 @@ export class MasterProposalsManager {
         const toIssue = added.map(did => MasterVoteProtocol.instance.issueVote$(did, proposal)
           .pipe(map(data => ({data, did}))))
 
-        return forkJoin(toRevoke).pipe(
-          switchMap(() => forkJoin(toIssue)),
+        return forkJoin$(toRevoke).pipe(
+          switchMap(() => forkJoin$(toIssue)),
           map(voteDetails => voteDetails.forEach(x => votes.set(x.did, x.data))),
           map(() => ({...proposal, votes}))
         )
@@ -198,20 +201,24 @@ export class MasterProposalsManager {
       combineLatestWith(State.instance._subjectOntology$),
       tap(() => State.instance.startUpdating()),
       withLatestFrom(this._state$),
-      map(([[masters, subjects], proposals]) => this.removeInvalidated(masters, subjects, proposals)),
+      map(([[masters, subjects], proposals]) => {
+        return this.removeInvalidated(masters, subjects, proposals);
+      }),
       map(proposals => [...proposals.values()]
         .map(proposal =>
           this.updateProposal$(proposal)
             .pipe(map(_new => ({old: proposal, new: _new})))
         )
       ),
-      mergeMap(updates => forkJoin([...updates])),
+      mergeMap(updates =>
+        forkJoin$(updates)
+      ),
       withLatestFrom(this._state$),
       switchMap(([updates, state]) => {
         let changed = false
         const newState = new Map(state)
         const arr: Observable<void>[] = []
-        updates.forEach(update => {
+        updates.forEach((update: any) => {
           if (update.new === null) return
           changed = true
           if (typeof update.new !== "boolean") {
@@ -223,8 +230,8 @@ export class MasterProposalsManager {
           if (update.new === true) arr.push(MasterProposalsManager.actionProposal$(update.old))
           return
         })
-        if (changed) this._state$.next(newState)
-        return forkJoin(arr)
+        if (changed) this._state$.next(newState as any)
+        return forkJoin$(arr)
       }),
       map(() => undefined as void),
       tap({

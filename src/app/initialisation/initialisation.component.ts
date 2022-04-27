@@ -45,8 +45,8 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   get name() { return this.initialisationForm.get('name') as FormControl }
   readonly initialisationForm = new FormGroup({
     appType: new FormControl(API.AppType.USER, [Validators.required, isAppTypeValidator]),
-    masterDID: new FormControl('', Validators.required),
-    name: new FormControl('', Validators.required)
+    masterDID: new FormControl(''),
+    name: new FormControl('')
   })
 
   readonly vonNetworkURL = new FormControl('http://host.docker.internal:9000', Validators.required)
@@ -140,8 +140,8 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
   private manageValidators() {
     const subscription1 = this.appType.valueChanges.subscribe(value => {
       if (value === API.AppType.CONTROLLER) {
-        this.masterDID.removeValidators(Validators.required)
-        this.name.removeValidators(Validators.required)
+        this.masterDID.clearValidators()
+        this.name.clearValidators()
       } else {
         this.masterDID.addValidators(Validators.required)
         this.name.addValidators(Validators.required)
@@ -151,7 +151,7 @@ export class InitialisationComponent implements OnInit, AfterViewInit, OnDestroy
     })
     const subscription2 = this.autoRegisterPublicDID.valueChanges.subscribe(value => {
       if (value) this.initVonNetworkURL.addValidators(Validators.required)
-      else this.initVonNetworkURL.removeValidators(Validators.required)
+      else this.initVonNetworkURL.clearValidators()
       this.initVonNetworkURL.updateValueAndValidity()
     })
     this.destroy$.subscribe(() => {

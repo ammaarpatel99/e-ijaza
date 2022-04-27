@@ -1,5 +1,5 @@
-import {Immutable, voidObs$} from "@project-utils";
-import {catchError, forkJoin, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
+import {catchError, from, last, mergeMap, Observable, switchMap, tap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -70,8 +70,8 @@ export class MasterProposalStoreProtocol {
             .pipe(map(cred_ex_id => this.credentialIDs.set(id, cred_ex_id)))
         )
 
-        return forkJoin(arr).pipe(
-          switchMap(() => forkJoin(arr2)),
+        return forkJoin$(arr).pipe(
+          switchMap(() => forkJoin$(arr2)),
           map(() => state)
         )
       }),

@@ -1,8 +1,8 @@
 import {CredentialProofProtocol} from "../aries-based-protocols";
 import {map, switchMap} from "rxjs/operators";
-import {forkJoin, Observable, ReplaySubject, withLatestFrom} from "rxjs";
+import {Observable, ReplaySubject, withLatestFrom} from "rxjs";
 import {State} from "../state";
-import {Immutable, voidObs$} from "@project-utils";
+import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 
 export interface Proof {
   did: string
@@ -87,7 +87,7 @@ export class CredentialProof {
           })
         proof.proof = [...existingResults, ...newResults]
         this.update()
-        return forkJoin(newResults.map(proof => this.prove$(proof)))
+        return forkJoin$(newResults.map(proof => this.prove$(proof)))
       }),
       map(() => undefined as void)
     )

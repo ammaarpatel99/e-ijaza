@@ -8,7 +8,6 @@ import {
 import {
   catchError, defer,
   filter,
-  forkJoin,
   from,
   last,
   mergeMap,
@@ -22,7 +21,7 @@ import {teachingSchema} from "../schemas";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Server, Schemas} from '@project-types'
-import {Immutable} from "@project-utils";
+import {forkJoin$, Immutable} from "@project-utils";
 import {UserIssuedCredential} from "../../types/server";
 import {UserCredentialsManager} from "../credentials";
 
@@ -132,7 +131,7 @@ export class CredentialIssueProtocol {
           map(deleted => deleted ? undefined : cred)
         )
       )),
-      switchMap(creds => forkJoin(creds)),
+      switchMap(creds => forkJoin$(creds)),
       map(creds => creds.filter(cred => !!cred) as typeof creds extends (infer T)[] ? Exclude<T, undefined>[] : never),
       map(creds => creds.map((cred): Server.UserHeldCredential => ({
         credentialID: cred.referent!,
@@ -174,7 +173,7 @@ export class CredentialIssueProtocol {
           }))
         )
       )),
-      switchMap(creds => forkJoin(creds)),
+      switchMap(creds => forkJoin$(creds)),
       map(creds => this._issuedCredentials$.next(new Set(creds)))
     )
   }

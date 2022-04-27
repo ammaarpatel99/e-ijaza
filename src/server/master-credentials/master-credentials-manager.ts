@@ -1,8 +1,17 @@
 import {CredentialIssueProtocol, MastersStoreProtocol, MastersShareProtocol} from '../aries-based-protocols'
-import {catchError, first, forkJoin, mergeMap, Observable, ReplaySubject, switchMap, tap, withLatestFrom} from "rxjs";
+import {
+  catchError,
+  first,
+  mergeMap,
+  Observable,
+  ReplaySubject,
+  switchMap,
+  tap,
+  withLatestFrom
+} from "rxjs";
 import {Server} from '@project-types'
 import {map} from "rxjs/operators";
-import {Immutable} from "@project-utils";
+import {forkJoin$, Immutable} from "@project-utils";
 import {State} from "../state";
 
 export class MasterCredentialsManager {
@@ -93,7 +102,7 @@ export class MasterCredentialsManager {
                 .pipe(map(() => ({did, subject})))
             )
           )
-        return forkJoin(revokeRequests).pipe(
+        return forkJoin$(revokeRequests).pipe(
           map(revoked => ({masters, revoked}))
         )
       }),
