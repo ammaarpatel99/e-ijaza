@@ -1,6 +1,6 @@
 import {Initialisation} from './initialisation'
-import {distinct, map, shareReplay} from "rxjs/operators";
-import {combineLatestWith, delay, filter, Observable, of, switchMap} from "rxjs";
+import {distinctUntilChanged, map, share, shareReplay} from "rxjs/operators";
+import {combineLatestWith, delay, filter, of, OperatorFunction, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "./master-credentials";
 import {
   MastersShareProtocol,
@@ -22,61 +22,62 @@ export class State {
   private constructor() { }
 
   private readonly mutex = new Mutex()
+  private readonly emitValues$ = this._emitValues$()
 
   readonly _initialisationState$ = Initialisation.instance.initialisationData$.pipe(
     map(data => data.state),
-    distinct(),
+    distinctUntilChanged(),
     shareReplay(1)
   )
 
-  readonly initialisationState$ = this._initialisationState$.pipe(this.waitForNotUpdating.bind(this))
+  readonly initialisationState$ = this._initialisationState$.pipe(this.waitForNotUpdating())
 
   readonly _did$ = Initialisation.instance.initialisationData$.pipe(
     map(data => 'did' in data ? data.did : undefined),
     filter(data => data !== undefined),
     map(data => data as Exclude<typeof data, undefined>),
-    distinct(),
+    distinctUntilChanged(),
     shareReplay(1)
   )
 
 
-  readonly did$ = this._did$.pipe(this.waitForNotUpdating.bind(this))
+  readonly did$ = this._did$.pipe(this.waitForNotUpdating())
 
   readonly _name$ = Initialisation.instance.initialisationData$.pipe(
     map(data => 'name' in data ? data.name : undefined),
     filter(data => data !== undefined),
     map(data => data as Exclude<typeof data, undefined>),
-    distinct(),
+    distinctUntilChanged(),
     shareReplay(1)
   )
 
-  readonly name$ = this._name$.pipe(this.waitForNotUpdating.bind(this))
+  readonly name$ = this._name$.pipe(this.waitForNotUpdating())
 
   readonly _appType$ = Initialisation.instance.initialisationData$.pipe(
     map(data => "appType" in data ? data.appType : undefined),
     filter(data => data !== undefined),
     map(data => data as Exclude<typeof data, undefined>),
-    distinct(),
+    distinctUntilChanged(),
     shareReplay(1)
   )
 
-  readonly appType$ = this._appType$.pipe(this.waitForNotUpdating.bind(this))
+  readonly appType$ = this._appType$.pipe(this.waitForNotUpdating())
 
   readonly _controllerDID$ = Initialisation.instance.initialisationData$.pipe(
     map(data => "controllerDID" in data ? data.controllerDID : undefined),
     filter(data => data !== undefined),
     map(data => data as Exclude<typeof data, undefined>),
-    distinct(),
+    distinctUntilChanged(),
     shareReplay(1)
   )
 
-  readonly controllerDID$ = this._controllerDID$.pipe(this.waitForNotUpdating.bind(this))
+  readonly controllerDID$ = this._controllerDID$.pipe(this.waitForNotUpdating())
 
   readonly _controllerMasters$ = MasterCredentialsManager.instance.state$
-  readonly controllerMasters$ = this._controllerMasters$.pipe(this.waitForNotUpdating.bind(this))
+  readonly controllerMasters$ = this._controllerMasters$.pipe(this.waitForNotUpdating())
 
   readonly _userMasters$ = MastersShareProtocol.instance.userState$
-  readonly userMasters$ = this._userMasters$.pipe(this.waitForNotUpdating.bind(this))
+  readonly userMasters$ = this._userMasters$.pipe(this.waitForNotUpdating())
 
   readonly _subjectOntology$ = this._appType$.pipe(
     switchMap(appType => appType === Server.AppType.CONTROLLER
@@ -85,56 +86,59 @@ export class State {
     )
   )
 
-  readonly subjectOntology$ = this._subjectOntology$.pipe(this.waitForNotUpdating.bind(this))
+  readonly subjectOntology$ = this._subjectOntology$.pipe(this.waitForNotUpdating())
 
   readonly _controllerMasterProposals$ = MasterProposalsManager.instance.state$
-  readonly controllerMasterProposals$ = this._controllerMasterProposals$.pipe(this.waitForNotUpdating.bind(this))
+  readonly controllerMasterProposals$ = this._controllerMasterProposals$.pipe(this.waitForNotUpdating())
 
   readonly _userMasterVotes$ = MasterVoteProtocol.instance.userVotes$
-  readonly userMasterVotes$ = this._userMasterVotes$.pipe(this.waitForNotUpdating.bind(this))
+  readonly userMasterVotes$ = this._userMasterVotes$.pipe(this.waitForNotUpdating())
 
   readonly _controllerOntologyProposals$ = OntologyProposalManager.instance.state$
-  readonly controllerOntologyProposals$ = this._controllerOntologyProposals$.pipe(this.waitForNotUpdating.bind(this))
+  readonly controllerOntologyProposals$ = this._controllerOntologyProposals$.pipe(this.waitForNotUpdating())
 
   readonly _userOntologyVotes$ = OntologyVoteProtocol.instance.userVotes$
-  readonly userOntologyVotes$ = this._userOntologyVotes$.pipe(this.waitForNotUpdating.bind(this))
+  readonly userOntologyVotes$ = this._userOntologyVotes$.pipe(this.waitForNotUpdating())
 
   readonly _heldCredentials$ = UserCredentialsManager.instance.heldCredentials$
-  readonly heldCredentials$ = this._heldCredentials$.pipe(this.waitForNotUpdating.bind(this))
+  readonly heldCredentials$ = this._heldCredentials$.pipe(this.waitForNotUpdating())
 
   readonly _issuedCredentials$ = UserCredentialsManager.instance.issuedCredentials$
-  readonly issuedCredentials$ = this._issuedCredentials$.pipe(this.waitForNotUpdating.bind(this))
+  readonly issuedCredentials$ = this._issuedCredentials$.pipe(this.waitForNotUpdating())
 
   readonly _reachableSubjects$ = UserCredentialsManager.instance.reachableSubjects$
-  readonly reachableSubjects$ = this._reachableSubjects$.pipe(this.waitForNotUpdating.bind(this))
+  readonly reachableSubjects$ = this._reachableSubjects$.pipe(this.waitForNotUpdating())
 
   readonly _outgoingProofs$ = CredentialProofManager.instance.outgoingProofs$
-  readonly outgoingProofs$ = this._outgoingProofs$.pipe(this.waitForNotUpdating.bind(this))
+  readonly outgoingProofs$ = this._outgoingProofs$.pipe(this.waitForNotUpdating())
 
   readonly _incomingProofs$ = CredentialProofManager.instance.incomingProofs$
-  readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating.bind(this))
+  readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating())
 
   startUpdating() { this.mutex.hold() }
   stopUpdating() {this.mutex.release() }
 
-  private waitForNotUpdating<T>(source: Observable<T>): Observable<T> {
-    const shareValue$ = this.mutex.isHeld$.pipe(
-      distinct(),
+  private _emitValues$() {
+    return this.mutex.isHeld$.pipe(
+      distinctUntilChanged(),
       switchMap(held => {
-        if (held) return of(true)
-        return of(false).pipe(delay(100)) // require there to be no change for 100ms in order to send false
-      })
+        if (held) return of(false)
+        return of(true).pipe(delay(100)) // require there to be no change for 100ms in order to send false
+      }),
+      share()
     )
+  }
 
-    return source.pipe(
-      combineLatestWith(shareValue$),
+  private waitForNotUpdating<T>(): OperatorFunction<T,T> {
+    return source => source.pipe(
+      combineLatestWith(this.emitValues$),
       map(([value, shareValue]) => {
-        if (!shareValue) return value
+        if (shareValue) return value
         return
       }),
       filter(value => value !== undefined),
       map(value => value as Exclude<typeof value, undefined>),
-      distinct(),
+      distinctUntilChanged(),
       shareReplay(1)
     )
   }

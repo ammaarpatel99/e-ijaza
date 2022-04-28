@@ -7,7 +7,6 @@ import {runAries} from "./run-aries";
 import axios from "axios";
 import {initialiseController$, initialiseUser$} from './initialise'
 import {environment} from "../../environments/environment";
-import {initialiseAPIStateTracker$} from '../api'
 
 export class Initialisation {
   private static _instance: Initialisation | undefined
@@ -15,9 +14,7 @@ export class Initialisation {
     if (!this._instance) this._instance = new Initialisation()
     return this._instance
   }
-  private constructor() {
-    initialiseAPIStateTracker$().subscribe()
-  }
+  private constructor() { }
 
   private initialisationDataCache: Immutable<API.InitialisationData> | undefined
   private readonly _initialisationData$ = new BehaviorSubject<Immutable<Server.InitialisationStateData>>({state: Server.InitialisationState.START_STATE})

@@ -10,12 +10,6 @@ interface _TimedData<T> {
 }
 type TimedData<T> = Immutable<_TimedData<T>>
 
-export function initialiseAPIStateTracker$() {
-  return defer(() => of(StateManager.instance)).pipe(
-    map(() => undefined as void)
-  )
-}
-
 export class StateManager {
   private static _instance: StateManager | undefined
   static get instance() {
