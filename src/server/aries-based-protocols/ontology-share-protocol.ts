@@ -1,13 +1,14 @@
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
 import {map, mergeMap, shareReplay, startWith, tap} from "rxjs/operators";
 import {
+  BehaviorSubject,
   catchError,
   defer,
   filter,
   first,
   from,
   last,
-  Observable, pairwise, ReplaySubject,
+  Observable, pairwise,
   switchMap,
   withLatestFrom
 } from "rxjs";
@@ -75,7 +76,7 @@ export class OntologyShareProtocol {
             connection_id: cred.connection_id!,
             rev_reg_id: cred.revoc_reg_id!,
             cred_rev_id: cred.revocation_id!,
-            subject: JSON.parse(cred.credential!.attrs!['subject']).name
+            subject: JSON.parse(cred.credential_proposal_dict!.credential_proposal!.attributes[0].value).name
           }))
           .forEach(cred => {
             let set = this.issuedSubject.get(cred.subject)
@@ -256,7 +257,7 @@ export class OntologyShareProtocol {
 
   // USER
 
-  private readonly _userState$ = new ReplaySubject<Immutable<SubjectDataWithOptional>>(1)
+  private readonly _userState$ = new BehaviorSubject<Immutable<SubjectDataWithOptional>>(new Map())
   readonly userState$ = this.exposedUserState$()
 
   initialiseUser$() {

@@ -77,7 +77,7 @@ export class CredentialProof {
 
   private prove$(proof: Proof): Observable<void> {
     const obs$ = CredentialProofProtocol.instance.requestProof$(proof.did, proof.subject).pipe(
-      withLatestFrom(State.instance.controllerDID$),
+      withLatestFrom(State.instance._controllerDID$),
       switchMap(([result, controllerDID]) => {
         if (result === undefined) {
           proof.proof = false

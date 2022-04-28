@@ -11,7 +11,7 @@ import {
   subjectVoteSchema,
   Schema
 } from './'
-import {forkJoin$, voidObs$} from "@project-utils";
+import {forkJoin$} from "@project-utils";
 import {switchMap} from "rxjs";
 import {map} from "rxjs/operators";
 

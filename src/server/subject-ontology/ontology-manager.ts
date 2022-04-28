@@ -27,7 +27,7 @@ export class OntologyManager {
         this._state$.next(state)
         this.watchState()
       }),
-      switchMap(() => OntologyStoreProtocol.instance.initialiseController$())
+      switchMap(() => OntologyShareProtocol.instance.initialiseController$())
     )
   }
 

@@ -3,7 +3,7 @@ import {first, switchMap} from "rxjs";
 import {connectViaPublicDID$} from "./connect-via-public-did";
 
 export function connectToController$() {
-  return State.instance.controllerDID$.pipe(
+  return State.instance._controllerDID$.pipe(
     first(),
     switchMap(did => connectViaPublicDID$({their_public_did: did}))
   )

@@ -320,7 +320,7 @@ export class OntologyVoteProtocol {
 
   private getMasterCredID$() {
     return State.instance.heldCredentials$.pipe(
-      withLatestFrom(State.instance.controllerDID$),
+      withLatestFrom(State.instance._controllerDID$),
       first(),
       map(([creds, controllerDID]) =>
         [...creds]

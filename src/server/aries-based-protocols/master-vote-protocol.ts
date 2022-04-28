@@ -299,7 +299,7 @@ export class MasterVoteProtocol {
   private getMasterCredID$() {
     return State.instance.heldCredentials$.pipe(
       first(),
-      withLatestFrom(State.instance.controllerDID$),
+      withLatestFrom(State.instance._controllerDID$),
       map(([creds, controllerDID]) =>
         [...creds]
           .filter(cred => cred.issuerDID === controllerDID)

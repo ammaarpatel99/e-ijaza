@@ -3,7 +3,7 @@ import {
   combineLatestWith, defer, filter,
   first,
   from, mergeMap,
-  Observable,
+  Observable, of,
   ReplaySubject,
   switchMap, tap,
   withLatestFrom
@@ -197,8 +197,8 @@ export class UserCredentialsManager {
           .map(cred => cred.subject)
         )
         return forkJoin$([
-          SubjectOntology.instance.getAllReachable$(heldSubjects),
-          SubjectOntology.instance.getAllReachable$(masterSubjects)
+          heldSubjects.size > 0 ? SubjectOntology.instance.getAllReachable$(heldSubjects) : of([]),
+          masterSubjects.size > 0 ? SubjectOntology.instance.getAllReachable$(masterSubjects) : of([])
         ])
       }),
       map(([subjects, masterSubjects]) => {
