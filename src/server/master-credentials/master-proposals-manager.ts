@@ -49,15 +49,19 @@ export class MasterProposalsManager {
       switchMap(masters => {
         if (masters.size > 0) throw new Error(`controller can't create master`)
         return this.addProposal$(proposal)
+      }),
+      tap({
+        next: () => State.instance.stopUpdating(),
+        error: () => State.instance.stopUpdating()
       })
     )
   }
 
   private watchNewProposals() {
     const obs$: Observable<void> = MasterVoteProtocol.instance.newProposals$.pipe(
-      map(proposal => {
+      mergeMap(proposal =>
         this.addProposal$(proposal)
-      }),
+      ),
       catchError(e => {
         console.error(e)
         return obs$
@@ -97,8 +101,9 @@ export class MasterProposalsManager {
 
         const newVotes = new Map(proposal.votes)
         newVotes.set(vote.voterDID, vote.vote)
-
+        const newProposal = {...proposal, votes: newVotes}
         const newState = new Map(state)
+        newState.set(proposalID, newProposal)
         this._state$.next(newState)
       }),
       tap({
@@ -123,22 +128,25 @@ export class MasterProposalsManager {
         let newState = this.removeInvalidated(state!, subjects, masters)
         return this.updateVoters$(newState || state!, masters).pipe(
           map(_newState => _newState || newState),
-          switchMap(newState =>
-            this.actionProposals$(newState || state!).pipe(
-              map(_newState => _newState || newState)
-            )
-          ),
-          switchMap(newState => {
-            if (!oldState) return of(newState)
+          map(newState => {
+            const res = this.actionProposals(newState || state!)
+            if (res) return res
+            return {newState, actions: []}
+          }),
+          switchMap(({newState, actions}) => {
+            if (!oldState) return of({newState, actions})
             return this.issueAndRevokeVotes$(oldState, newState || state!).pipe(
-              map(_newState => _newState || newState)
+              map(_newState => _newState || newState),
+              map(newState => ({newState, actions}))
             )
           }),
-          map(newState => {
+          switchMap(({newState, actions}) => {
             if (newState) this._state$.next(newState)
+            return forkJoin$(actions)
           })
         )
       }),
+      map(() => undefined as void),
       tap({
         next: () => State.instance.stopUpdating(),
         error: () => State.instance.stopUpdating()
@@ -177,6 +185,7 @@ export class MasterProposalsManager {
     return forkJoin$(
       [...masters].map(([did, subjectMap]) => {
         const heldSubjects = new Set([...subjectMap].map(([subject, _]) => subject))
+        if (heldSubjects.size === 0) return of(null)
         return SubjectOntology.instance.canReachFromSubjects$(heldSubjects, subject).pipe(
           map(reached => reached ? did : null)
         )
@@ -201,7 +210,6 @@ export class MasterProposalsManager {
       newVotes.push([voter, {connection_id: '', cred_rev_id: '', rev_reg_id: ''}])
     })
     if (!changed) return
-    changed = true
     return {...proposal, votes: new Map(newVotes)} as typeof proposal
   }
 
@@ -214,6 +222,7 @@ export class MasterProposalsManager {
       this.getVoters$(proposal.subject, masters).pipe(
         map(voters => {
           const newProposal = this._updateVoters(voters, proposal)
+          if (newProposal) changed = true
           return [id, newProposal || proposal] as [typeof id, typeof proposal]
         })
       )
@@ -235,33 +244,27 @@ export class MasterProposalsManager {
     if (total === 0 || inFavour > boundary) {
       if (proposal.proposalType === Server.ProposalType.ADD) {
         return MasterCredentialsManager.instance.addMaster$(proposal.did, proposal.subject)
-          .pipe(map(() => true))
       }
       return MasterCredentialsManager.instance.removeMaster$(proposal.did, proposal.subject)
-        .pipe(map(() => true))
-    } else if (against > boundary) return of(true)
-    return of(false)
+    } else if (against > boundary) return voidObs$
+    return
   }
 
-  private actionProposals$(state: Immutable<Server.ControllerMasterProposals>) {
-    const updates$ = [...state].map(([id, proposal]) =>
-      this.actionProposal$(proposal).pipe(
-        map(actioned => {
-          if (actioned) return null
-          return [id, proposal] as [typeof id, typeof proposal]
-        })
-      )
-    )
-    return forkJoin$(updates$).pipe(
-      map(state =>
-        state.filter(proposal => proposal !== null) as [string, Immutable<Server.ControllerMasterProposal>][]
-      ),
-      map(state => new Map(state)),
-      map(newState => {
-        if (newState.size === state.size) return
-        return newState as typeof state
+  private actionProposals(state: Immutable<Server.ControllerMasterProposals>) {
+    const actions: Observable<void>[] = []
+    const updates = [...state]
+      .map(([id, proposal]) => {
+        const action$ = this.actionProposal$(proposal)
+        if (!action$) return [id, proposal] as [typeof id, typeof proposal]
+        actions.push(action$)
+        return null
       })
-    )
+      .filter(data => data !== null)
+      .map(data => data as Exclude<typeof data, null>)
+
+    const newState = new Map(updates)
+    if (newState.size === state.size) return
+    return {actions, newState}
   }
 
   private issueAndRevokeVotes$(
@@ -270,26 +273,27 @@ export class MasterProposalsManager {
   ) {
     const revoke$ = forkJoin$(
       [...oldState].flatMap(([id, proposal]) => {
-        const newVotes = state.get(id)?.votes || new Map()
-        return [...proposal.votes].map(([did, vote]) => {
-          const newVote = newVotes.get(did)
-          if (vote === newVote || typeof vote === "boolean") return voidObs$
-          return MasterVoteProtocol.instance.revokeVote$(vote, proposal)
+        const newVotes = state.get(id)?.votes
+        return [...proposal.votes].map(([did, oldVote]) => {
+          const newVote = newVotes?.get(did)
+          if (typeof oldVote !== 'boolean' && (!newVote || typeof newVote === 'boolean')) {
+            return MasterVoteProtocol.instance.revokeVote$(oldVote, proposal)
+          }
+          return voidObs$
         })
       })
     )
+
     let changed = false
     const newState$ = [...state].map(([id, proposal]) => {
-      const oldVotes = oldState.get(id)?.votes || new Map()
       const votes = [...proposal.votes].map(([did, vote]) => {
-        const oldVote = oldVotes.get(did)
-        if (vote === oldVote || typeof vote === "boolean") {
-          return of([did, vote] as [typeof did, typeof vote])
+        if (typeof vote !== 'boolean' && vote.connection_id === '') {
+          changed = true
+          return MasterVoteProtocol.instance.issueVote$(did, proposal).pipe(
+            map(newVote => [did, newVote] as [typeof did, typeof newVote])
+          )
         }
-        changed = true
-        return MasterVoteProtocol.instance.issueVote$(did, proposal).pipe(
-          map(vote => [did, vote] as [typeof did, typeof vote])
-        )
+        return of([did, vote] as [typeof did, typeof vote])
       })
       return forkJoin$(votes).pipe(
         map(votes =>

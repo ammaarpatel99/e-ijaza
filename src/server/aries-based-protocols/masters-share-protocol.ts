@@ -104,8 +104,10 @@ export class MastersShareProtocol {
           }
         })).pipe(map(() => cred_ex_id))
       ),
-      switchMap(cred_ex_id => WebhookMonitor.instance.monitorCredential$(cred_ex_id)),
-      last(),
+      switchMap(cred_ex_id =>
+        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
+          .pipe(last())
+      ),
       map(({connection_id, revoc_reg_id, revocation_id}) => {
         this.issued.add({
           connection_id: connection_id!,

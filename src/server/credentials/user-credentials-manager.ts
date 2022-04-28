@@ -72,7 +72,7 @@ export class UserCredentialsManager {
     return this._heldCredentials$.pipe(
       first(),
       tap(() => State.instance.startUpdating()),
-      map(state => {
+      mergeMap(state => {
         const cred = [...state].filter(_cred => credLocalID === UserCredentialsManager.heldCredentialID(_cred)).shift()
         if (!cred) throw new Error(`deleting non-existent cred`)
         return defer(() => from(

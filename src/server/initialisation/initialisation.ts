@@ -32,9 +32,15 @@ export class Initialisation {
       switchMap(() => this.createAriesAgent$(data)),
       switchMap(() => {
         if (!data.vonNetworkURL) {
-          return voidObs$
+          return this.fetchPublicDID$().pipe(
+            switchMap(() => this.initialiseIfData$()),
+            catchError(() => voidObs$)
+          )
         }
-        return this.autoRegisterDID$({vonNetworkURL: data.vonNetworkURL})
+        return this.fetchPublicDID$().pipe(
+          switchMap(() => this.initialiseIfData$()),
+          catchError(() => this.autoRegisterDID$({vonNetworkURL: data.vonNetworkURL!}))
+        )
       })
     )
   }

@@ -5,5 +5,10 @@ import {Aries} from "@project-types";
 export async function deleteCredential(
   pathParams: Aries.paths['/credential/{credential_id}']['delete']['parameters']['path']
 ) {
-  await axios.delete(`${ariesAgentURL}/credential/${pathParams.credential_id}`)
+  try {
+    await axios.delete(`${ariesAgentURL}/credential/${pathParams.credential_id}`)
+  } catch (e) {
+    console.error(`failed to delete credential with ID: ${pathParams.credential_id}`)
+    return
+  }
 }

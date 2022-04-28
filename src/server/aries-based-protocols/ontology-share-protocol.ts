@@ -115,8 +115,10 @@ export class OntologyShareProtocol {
           }
         })).pipe(map(() => cred_ex_id))
       ),
-      switchMap(cred_ex_id => WebhookMonitor.instance.monitorCredential$(cred_ex_id)),
-      last(),
+      switchMap(cred_ex_id =>
+        WebhookMonitor.instance.monitorCredential$(cred_ex_id)
+          .pipe(last())
+      ),
       map(({connection_id, revoc_reg_id, revocation_id}) => {
         this.issuedList.add({
           connection_id: connection_id!,
@@ -178,10 +180,10 @@ export class OntologyShareProtocol {
       ),
       switchMap(({cred_ex_id, subject}) =>
         WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(
+          last(),
           map(data => ({...data, subject}))
         )
       ),
-      last(),
       map(({connection_id, revoc_reg_id, revocation_id, subject}) => {
         let set = this.issuedSubject.get(subject)
         if (!set) {
@@ -272,9 +274,19 @@ export class OntologyShareProtocol {
     return this._userState$.pipe(
       filter(state => [...state].every(([_, value]) => value !== null)),
       map(state => state as Server.Subjects),
+      filter(state => this.allSubjectsExist(state)),
       mergeMap(state => SubjectOntology.instance.update$(state)),
       shareReplay(1)
     )
+  }
+
+  private allSubjectsExist(subjects: Server.Subjects) {
+    const set = new Set<string>()
+    subjects.forEach(data => {
+      data.children.forEach(x => set.add(x))
+      data.componentSets.forEach(x => x.forEach(y => set.add(y)))
+    })
+    return [...set].every(subject => subjects.has(subject))
   }
 
   private refreshData$() {

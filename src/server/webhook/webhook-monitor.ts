@@ -97,7 +97,7 @@ export class WebhookMonitor {
       this.proofs,
       data,
       data => data.presentation_exchange_id!,
-      data => data.state === 'verified',
+      data => data.state === 'verified' || data.state === 'presentation_acked',
       data => !!data.error_msg,
       this._proofs$
     )

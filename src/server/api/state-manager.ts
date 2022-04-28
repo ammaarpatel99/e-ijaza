@@ -126,8 +126,8 @@ export class StateManager {
         proposalType: proposal.proposalType,
         subject: proposal.subject,
         votes: {
-          for: [...proposal.votes.values()].map(vote => vote === true).length,
-          against: [...proposal.votes.values()].map(vote => vote === false).length,
+          for: [...proposal.votes.values()].filter(vote => vote === true).length,
+          against: [...proposal.votes.values()].filter(vote => vote === false).length,
           total: proposal.votes.size
         }
       }))
@@ -151,8 +151,8 @@ export class StateManager {
           ? {type: API.SubjectProposalType.CHILD, child: proposal.change.child}
           : {type: API.SubjectProposalType.COMPONENT_SET, componentSet: [...proposal.change.component_set]},
         votes: {
-          for: [...proposal.votes.values()].map(vote => vote === true).length,
-          against: [...proposal.votes.values()].map(vote => vote === false).length,
+          for: [...proposal.votes.values()].filter(vote => vote === true).length,
+          against: [...proposal.votes.values()].filter(vote => vote === false).length,
           total: proposal.votes.size
         }
       }))

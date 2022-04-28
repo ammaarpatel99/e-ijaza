@@ -21,7 +21,7 @@ import {
   Observable, of,
   ReplaySubject,
   Subject,
-  switchMap,
+  switchMap, tap,
   withLatestFrom
 } from "rxjs";
 import {subjectVoteSchema, teachingSchema} from "../schemas";
@@ -101,14 +101,10 @@ export class OntologyVoteProtocol {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
       filter(proof => proof.state === 'verified' && proof.presentation_proposal_dict?.comment === OntologyVoteProtocol.VOTE_PROOF_NAME),
       map(proof => {
-        const voteDetailsID = Object.entries(proof.presentation_request!.requested_attributes)
-          .filter(([_, data]) => data.name === 'voteDetails')
-          .map(([id, _]) => id).shift()!
-        const voteChoiceID = Object.entries(proof.presentation_request!.requested_attributes)
-          .filter(([_, data]) => data.name === 'voteChoice')
-          .map(([id, _]) => id).shift()!
-        const voteDetails = JSON.parse(proof.presentation!.requested_proof!.revealed_attrs![voteDetailsID].raw!) as Schemas.SubjectProposalVoteSchema['voteDetails']
-        const voteChoice = JSON.parse(proof.presentation!.requested_proof!.revealed_attrs![voteChoiceID].raw!) as boolean
+        const voteDetails = JSON.parse(
+          proof.presentation!.requested_proof!.revealed_attr_groups!["1_votedetails_uuid"].values!["voteDetails"].raw!
+        ) as Schemas.SubjectProposalVoteSchema['voteDetails']
+        const voteChoice = JSON.parse(proof.presentation!.requested_proof!.self_attested_attrs!["self_votechoice_uuid"]) as boolean
         return {voteDetails, voteChoice}
       }),
       map(({voteDetails, voteChoice}): Server.ControllerOntologyVote => ({
@@ -138,7 +134,7 @@ export class OntologyVoteProtocol {
       mergeMap(proof => {
         const conn_id = proof.connection_id!
         const proposal = JSON.parse(
-          proof.presentation!.requested_proof!.self_attested_attrs!['proposal']
+          proof.presentation!.requested_proof!.self_attested_attrs!['self_proposal_uuid']
         ) as API.SubjectProposalData
         return this.validateNewProposal$(conn_id).pipe(
           map(() => this._newProposals$.next({
@@ -157,7 +153,7 @@ export class OntologyVoteProtocol {
     obs$.subscribe()
   }
 
-  validateNewProposal$(connectionID: string) {
+  private validateNewProposal$(connectionID: string) {
     const date = Date.now()
     return voidObs$.pipe(
       switchMap(() => from(requestProof({
@@ -232,9 +228,21 @@ export class OntologyVoteProtocol {
             }
           }))),
           switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
-          last()
+          switchMap(({state, presentation_exchange_id}) => {
+            if (state !== 'request_received') return voidObs$
+            return from(presentProof({pres_ex_id: presentation_exchange_id!}, {
+              requested_predicates: {},
+              self_attested_attributes: {
+                self_votechoice_uuid: JSON.stringify(data.voteChoice)
+              },
+              requested_attributes: {"1_votedetails_uuid": {
+                cred_id: data.credentialID, revealed: true
+              }}
+            }))
+          })
         )
       ),
+      last(),
       map(() => undefined as void)
     )
   }
@@ -247,7 +255,7 @@ export class OntologyVoteProtocol {
       }),
       switchMap(connectionID =>
         from(proposeProof({
-          auto_present: false,
+          auto_present: true,
           connection_id: connectionID,
           comment: OntologyVoteProtocol.CREATION_PROOF_NAME,
           presentation_proposal: {
@@ -256,7 +264,19 @@ export class OntologyVoteProtocol {
               {name: 'proposal', value: JSON.stringify(proposal)}
             ]
           }
-        })).pipe(map(() => connectionID))
+        })).pipe(
+          switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
+          filter(({state}) => state === 'request_received'),
+          first(),
+          switchMap(({presentation_exchange_id}) => from(presentProof({pres_ex_id: presentation_exchange_id!}, {
+            requested_attributes: {},
+            requested_predicates: {},
+            self_attested_attributes: {
+              self_proposal_uuid: JSON.stringify(proposal)
+            }
+          }))),
+          map(() => connectionID)
+        )
       ),
       switchMap(connectionID => this.watchForIsMaster$(connectionID)),
       map(() => undefined as void)

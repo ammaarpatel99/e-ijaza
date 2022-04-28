@@ -63,10 +63,13 @@ export class OntologyProposalStoreProtocol {
       pairwise(),
       mergeMap(([oldState, state]) => {
         if (!oldState) return voidObs$
-        const {deleted, edited} = this.findChanges(oldState, state!)
+        const {deleted, edited} = this.findChanges(state!, oldState)
         const arr = [...deleted, ...edited].map(([id, _]) => {
           const credential_id = this.credentialIDs.get(id)
-          if (!credential_id) throw new Error(`deleting stored ontology proposal but no credential id found`)
+          if (!credential_id) {
+            if (deleted.has(id)) throw new Error(`deleting stored ontology proposal but no credential id found`)
+            return voidObs$
+          }
           return defer(() => from(deleteCredential({credential_id})))
             .pipe(map(() => {this.credentialIDs.delete(id)}))
         })
