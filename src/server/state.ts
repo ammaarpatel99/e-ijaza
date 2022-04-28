@@ -1,6 +1,6 @@
 import {Initialisation} from './initialisation'
 import {distinct, map, shareReplay} from "rxjs/operators";
-import {combineLatestWith, delay, filter, Observable, switchMap} from "rxjs";
+import {combineLatestWith, delay, filter, Observable, of, switchMap} from "rxjs";
 import {MasterCredentialsManager, MasterProposalsManager} from "./master-credentials";
 import {
   MastersShareProtocol,
@@ -118,11 +118,18 @@ export class State {
   stopUpdating() {this.mutex.release() }
 
   private waitForNotUpdating<T>(source: Observable<T>): Observable<T> {
+    const shareValue$ = this.mutex.isHeld$.pipe(
+      distinct(),
+      switchMap(held => {
+        if (held) return of(true)
+        return of(false).pipe(delay(100)) // require there to be no change for 100ms in order to send false
+      })
+    )
+
     return source.pipe(
-      delay(200), // allow other code to take hold of mutex before checking if mutex is held
-      combineLatestWith(this.mutex.isHeld$),
-      map(([value, isHeld]) => {
-        if (!isHeld) return value
+      combineLatestWith(shareValue$),
+      map(([value, shareValue]) => {
+        if (!shareValue) return value
         return
       }),
       filter(value => value !== undefined),
