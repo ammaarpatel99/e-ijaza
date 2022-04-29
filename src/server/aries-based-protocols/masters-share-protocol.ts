@@ -68,14 +68,18 @@ export class MastersShareProtocol {
     return defer(() => from(
       getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
     )).pipe(
-      map(results => results.results
-        ?.filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
-        .map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
-          connection_id: connection_id!,
-          rev_reg_id: revoc_reg_id!,
-          cred_rev_id: revocation_id!
-        }))
-        .forEach(cred => this.issued.add(cred))
+      map(results => results.results || []),
+      switchMap(results => {
+          results
+            .filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
+            .map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
+              connection_id: connection_id!,
+              rev_reg_id: revoc_reg_id!,
+              cred_rev_id: revocation_id!
+            }))
+            .forEach(cred => this.issued.add(cred));
+          return this.revokeIssued$()
+        }
       )
     )
   }

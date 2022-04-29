@@ -58,18 +58,19 @@ export class OntologyShareProtocol {
       getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
     )).pipe(
       map(results => results.results || []),
-      map(results => {
+      switchMap(results => {
         // SUBJECT LISTS
-        results
+        const lists = results
           .filter(cred => cred.schema_id === subjectsListSchema.schemaID)
           .map((cred): Server.CredentialInfo => ({
             connection_id: cred.connection_id!,
             rev_reg_id: cred.revoc_reg_id!,
             cred_rev_id: cred.revocation_id!
           }))
-          .forEach(cred => this.issuedList.add(cred))
+          //.forEach(cred => this.issuedList.add(cred))
 
         // INDIVIDUAL SUBJECTS
+        const subjects = new Map<string, Set<Server.CredentialInfo>>()
         results
           .filter(cred => cred.schema_id === subjectDataSchema.schemaID)
           .map(cred => ({
@@ -79,13 +80,22 @@ export class OntologyShareProtocol {
             subject: JSON.parse(cred.credential_proposal_dict!.credential_proposal!.attributes[0].value).name
           }))
           .forEach(cred => {
-            let set = this.issuedSubject.get(cred.subject)
+            // let set = this.issuedSubject.get(cred.subject)
+            let set = subjects.get(cred.subject)
             if (!set) {
               set = new Set()
-              this.issuedSubject.set(cred.subject, set)
+              // this.issuedSubject.set(cred.subject, set)
+              subjects.set(cred.subject, set)
             }
             set.add(cred)
           })
+
+        return forkJoin$([
+          this.revokeIssued$(new Set(lists)),
+          ...[...subjects].map(([subject, creds]) =>
+            this.revokeIssued$(creds, `deleted:${subject}`)
+          )
+        ])
       })
     )
   }
@@ -291,9 +301,7 @@ export class OntologyShareProtocol {
 
   private refreshData$() {
     return forkJoin$([this.clearSubjectsList$(), this.clearSubjects$()]).pipe(
-      switchMap(() => this.getSubjectsList$()),
-      switchMap(subjects => forkJoin$(subjects.map(subject => this.getSubject$(subject)))),
-      map(() => undefined as void)
+      switchMap(() => this.getSubjectsList$())
     )
   }
 
@@ -315,21 +323,21 @@ export class OntologyShareProtocol {
       map(res => JSON.parse(res.credential!.attrs!['subjects']) as Schemas.SubjectsSchema['subjects']),
       withLatestFrom(this._userState$),
       first(),
-      map(([res, oldState]) => {
+      switchMap(([res, oldState]) => {
         const state = new Map() as SubjectDataWithOptional
-        let changed = state.size !== oldState.size
+        const requests: Observable<void>[] = []
         res.forEach(subject => {
           const data = oldState.get(subject)
-          if (data === undefined) {
+          if (data !== undefined) state.set(subject, data)
+          else {
             state.set(subject, null)
-            changed = true
-          } else {
-            state.set(subject, data)
+            requests.push(this.getSubject$(subject))
           }
         })
-        if (changed) this._userState$.next(state)
-        return res
-      })
+        this._userState$.next(state)
+        return forkJoin$(requests)
+      }),
+      map(() => undefined as void)
     )
   }
 

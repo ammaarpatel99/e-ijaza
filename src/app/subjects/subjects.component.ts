@@ -3,9 +3,10 @@ import {StateService} from "../services/state/state.service";
 import {ApiService} from "../services/api/api.service";
 import {LoadingService} from "../services/loading/loading.service";
 import {FormControl, FormGroup, ValidatorFn, Validators} from "@angular/forms";
-import {AsyncSubject, combineLatest, of, switchMap, takeUntil, tap} from "rxjs";
+import {AsyncSubject, combineLatest, of, switchMap, takeUntil, tap, withLatestFrom} from "rxjs";
 import {API} from "@project-types";
 import {map} from "rxjs/operators";
+import {Immutable, voidObs$} from "@project-utils";
 
 @Component({
   selector: 'app-subjects',
@@ -188,11 +189,14 @@ export class SubjectsComponent implements OnInit, OnDestroy {
 
   private _possibleNewSetElements$() {
     const descendants$ = this.newSetParent.valueChanges.pipe(
-      switchMap((parent: string) =>
-        this.api.getDescendants$(parent).pipe(
+      withLatestFrom(this.stateService.subjects$),
+      switchMap(([parent, subjects]: [string, Immutable<API.Subject[]>]) => {
+        if (!subjects.filter(data => data.name === parent).shift())
+          return of([parent, []] as [typeof parent, string[]])
+        return this.api.getDescendants$(parent).pipe(
           map(subjects => [parent, subjects] as [typeof parent, typeof subjects])
         )
-      )
+      })
     )
     return combineLatest([
       descendants$,

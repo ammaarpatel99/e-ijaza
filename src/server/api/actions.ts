@@ -43,7 +43,7 @@ router.post('/ontology/vote', (req, res, next) => {
 })
 
 router.post('/descendants', (req, res, next) => {
-  SubjectOntology.instance.getDescendants$(req.body).subscribe({
+  SubjectOntology.instance.getDescendants$(req.body.subject).subscribe({
     next: data => res.send([...data]),
     error: err => next(err)
   })

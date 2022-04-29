@@ -38,7 +38,7 @@
               <mat-option *ngFor="let set of row.removableComponentSets" [value]="set" >{{set}}</mat-option>
             </mat-select>
           </mat-form-field>
-          <button mat-button [disabled]="!componentSetSelect.value || !!(loading$ | async)" (click)="proposeRemoval(row.name, subjectSelect.value)" >
+          <button mat-button [disabled]="!componentSetSelect.value || !!(loading$ | async)" (click)="proposeRemoval(row.name, componentSetSelect.value)" >
             Propose Removal
           </button>
           <br/>

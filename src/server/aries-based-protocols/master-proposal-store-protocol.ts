@@ -1,5 +1,5 @@
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
-import {catchError, defer, from, last, mergeMap, Observable, pairwise, switchMap} from "rxjs";
+import {catchError, defer, filter, first, from, last, mergeMap, Observable, pairwise, switchMap} from "rxjs";
 import {
   connectToSelf$,
   deleteCredential,
@@ -7,7 +7,7 @@ import {
   getHeldCredentials,
   issueCredential
 } from "../aries-api";
-import {masterProposalSchema} from "../schemas";
+import {masterProposalSchema, subjectProposalSchema} from "../schemas";
 import {map, startWith} from "rxjs/operators";
 import {Schemas, Server} from "@project-types"
 import {WebhookMonitor} from "../webhook";
@@ -64,13 +64,16 @@ export class MasterProposalStoreProtocol {
         const {deleted, edited} = this.findChanges(state!, oldState)
         const arr = [...deleted, ...edited].map(([id, _]) => {
           const credential_id = this.credentialIDs.get(id)
-          if (!credential_id) throw new Error(`deleting stored master proposal but no credential id found`)
+          if (!credential_id) {
+            console.error(`deleting stored master proposal but no credential id found`)
+            return voidObs$
+          }
           return defer(() => from(deleteCredential({credential_id})))
             .pipe(map(() => {this.credentialIDs.delete(id)}))
         })
         const arr2 = [...edited].map(([id, proposal]) =>
           this.storeProposal$(MasterProposalStoreProtocol.proposalToSchema(proposal))
-            .pipe(map(cred_ex_id => {this.credentialIDs.set(id, cred_ex_id)}))
+            .pipe(map(cred_id => {this.credentialIDs.set(id, cred_id)}))
         )
 
         return forkJoin$(arr).pipe(
@@ -106,27 +109,39 @@ export class MasterProposalStoreProtocol {
   }
 
   private storeProposal$(proposal: Immutable<Schemas.MasterProposalStateSchema>) {
+    const issueCred$ = (connectionID: string) => defer(() =>
+      from(issueCredential({
+        connection_id: connectionID,
+        auto_remove: true,
+        cred_def_id: masterProposalSchema.credID,
+        credential_proposal: {
+          attributes: [{
+            name: 'proposal',
+            value: JSON.stringify(proposal.proposal)
+          }]
+        }
+      }))
+    )
+
+    const watchCred$ = (connectionID: string) =>
+      WebhookMonitor.instance.credentials$.pipe(
+        filter(({connection_id, credential_definition_id, state}) =>
+          connection_id === connectionID &&
+          credential_definition_id === masterProposalSchema.credID &&
+          state === 'credential_acked'
+        ),
+        first(),
+        map(({credential}) => credential!.referent!)
+      )
+
     return connectToSelf$().pipe(
       switchMap(connections =>
-        from(issueCredential({
-          connection_id: connections[0],
-          auto_remove: true,
-          cred_def_id: masterProposalSchema.credID,
-          credential_proposal: {
-            attributes: [{
-              name: 'proposal',
-              value: JSON.stringify(proposal.proposal)
-            }]
-          }
-        })).pipe(
-          switchMap(({credential_exchange_id}) => WebhookMonitor.instance.monitorCredential$(credential_exchange_id!)),
-          last(),
-          map(({credential_exchange_id}) => ({connections, credential_exchange_id}))
+        forkJoin$([issueCred$(connections[0]), watchCred$(connections[1])]).pipe(
+          switchMap(([_, cred_id]) =>
+            deleteSelfConnections$(connections)
+              .pipe(map(() => cred_id))
+          )
         )
-      ),
-      switchMap(({connections, credential_exchange_id}) =>
-        deleteSelfConnections$(connections)
-          .pipe(map(() => credential_exchange_id!))
       )
     )
   }

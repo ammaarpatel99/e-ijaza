@@ -75,8 +75,8 @@ export class ApiService {
     )
   }
 
-  getDescendants$(body: string) {
-    return this.http.post<string[]>('/api/descendants', body)
+  getDescendants$(subject: string) {
+    return this.http.post<string[]>('/api/descendants', {subject})
   }
 
   updatePublicOnHeldCredential$(body: API.HeldCredential) {
