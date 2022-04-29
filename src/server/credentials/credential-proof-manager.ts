@@ -142,17 +142,33 @@ export class CredentialProofManager {
         if (!subjects.has(data.subject)) {
           this.incomingProofs.delete(id)
           return CredentialProofProtocol.instance.rejectProof$(data.pres_ex_id)
+            .pipe(map(() => true))
         }
         return this.autoRespondToRequest$(data.subject, data.pres_ex_id, heldCredentials).pipe(
-          map(success => {
+          tap(success => {
             if (success) this.incomingProofs.delete(id)
           })
         )
       })
-    return forkJoin$(requests$)
+    return forkJoin$(requests$).pipe(
+      map(res => res.includes(true))
+    )
   }
 
   private updateProofs$(heldCredentials: Immutable<Server.UserHeldCredentials>) {
+    const areProofsChanged = (
+      proof1: Immutable<IncomingRequest['proof']>,
+      proof2: Immutable<IncomingRequest['proof']>
+    ) => {
+      if (proof1 === false || proof2 === false) return proof2 !== proof1
+      if (proof1.length !== proof2.length) return true
+      const creds1 = new Set(proof1.map(cred => `${cred.credID}-${cred.did}-${cred.subject}`))
+      return proof2
+        .map(cred => `${cred.credID}-${cred.did}-${cred.subject}`)
+        .filter(credString => !creds1.has(credString))
+        .length > 0
+    }
+
     const requests$ = [...this.incomingProofs]
       .map(([id, data]) => {
         return this.getRequiredCreds$(data.subject, false, heldCredentials).pipe(
@@ -160,11 +176,17 @@ export class CredentialProofManager {
             const _data = {...data}
             if (!creds) _data.proof = false
             else _data.proof = creds.map(cred => ({credID: cred.credentialID, subject: cred.subject ,did: cred.issuerDID}))
-            this.incomingProofs.set(id, _data)
+            if (areProofsChanged(data.proof, _data.proof)) {
+              this.incomingProofs.set(id, _data)
+              return true
+            }
+            return false
           })
         )
       })
-    return forkJoin$(requests$)
+    return forkJoin$(requests$).pipe(
+      map(res => res.includes(true))
+    )
   }
 
   private watchState() {
@@ -173,10 +195,15 @@ export class CredentialProofManager {
       tap(() => State.instance.startUpdating()),
       mergeMap(([heldCredentials, subjects]) =>
         this.removeInvalidAndAutoResponse$(heldCredentials, subjects).pipe(
-          switchMap(() => this.updateProofs$(heldCredentials))
+          switchMap(changed =>
+            this.updateProofs$(heldCredentials)
+              .pipe(map(_changed => _changed || changed))
+          )
         )
       ),
-      map(() => this.updateIncoming()),
+      map(changed => {
+        if (changed) this.updateIncoming()
+      }),
       tap({
         next: () => State.instance.stopUpdating(),
         error: () => State.instance.stopUpdating()
