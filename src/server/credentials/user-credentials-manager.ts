@@ -138,7 +138,7 @@ export class UserCredentialsManager {
             }
           }
         })
-        if (!changed) return voidObs$
+        if (!changed && newState.size === oldState.size) return voidObs$
         return forkJoin$([...toDelete].map(cred => defer(() => from(
           deleteCredential({credential_id: cred.credentialID})
         )))).pipe(

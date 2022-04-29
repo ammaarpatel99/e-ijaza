@@ -116,7 +116,7 @@ export class State {
   readonly incomingProofs$ = this._incomingProofs$.pipe(this.waitForNotUpdating())
 
   startUpdating() { this.mutex.hold() }
-  stopUpdating() { this.mutex.release() }
+  stopUpdating() {this.mutex.release() }
 
   private _emitValues$() {
     return this.mutex.isHeld$.pipe(

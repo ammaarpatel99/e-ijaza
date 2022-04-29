@@ -283,7 +283,7 @@ export class OntologyProposalManager {
           return OntologyManager.instance.removeComponentSet$(proposal.subject, proposal.change.component_set)
         }
       }
-    } else if (against > boundary) return voidObs$
+    } else if (against >= boundary) return voidObs$
     return
   }
 

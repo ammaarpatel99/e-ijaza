@@ -61,6 +61,7 @@ export class MasterCredentialsManager {
         const newMap = new Map(oldMap || [])
         newMap.delete(subject)
         newState.set(did, newMap)
+        if (newMap.size === 0) newState.delete(did)
         this._state$.next(newState)
       })
     )

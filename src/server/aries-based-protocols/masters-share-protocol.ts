@@ -53,14 +53,13 @@ export class MastersShareProtocol {
 
   // CONTROLLER
 
-  private readonly issued = new Set<Immutable<Server.CredentialInfo>>()
-
   initialiseController$() {
-    return this.getIssued$().pipe(
+    return voidObs$.pipe(
       map(() => {
         this.handleRequests()
         this.revokeSharedOnUpdate()
-      })
+      }),
+      switchMap(() => this.revokeIssued$())
     )
   }
 
@@ -69,18 +68,36 @@ export class MastersShareProtocol {
       getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
     )).pipe(
       map(results => results.results || []),
-      switchMap(results => {
-          results
-            .filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
-            .map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
-              connection_id: connection_id!,
-              rev_reg_id: revoc_reg_id!,
-              cred_rev_id: revocation_id!
-            }))
-            .forEach(cred => this.issued.add(cred));
-          return this.revokeIssued$()
-        }
+      map(results =>
+        results
+          .filter(cred => cred.schema_id === mastersPublicSchema.schemaID)
+          .map(({connection_id, revocation_id, revoc_reg_id}): Server.CredentialInfo => ({
+            connection_id: connection_id!,
+            rev_reg_id: revoc_reg_id!,
+            cred_rev_id: revocation_id!
+          }))
       )
+    )
+  }
+
+  private revokeIssued$() {
+    return this.getIssued$().pipe(
+      switchMap(creds => forkJoin$(creds.map(cred =>
+        from(revokeCredential({
+          publish: true,
+          notify: true,
+          cred_rev_id: cred.cred_rev_id,
+          rev_reg_id: cred.rev_reg_id,
+          connection_id: cred.connection_id,
+          comment: 'list of master credentials has been updated'
+        })).pipe(
+          catchError(e => {
+            console.error(`Failed to revoke public master credentials list: ${e}`)
+            return voidObs$
+          })
+        )
+      ))),
+      map(() => undefined as void)
     )
   }
 
@@ -112,41 +129,13 @@ export class MastersShareProtocol {
         WebhookMonitor.instance.monitorCredential$(cred_ex_id)
           .pipe(last())
       ),
-      map(({connection_id, revoc_reg_id, revocation_id}) => {
-        this.issued.add({
-          connection_id: connection_id!,
-          rev_reg_id: revoc_reg_id!,
-          cred_rev_id: revocation_id!
-        });
-      }),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
     )
     obs$.subscribe()
-  }
-
-  private revokeIssued$() {
-    return voidObs$.pipe(
-      map(() => [...this.issued]),
-      switchMap(creds => forkJoin$(creds.map(cred =>
-        from(revokeCredential({
-          publish: true,
-          notify: true,
-          cred_rev_id: cred.cred_rev_id,
-          rev_reg_id: cred.rev_reg_id,
-          connection_id: cred.connection_id,
-          comment: 'list of master credentials has been updated'
-        })).pipe(
-          catchError(e => {
-            console.error(`Failed to revoke public master credentials list: ${e}`)
-            return voidObs$
-          })
-        )
-      ))),
-      map(() => this.issued.clear())
-    )
   }
 
   private revokeSharedOnUpdate() {

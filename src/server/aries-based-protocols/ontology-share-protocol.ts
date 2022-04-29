@@ -1,5 +1,5 @@
 import {forkJoin$, Immutable, voidObs$} from "@project-utils";
-import {map, mergeMap, shareReplay, startWith, tap} from "rxjs/operators";
+import {map, mergeMap, shareReplay, startWith} from "rxjs/operators";
 import {
   BehaviorSubject,
   catchError,
@@ -40,26 +40,45 @@ export class OntologyShareProtocol {
 
   // CONTROLLER
 
-  private readonly issuedList = new Set<Immutable<Server.CredentialInfo>>()
-  private readonly issuedSubject = new Map<string, Set<Immutable<Server.CredentialInfo>>>()
-
   initialiseController$() {
-    return this.getIssued$().pipe(
+    return voidObs$.pipe(
       map(() => {
         this.handleSubjectListRequests()
         this.handleSubjectDataRequests()
         this.revokeSharedOnUpdate()
-      })
+      }),
+      switchMap(() => forkJoin$([this.revokeLists$(), this.revokeSubjects$()])),
+      map(() => undefined as void)
     )
   }
 
-  private getIssued$() {
+  private revokeIssued$(credData: Set<Server.CredentialInfo>, comment?: string) {
+    return voidObs$.pipe(
+      map(() => [...credData]),
+      switchMap(creds => forkJoin$(creds.map(cred =>
+        from(revokeCredential({
+          publish: true,
+          notify: true,
+          cred_rev_id: cred.cred_rev_id,
+          rev_reg_id: cred.rev_reg_id,
+          connection_id: cred.connection_id,
+          comment: comment || `edited subject list`
+        })).pipe(
+          catchError(e => {
+            console.error(`Failed to revoke subject ontology related credential: ${e}`)
+            return voidObs$
+          })
+        )
+      )))
+    )
+  }
+
+  private revokeLists$() {
     return defer(() => from(
       getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
     )).pipe(
       map(results => results.results || []),
       switchMap(results => {
-        // SUBJECT LISTS
         const lists = results
           .filter(cred => cred.schema_id === subjectsListSchema.schemaID)
           .map((cred): Server.CredentialInfo => ({
@@ -67,9 +86,19 @@ export class OntologyShareProtocol {
             rev_reg_id: cred.revoc_reg_id!,
             cred_rev_id: cred.revocation_id!
           }))
-          //.forEach(cred => this.issuedList.add(cred))
+        return this.revokeIssued$(new Set(lists))
+      })
+    )
+  }
 
-        // INDIVIDUAL SUBJECTS
+  private revokeSubjects$(): Observable<void>
+  private revokeSubjects$(subject: string, deleted: boolean): Observable<void>
+  private revokeSubjects$(subject?: string, deleted?: boolean) {
+    return defer(() => from(
+      getIssuedCredentials({role: 'issuer', state: 'credential_acked'})
+    )).pipe(
+      map(results => results.results || []),
+      switchMap(results => {
         const subjects = new Map<string, Set<Server.CredentialInfo>>()
         results
           .filter(cred => cred.schema_id === subjectDataSchema.schemaID)
@@ -79,6 +108,7 @@ export class OntologyShareProtocol {
             cred_rev_id: cred.revocation_id!,
             subject: JSON.parse(cred.credential_proposal_dict!.credential_proposal!.attributes[0].value).name
           }))
+          .filter(cred => !subject ? true : cred.subject === subject)
           .forEach(cred => {
             // let set = this.issuedSubject.get(cred.subject)
             let set = subjects.get(cred.subject)
@@ -91,12 +121,12 @@ export class OntologyShareProtocol {
           })
 
         return forkJoin$([
-          this.revokeIssued$(new Set(lists)),
           ...[...subjects].map(([subject, creds]) =>
-            this.revokeIssued$(creds, `deleted:${subject}`)
+            this.revokeIssued$(creds, `${deleted ? 'deleted' : 'edited'}:${subject}`)
           )
         ])
-      })
+      }),
+      map(() => undefined as void)
     )
   }
 
@@ -129,13 +159,7 @@ export class OntologyShareProtocol {
         WebhookMonitor.instance.monitorCredential$(cred_ex_id)
           .pipe(last())
       ),
-      map(({connection_id, revoc_reg_id, revocation_id}) => {
-        this.issuedList.add({
-          connection_id: connection_id!,
-          rev_reg_id: revoc_reg_id!,
-          cred_rev_id: revocation_id!
-        });
-      }),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
@@ -190,49 +214,16 @@ export class OntologyShareProtocol {
       ),
       switchMap(({cred_ex_id, subject}) =>
         WebhookMonitor.instance.monitorCredential$(cred_ex_id).pipe(
-          last(),
-          map(data => ({...data, subject}))
+          last()
         )
       ),
-      map(({connection_id, revoc_reg_id, revocation_id, subject}) => {
-        let set = this.issuedSubject.get(subject)
-        if (!set) {
-          set = new Set()
-          this.issuedSubject.set(subject, set)
-        }
-        set.add({
-          connection_id: connection_id!,
-          rev_reg_id: revoc_reg_id!,
-          cred_rev_id: revocation_id!
-        })
-      }),
+      map(() => undefined as void),
       catchError(e => {
         console.error(e)
         return obs$
       })
     ) as Observable<void>
     obs$.subscribe()
-  }
-
-  private revokeIssued$(credData: Set<Server.CredentialInfo>, comment?: string) {
-    return voidObs$.pipe(
-      map(() => [...credData]),
-      switchMap(creds => forkJoin$(creds.map(cred =>
-        from(revokeCredential({
-          publish: true,
-          notify: true,
-          cred_rev_id: cred.cred_rev_id,
-          rev_reg_id: cred.rev_reg_id,
-          connection_id: cred.connection_id,
-          comment: comment || `edited subject list`
-        })).pipe(
-          catchError(e => {
-            console.error(`Failed to revoke subject ontology related credential: ${e}`)
-            return voidObs$
-          })
-        )
-      )))
-    )
   }
 
   private revokeSharedOnUpdate() {
@@ -244,18 +235,9 @@ export class OntologyShareProtocol {
         const {deleted, edited, subjectsListChanged} =
           OntologyStoreProtocol.findChanges(state!, oldState)
         return forkJoin$([
-          ...deleted.map(subject => {
-            const set = this.issuedSubject.get(subject) || new Set()
-            return this.revokeIssued$(set, `deleted:${subject}`)
-              .pipe(tap(() => this.issuedSubject.delete(subject)))
-          }),
-          ...edited.map(subject => {
-            const set = this.issuedSubject.get(subject) || new Set()
-            return this.revokeIssued$(set, `edited:${subject}`)
-              .pipe(tap(() => this.issuedSubject.delete(subject)))
-          }),
-          subjectsListChanged ? this.revokeIssued$(this.issuedList)
-            .pipe(tap(() => this.issuedList.clear())) : voidObs$
+          ...deleted.map(subject => this.revokeSubjects$(subject, true)),
+          ...edited.map(subject => this.revokeSubjects$(subject, false)),
+          subjectsListChanged ? this.revokeLists$() : voidObs$
         ])
       }),
       map(() => undefined as void),

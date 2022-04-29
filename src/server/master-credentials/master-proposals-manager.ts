@@ -246,7 +246,7 @@ export class MasterProposalsManager {
         return MasterCredentialsManager.instance.addMaster$(proposal.did, proposal.subject)
       }
       return MasterCredentialsManager.instance.removeMaster$(proposal.did, proposal.subject)
-    } else if (against > boundary) return voidObs$
+    } else if (against >= boundary) return voidObs$
     return
   }
 
