@@ -22,7 +22,7 @@ elif [ "$1" = "start" ]; then
     echo "Usage: $0 $1 [container-name] [app-port] [aries-port] [--dev aries-admin-port]"
     exit 1
   elif [ "$5" = "--dev" ] && [ -n "$6" ]; then
-    docker run -it --rm \
+    PORT="$3" docker run -it --rm \
     --name "$2" \
     -p "${3}:${3}" -p "${4}:${4}" -p "${6}:${6}" \
     -e PORT="${3}" \
