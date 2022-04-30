@@ -21,7 +21,7 @@
           Pending
         </ng-container>
         <ng-template #proofResult>
-          {{row.did}} is <ng-container *ngIf="row.result">NOT</ng-container> authorized in {{row.subject}}
+          {{row.did}} is <ng-container *ngIf="!row.result">NOT</ng-container> authorized in {{row.subject}}
         </ng-template>
       </td>
     </ng-container>

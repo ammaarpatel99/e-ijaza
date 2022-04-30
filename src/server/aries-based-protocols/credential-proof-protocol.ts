@@ -92,7 +92,7 @@ export class CredentialProofProtocol {
   }
 
   private requestProofForCredentials$(connection_id: string, subjects: SubjectToProve[]) {
-    const time = Date.now().toString()
+    const time = Date.now()
     return voidObs$.pipe(
       switchMap(() => from(requestProof({
         connection_id,

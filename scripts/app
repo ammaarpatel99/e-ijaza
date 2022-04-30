@@ -24,17 +24,27 @@ elif [ "$1" = "start" ]; then
   elif [ "$5" = "--dev" ] && [ -n "$6" ]; then
     docker run -it --rm \
     --name "$2" \
-    -p "${3}:4000" -p "${4}:4001" -p "${6}:4002" \
-    -e WEBHOOK_URL="localhost:4000/webhook" \
+    -p "${3}:${3}" -p "${4}:${4}" -p "${6}:${6}" \
+    -e PORT="${3}" \
+    -e ARIES_PORT="${4}" \
+    -e ARIES_ADMIN_PORT="${6}" \
+    -e WEBHOOK_URL="localhost:${3}/webhook" \
     -v "$(pwd):/home/indy/app" \
     -v "$(pwd)/logs/${2}-$(date +"%F-%H-%M-%S"):/home/indy/logs" \
     e_ijaza_app_dev
   else
+    ARIES_ADMIN_PORT="10000"
+    if [ "$3" = "$ARIES_ADMIN_PORT" ] || [ "$4" = "$ARIES_ADMIN_PORT" ]; then
+      echo "Can't use port 10000 as it is used internally to control the aries agent"
+      exit 1
+    fi
     docker run -itd \
     --name "$2" \
-    -p "${3}:${3}" -p "${4}:4001" \
+    -p "${3}:${3}" -p "${4}:${4}" \
     -e PORT="${3}" \
-    -e WEBHOOK_URL="localhost:4000/webhook" \
+    -e ARIES_PORT="${4}" \
+    -e ARIES_ADMIN_PORT="${ARIES_ADMIN_PORT}" \
+    -e WEBHOOK_URL="localhost:${3}/webhook" \
     -v "$(pwd)/logs/${2}-$(date +"%F-%H-%M-%S"):/home/indy/logs" \
     e_ijaza_app
   fi

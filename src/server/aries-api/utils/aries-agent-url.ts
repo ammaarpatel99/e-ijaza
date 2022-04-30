@@ -1,3 +1,1 @@
-import {environment} from "../../../environments/environment";
-
-export const ariesAgentURL = environment.ariesAgentURL
+export const ariesAgentURL = `http://localhost:${process.env['ARIES_ADMIN_PORT'] || 10000}`

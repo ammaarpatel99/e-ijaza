@@ -11,9 +11,9 @@ export function runAries(data: {
   const logsDir = process.env['LOGS_DIR']
   const childProcess = spawn('/bin/bash', [
     '-c', 'aca-py start '  +
-    '--admin 0.0.0.0 4002 ' +
+    `--admin 0.0.0.0 ${process.env['ARIES_ADMIN_PORT'] || 10000} ` +
     '--admin-insecure-mode ' +
-    '--webhook-url http://localhost:4000/webhook ' +
+    `--webhook-url http://localhost:${process.env['PORT'] || 4000}/webhook ` +
 
     '--auto-accept-invites ' +
     '--auto-accept-requests ' +
@@ -46,7 +46,7 @@ export function runAries(data: {
 
     '--auto-provision ' +
 
-    '--inbound-transport http 0.0.0.0 4001 ' +
+    `--inbound-transport http 0.0.0.0 ${process.env['ARIES_PORT'] || 4001} ` +
     '--outbound-transport http ' +
 
     `--wallet-key ${data.walletKey} ` +
