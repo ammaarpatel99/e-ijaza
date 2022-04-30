@@ -192,7 +192,10 @@ export class CredentialIssueProtocol {
 
   private watchReceived() {
     const obs$: Observable<void> = WebhookMonitor.instance.credentials$.pipe(
-      filter(({schema_id, state}) => schema_id === teachingSchema.schemaID && state === 'credential_acked'),
+      filter(({schema_id, state, initiator}) =>
+        schema_id === teachingSchema.schemaID
+        && state === 'credential_acked' && initiator === 'external'
+      ),
       map(({credential: cred}): Server.UserHeldCredential => ({
         credentialID: cred!.referent!,
         subject: cred!.attrs!['subject']!,

@@ -41,7 +41,7 @@ export class CredentialProofProtocol {
   private constructor() { }
 
   private static SUBJECTS_PROOF_NAME = 'Authorization - Subjects to Prove Subject'
-  private static CREDENTIALS_PROOF_NAME = 'Authorization - Subjects to Prove Subject'
+  private static CREDENTIALS_PROOF_NAME = 'Authorization - Credentials to Prove Subject'
 
   // OUTGOING
 
@@ -157,7 +157,8 @@ export class CredentialProofProtocol {
 
   private watchRequests() {
     const obs$: Observable<void> = WebhookMonitor.instance.proofs$.pipe(
-      filter(({state, presentation_request}) => state === 'request_received'
+      filter(({state, presentation_request, role}) =>
+        state === 'request_received' && role === 'prover'
         && presentation_request?.name === CredentialProofProtocol.SUBJECTS_PROOF_NAME
       ),
       mergeMap(({presentation_request, presentation_exchange_id, connection_id}) => {
@@ -179,9 +180,8 @@ export class CredentialProofProtocol {
 
   private watchForCredsRequest$(connectionID: string, proof: Immutable<CredToProve[]>) {
     return WebhookMonitor.instance.proofs$.pipe(
-      filter(({state, presentation_request, connection_id}) =>
-        connection_id === connectionID
-        && state === 'request_received'
+      filter(({state, presentation_request, connection_id, role}) =>
+        connection_id === connectionID && state === 'request_received' && role === 'prover'
         && presentation_request?.name === CredentialProofProtocol.CREDENTIALS_PROOF_NAME
       ),
       first(),
