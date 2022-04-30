@@ -32,7 +32,8 @@ elif [ "$1" = "start" ]; then
   else
     docker run -itd \
     --name "$2" \
-    -p "${3}:4000" -p "${4}:4001" \
+    -p "${3}:${3}" -p "${4}:4001" \
+    -e PORT="${3}" \
     -e WEBHOOK_URL="localhost:4000/webhook" \
     -v "$(pwd)/logs/${2}-$(date +"%F-%H-%M-%S"):/home/indy/logs" \
     e_ijaza_app
@@ -51,7 +52,7 @@ elif [ "$1" = "remove" ]; then
       echo "Usage: $0 $1 [container-name]"
       exit 1
     else
-      docker rm "$2"
+      docker rm -v "$2"
     fi
 
 
