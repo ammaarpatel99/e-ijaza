@@ -130,7 +130,7 @@ export class CredentialProofManager {
       switchMap(creds => {
         if (!creds) return of(false)
         return CredentialProofProtocol.instance.respondToRequest$(pres_ex_id,
-          creds.map(cred => ({cred_id: cred.credentialID, subject: cred.subject, issuerDID: cred.subject}))
+          creds.map(cred => ({cred_id: cred.credentialID, subject: cred.subject, issuerDID: cred.issuerDID}))
         ).pipe(map(() => true))
       })
     )
