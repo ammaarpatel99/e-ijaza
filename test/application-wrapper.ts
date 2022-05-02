@@ -105,4 +105,18 @@ export class ApplicationWrapper {
       process.stderr.write(data + '\n')
     })
   }
+
+  removeApplication() {
+    const childProcess = spawn('/bin/bash', [
+      '-c', `docker rm -v ${this.name}`
+    ])
+    childProcess.stdout.on('data', (data: any) => {
+      process.stdout.write(this.name + ' REMOVE:\n')
+      process.stdout.write(data + '\n')
+    })
+    childProcess.stderr.on('data', (data: any) => {
+      process.stderr.write(this.name + ' REMOVE:\n')
+      process.stderr.write(data + '\n')
+    })
+  }
 }

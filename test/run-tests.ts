@@ -6,6 +6,7 @@ import {OntologyCreator} from "./ontology-creator";
 
 
 import {testData} from './ijaza-data'
+import {ApplicationWrapper} from "./application-wrapper";
 
 
 const verifierRuns = [1]
@@ -91,6 +92,16 @@ async function runVerifiers(verifiers: Verifier[], users: User[]) {
   await asyncTimout(5000)
 }
 
+async function cleanup(applications: ApplicationWrapper[]) {
+  console.log(`stopping applications`)
+  applications.map(app => app.stopApplication())
+  await asyncTimout(1000 * 60)
+  console.log('removing applications');
+  applications.map(app => app.removeApplication())
+  await asyncTimout(1000 * 5)
+  console.log(`cleanup complete`)
+}
+
 async function runTests() {
   const {controller, ontologyCreator, verifiers, users} = createAgents()
   await setup(controller, ontologyCreator, verifiers, users)
@@ -99,7 +110,7 @@ async function runTests() {
       await runVerifiers(verifiers.slice(0,verifyNum), users)
       await asyncTimout(1000 * 60 * 3)
     }
-  }
+  }await cleanup([controller, ontologyCreator, ...verifiers, ...users])
 }
 
 
