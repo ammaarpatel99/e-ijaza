@@ -29,7 +29,7 @@ export class ProverTimingLogger {
       this.fileStream.write('start,responded_to_subject_req,received_creds_req,responded_to_creds_req,end')
     }
     this.fileStream.write(
-      `${timing.start},${timing.responded_to_subject_req},${timing.received_creds_req},${timing.responded_to_creds_req},${timing.end}`
+      `\n${timing.start},${timing.responded_to_subject_req},${timing.received_creds_req},${timing.responded_to_creds_req},${timing.end}`
     )
   }
 

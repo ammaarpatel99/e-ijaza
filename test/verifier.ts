@@ -32,6 +32,6 @@ export class Verifier extends ApplicationWrapper {
         throw new Error(`failed to run proof`)
       }
     })
-    await axios.post(`${this.apiURL}/proof/delete`, proofRes)
+    await axios.post(`${this.apiURL}/proof/delete`, proofRes.value)
   }
 }

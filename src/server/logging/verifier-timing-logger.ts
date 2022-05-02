@@ -21,7 +21,7 @@ export class VerifierTimingLogger {
       this.fileStream.write('start,end')
     }
     this.fileStream.write(
-      `${start},${end}`
+      `\n${start},${end}`
     )
   }
 
