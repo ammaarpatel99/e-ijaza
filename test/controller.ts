@@ -20,13 +20,13 @@ export class Controller extends ApplicationWrapper {
     const data: MasterProposalData = {did: did, proposalType: ProposalType.ADD, subject: 'knowledge'}
     await axios.post(`${this.apiURL}/master/propose`, data)
     await repeatWithBackoff({
-      initialTimeout: 5 * 1000,
+      initialTimeout: 10 * 1000,
       exponential: false,
       backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<Master[]>(
-          `${this.apiURL}/masters`
+          `${this.apiURL}/state/masters`
         )
         const _proposal = data.filter(master =>
           master.did === did && master.subjects.includes('knowledge')

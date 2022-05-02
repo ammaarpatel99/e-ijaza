@@ -60,9 +60,11 @@ export class ApplicationWrapper {
   }
 
   async initialise(controllerDID?: string) {
-    await axios.post<State.UpdateRes>(
-      `${this.apiURL}/state/update`, {timestamp: 0} as State.UpdateReq
-    )
+    try {
+      await axios.post(
+        `${this.apiURL}/state/update`, {timestamp: 0} as State.UpdateReq
+      )
+    } catch {}
     const _data: Omit<FullInitialisationData, 'controllerDID' | 'appType'> = {
       advertisedEndpoint: `http://host.docker.internal:${this.agentPort}`,
       genesisURL: `http://host.docker.internal:9000/genesis`,

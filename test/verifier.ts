@@ -1,5 +1,5 @@
 import {ApplicationWrapper} from "./application-wrapper";
-import {IssuedCredential, NewProofRequest, OutgoingProofRequest} from "../src/types/interface-api";
+import {NewProofRequest, OutgoingProofRequest} from "../src/types/interface-api";
 import axios from "axios";
 import {repeatWithBackoff} from "../src/utils";
 
@@ -16,13 +16,13 @@ export class Verifier extends ApplicationWrapper {
     const data: NewProofRequest = {did, subject}
     await axios.post(`${this.apiURL}/proof/create`, data)
     const proofRes = await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 10 * 1000,
       exponential: false,
-      backoff: 10 * 1000,
+      backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<OutgoingProofRequest[]>(
-          `${this.apiURL}/proofs/outgoing`
+          `${this.apiURL}/state/proofs/outgoing`
         )
         const proofReq = data.filter(req => req.did === did && req.subject === subject).shift()
         if (!proofReq) return {success: false}

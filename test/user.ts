@@ -16,13 +16,13 @@ export class User extends ApplicationWrapper {
     const data: IssuedCredential = {did, subject}
     await axios.post(`${this.apiURL}/credential/issue`, data)
     await repeatWithBackoff({
-      initialTimeout: 5 * 1000,
+      initialTimeout: 10 * 1000,
       exponential: false,
       backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<IssuedCredential[]>(
-          `${this.apiURL}/issuedCredentials`
+          `${this.apiURL}/state/issuedCredentials`
         )
         const issuedCred = data.filter(cred =>
           cred.did === did && cred.subject === subject
@@ -37,12 +37,12 @@ export class User extends ApplicationWrapper {
 
   async makeCredsPublic() {
     const {data} = await axios.get<HeldCredential[]>(
-      `${this.apiURL}/heldCredentials`
+      `${this.apiURL}/state/heldCredentials`
     )
     for (const cred of data) {
       const newData = {...cred, public: true}
       await axios.put(`${this.apiURL}/credential/update`, newData)
-      await asyncTimout(10 * 1000)
+      await asyncTimout(60 * 1000)
     }
   }
 }
