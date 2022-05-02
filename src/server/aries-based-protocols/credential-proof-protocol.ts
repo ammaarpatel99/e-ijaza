@@ -9,13 +9,14 @@ import {
   Observable,
   of,
   Subject,
-  switchMap
+  switchMap, tap
 } from "rxjs";
 import {WebhookMonitor} from "../webhook";
 import {map} from "rxjs/operators";
 import {Immutable, voidObs$} from "@project-utils";
 import {teachingSchema} from "../schemas";
 import {SubjectOntology} from "../subject-ontology";
+import {ProverTimingLogger, VerifierTimingLogger} from "../logging";
 
 interface SubjectToProve {
   subject: string
@@ -47,12 +48,14 @@ export class CredentialProofProtocol {
 
   requestProof$(did: string, subject: string) {
     return connectViaPublicDID$({their_public_did: did}).pipe(
+      tap(conn_id => VerifierTimingLogger.instance.startRequest(conn_id)),
       switchMap(connectionID => {
         return this.requestProofForSubjects$(connectionID, subject).pipe(
           switchMap(data => {
             if (!data) return of(undefined)
             return this.requestProofForCredentials$(connectionID, data)
-          })
+          }),
+          tap(() => VerifierTimingLogger.instance.endRequest(connectionID))
         )
       })
     )
@@ -143,6 +146,7 @@ export class CredentialProofProtocol {
           subjects: JSON.stringify(proof.map(cred => ({...cred, cred_id: undefined})))
         }
       }))),
+      tap(({connection_id}) => ProverTimingLogger.instance.respondedToSubjectsRequest(pres_ex_id, connection_id!)),
       switchMap(({connection_id}) => this.watchForCredsRequest$(connection_id!, proof))
     )
   }
@@ -161,6 +165,7 @@ export class CredentialProofProtocol {
         state === 'request_received' && role === 'prover'
         && presentation_request?.name === CredentialProofProtocol.SUBJECTS_PROOF_NAME
       ),
+      tap(({presentation_exchange_id}) => ProverTimingLogger.instance.receivedRequest(presentation_exchange_id!)),
       mergeMap(({presentation_request, presentation_exchange_id, connection_id}) => {
         const subject = presentation_request!.requested_attributes['subjects'].name!
         return from(getConnection({conn_id: connection_id!})).pipe(
@@ -185,6 +190,7 @@ export class CredentialProofProtocol {
         && presentation_request?.name === CredentialProofProtocol.CREDENTIALS_PROOF_NAME
       ),
       first(),
+      tap(() => ProverTimingLogger.instance.receivedCredsRequest(connectionID)),
       switchMap(({presentation_exchange_id}) => from(presentProof({pres_ex_id: presentation_exchange_id!}, {
         self_attested_attributes: {},
         requested_predicates: {},
@@ -192,8 +198,10 @@ export class CredentialProofProtocol {
           cred_id: cred.cred_id, revealed: true
         }] as [string, {cred_id: string; revealed: true}]))
       }))),
+      tap(() => ProverTimingLogger.instance.respondedToCredsRequest(connectionID)),
       switchMap(({presentation_exchange_id}) => WebhookMonitor.instance.monitorProof$(presentation_exchange_id!)),
       last(),
+      tap(() => ProverTimingLogger.instance.completedRequest(connectionID)),
       map(() => undefined as void)
     )
   }
