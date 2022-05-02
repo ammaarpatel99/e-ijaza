@@ -9,6 +9,7 @@ import { APP_BASE_HREF } from '@angular/common';
 import { existsSync } from 'fs';
 
 import * as bodyParser from 'body-parser'
+import * as cors from 'cors'
 
 import {apiRouter, webhookRouter, attemptInitialisation$} from './src/server'
 import * as path from "path";
@@ -18,6 +19,7 @@ import * as path from "path";
 export function app(): express.Express {
   const server = express();
   server.use(bodyParser.json(), bodyParser.urlencoded({extended: true}))
+  server.use(cors())
 
   const distFolder = path.normalize(join(path.dirname(__filename), '../browser'))
   const indexHtml = existsSync(join(distFolder, 'index.original.html')) ? 'index.original.html' : 'index';

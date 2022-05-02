@@ -26,28 +26,28 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
   console.log(`starting applications`);
   [controller, ontologyCreator, ...users, ...verifiers].forEach(wrapper => wrapper.startApplication())
   console.log('started applications')
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log(`initialising controller`)
   await controller.initialise()
   console.log('initialised controller')
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log(`initialising ontology creator agent`)
   await ontologyCreator.initialise(controller.did)
   console.log('initialised ontology creator agent')
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log('issue master cred to ontology creator')
   await controller.issueFirstMasterCred(ontologyCreator.did)
   console.log('issued master cred')
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log(`acting on ontology commands`)
   for (const proposal of testData.ontologyCommands) {
     await ontologyCreator.makeProposal(proposal)
     console.log(`acted on ontology command`)
-    await asyncTimout(5000)
+    await asyncTimout(10 * 1000)
   }
   console.log('acted on all ontology commands')
 
@@ -57,14 +57,14 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
       .map(appWrapper => appWrapper.initialise(controller.did))
   )
   console.log(`initialised all applications`)
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log(`create initial master`)
   const masterDID = users.filter(user => user.name === testData.master.name).map(user => user.did).shift()
   if (!masterDID) throw new Error(`tried to issue initial master but ${testData.master.subject} doesn't exist`)
   await ontologyCreator.issueMaster(masterDID, testData.master.subject)
   console.log(`issued initial master`)
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 
   console.log(`issuing credentials`)
   for (const cred of testData.issueCreds) {
@@ -73,14 +73,14 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
     if (!issuer || !receiver) throw new Error(`issuing cred ${issuer}->${receiver} but the issuer or receiver doesn't exist`)
     await issuer.issueCred(receiver.did, cred.subject)
     console.log(`issued credential`)
-    await asyncTimout(5000)
+    await asyncTimout(10 * 1000)
   }
   console.log(`issued all credentials`)
 
   console.log(`making credentials public`)
   await Promise.all(users.map(user => user.makeCredsPublic()))
   console.log(`made credentials public`)
-  await asyncTimout(5000)
+  await asyncTimout(10 * 1000)
 }
 
 async function runVerifiers(verifiers: Verifier[], users: User[]) {
@@ -95,10 +95,10 @@ async function runVerifiers(verifiers: Verifier[], users: User[]) {
 async function cleanup(applications: ApplicationWrapper[]) {
   console.log(`stopping applications`)
   applications.map(app => app.stopApplication())
-  await asyncTimout(1000 * 60)
+  await asyncTimout(60 * 1000)
   console.log('removing applications');
   applications.map(app => app.removeApplication())
-  await asyncTimout(1000 * 5)
+  await asyncTimout(10 * 1000)
   console.log(`cleanup complete`)
 }
 
@@ -108,7 +108,7 @@ async function runTests() {
   for (let i = 0; i < numOfRepeats; i++) {
     for (const verifyNum of verifierRuns) {
       await runVerifiers(verifiers.slice(0,verifyNum), users)
-      await asyncTimout(1000 * 60 * 3)
+      await asyncTimout(3 * 60 * 1000)
     }
   }await cleanup([controller, ontologyCreator, ...verifiers, ...users])
 }

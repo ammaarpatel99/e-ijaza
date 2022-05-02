@@ -20,9 +20,9 @@ export class Controller extends ApplicationWrapper {
     const data: MasterProposalData = {did: did, proposalType: ProposalType.ADD, subject: 'knowledge'}
     await axios.post(`${this.apiURL}/master/propose`, data)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5 * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<Master[]>(

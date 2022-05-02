@@ -26,7 +26,7 @@ export class ApplicationWrapper {
   }
 
   protected get apiURL() {
-    return `http://host.docker.internal:${this.port}/api`
+    return `http://localhost:${this.port}/api`
   }
 
   constructor(readonly name: string) {
@@ -60,6 +60,9 @@ export class ApplicationWrapper {
   }
 
   async initialise(controllerDID?: string) {
+    await axios.post<State.UpdateRes>(
+      `${this.apiURL}/state/update`, {timestamp: 0} as State.UpdateReq
+    )
     const _data: Omit<FullInitialisationData, 'controllerDID' | 'appType'> = {
       advertisedEndpoint: `http://host.docker.internal:${this.agentPort}`,
       genesisURL: `http://host.docker.internal:9000/genesis`,
@@ -71,9 +74,9 @@ export class ApplicationWrapper {
       : {..._data, appType: AppType.CONTROLLER}
     await axios.post(`${this.apiURL}/state/fullInitialisation`, data)
     const initData = await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5 + 1000,
       exponential: false,
-      backoff: 10 * 1000,
+      backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.post<State.UpdateRes>(

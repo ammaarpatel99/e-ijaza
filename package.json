@@ -29,6 +29,7 @@
     "@nguniversal/express-engine": "^13.0.2",
     "@types/axios": "^0.14.0",
     "axios": "^0.25.0",
+    "cors": "^2.8.5",
     "express": "^4.15.2",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",

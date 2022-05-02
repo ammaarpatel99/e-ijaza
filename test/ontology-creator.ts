@@ -23,9 +23,9 @@ export class OntologyCreator extends ApplicationWrapper {
   async makeProposal(proposal: SubjectProposalData) {
     await axios.post(`${this.apiURL}/ontology/propose`, proposal)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5  * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5  * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<SubjectProposalData[]>(
@@ -51,9 +51,9 @@ export class OntologyCreator extends ApplicationWrapper {
     const vote: SubjectProposalVote = {...proposal, vote: true}
     await axios.post(`${this.apiURL}/ontology/vote`, vote)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5  * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5  * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<SubjectProposalData[]>(
@@ -84,9 +84,9 @@ export class OntologyCreator extends ApplicationWrapper {
     const proposal: MasterProposalData = {did, subject, proposalType: ProposalType.ADD}
     await axios.post(`${this.apiURL}/master/propose`, proposal)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5  * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5  * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<MasterProposalData[]>(
@@ -106,9 +106,9 @@ export class OntologyCreator extends ApplicationWrapper {
     const vote: MasterProposalVote = {...proposal, vote: true}
     await axios.post(`${this.apiURL}/master/vote`, vote)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5  * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5  * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<Master[]>(

@@ -1,15 +1,23 @@
 import {TestData} from "./test-data-type";
+import {ProposalType, SubjectProposalType} from "../src/types/schemas";
 
 export const testData: TestData = {
-  users: [],
-  ontologyCommands: [],
+  users: [
+    'prophet',
+    'student'
+  ],
+  ontologyCommands: [
+    {subject: 'knowledge', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.CHILD, child: 'ijaza_subject'}}
+  ],
   master:{
-    name: '',
-    subject: ''
+    name: 'prophet',
+    subject: 'ijaza_subject'
   },
-  issueCreds: [],
+  issueCreds: [
+    {subject: 'ijaza_subject', issuer: 'prophet', receiver: 'student' }
+  ],
   test: {
-    user: '',
-    subject: ''
+    user: 'student',
+    subject: 'ijaza_subject'
   }
 }

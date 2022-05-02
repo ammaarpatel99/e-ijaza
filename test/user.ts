@@ -16,9 +16,9 @@ export class User extends ApplicationWrapper {
     const data: IssuedCredential = {did, subject}
     await axios.post(`${this.apiURL}/credential/issue`, data)
     await repeatWithBackoff({
-      initialTimeout: 2000,
+      initialTimeout: 5 * 1000,
       exponential: false,
-      backoff: 5000,
+      backoff: 5 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<IssuedCredential[]>(
@@ -42,7 +42,7 @@ export class User extends ApplicationWrapper {
     for (const cred of data) {
       const newData = {...cred, public: true}
       await axios.put(`${this.apiURL}/credential/update`, newData)
-      await asyncTimout(5000)
+      await asyncTimout(10 * 1000)
     }
   }
 }
