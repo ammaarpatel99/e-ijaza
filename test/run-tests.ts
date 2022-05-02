@@ -69,9 +69,9 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
 
   console.log(`issuing credentials`)
   for (const cred of testData.issueCreds) {
-    const issuer = users.filter(user => user.name === cred.issuer).shift()
-    const receiver = users.filter(user => user.name === cred.receiver).shift()
-    if (!issuer || !receiver) throw new Error(`issuing cred ${issuer}->${receiver} but the issuer or receiver doesn't exist`)
+    const issuer = users.filter(user => user.rawName === cred.issuer).shift()
+    const receiver = users.filter(user => user.rawName === cred.receiver).shift()
+    if (!issuer || !receiver) throw new Error(`issuing cred ${cred.issuer}->${cred.receiver} but the issuer or receiver doesn't exist`)
     await issuer.issueCred(receiver.did, cred.subject)
     console.log(`issued credential`)
     await asyncTimout(60 * 1000)
@@ -86,7 +86,7 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
 
 async function runVerifiers(verifiers: Verifier[], users: User[]) {
   console.log(`running proof requests`)
-  const user = users.filter(user => user.name === testData.test.user).shift()
+  const user = users.filter(user => user.rawName === testData.test.user).shift()
   if (!user) throw new Error(`can't run test as user doesn't exist`)
   await Promise.all(verifiers.map(verifier => verifier.runProof(user.did, testData.test.subject)))
   console.log(`ran all proofs`)
