@@ -7,6 +7,7 @@ import {OntologyCreator} from "./ontology-creator";
 
 import {testData} from './ijaza-data'
 import {ApplicationWrapper} from "./application-wrapper";
+import {ProofResultLogger} from "./proof-result-logger";
 
 
 const verifierRuns = [1]
@@ -106,6 +107,7 @@ async function cleanup(applications: ApplicationWrapper[]) {
 async function runTests() {
   const {controller, ontologyCreator, verifiers, users} = createAgents()
   await setup(controller, ontologyCreator, verifiers, users)
+  ProofResultLogger.instance.instantiate([controller, ...users])
   for (let i = 0; i < numOfRepeats; i++) {
     for (const verifyNum of verifierRuns) {
       await runVerifiers(verifiers.slice(0,verifyNum), users)

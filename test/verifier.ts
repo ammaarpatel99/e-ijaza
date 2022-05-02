@@ -2,6 +2,7 @@ import {ApplicationWrapper} from "./application-wrapper";
 import {NewProofRequest, OutgoingProofRequest} from "../src/types/interface-api";
 import axios from "axios";
 import {repeatWithBackoff} from "../src/utils";
+import {ProofResultLogger} from "./proof-result-logger";
 
 export class Verifier extends ApplicationWrapper {
   constructor(id: number) {
@@ -18,20 +19,24 @@ export class Verifier extends ApplicationWrapper {
     const proofRes = await repeatWithBackoff({
       initialTimeout: 10 * 1000,
       exponential: false,
-      backoff: 5 * 1000,
+      backoff: 20 * 1000,
       maxRepeats: 200,
       callback: async () => {
         const {data} = await axios.get<OutgoingProofRequest[]>(
           `${this.apiURL}/state/proofs/outgoing`
         )
-        const proofReq = data.filter(req => req.did === did && req.subject === subject).shift()
+        const proofReq = data.filter(req =>
+          req.did === did && req.subject === subject &&
+          (req.result === null || typeof req.result === "boolean")
+        ).shift()
         if (!proofReq) return {success: false}
         return {success: true, value: proofReq}
       },
       failCallback: () => {
-        throw new Error(`failed to run proof`)
+        throw new Error(`failed to run or complete proof`)
       }
     })
     await axios.post(`${this.apiURL}/proof/delete`, proofRes.value)
+    ProofResultLogger.instance.logProof(proofRes.value!)
   }
 }
