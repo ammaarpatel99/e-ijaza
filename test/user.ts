@@ -4,8 +4,8 @@ import axios from "axios";
 import {asyncTimout, repeatWithBackoff} from "../src/utils";
 
 export class User extends ApplicationWrapper {
-  constructor(name: string) {
-    super(`user_${name}`);
+  constructor(readonly rawName: string) {
+    super(`user_${rawName}`);
   }
 
   initialise(controllerDID: string): Promise<void> {

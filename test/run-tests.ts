@@ -61,8 +61,8 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
   await asyncTimout(60 * 1000)
 
   console.log(`create initial master`)
-  const masterDID = users.filter(user => user.name === testData.master.name).map(user => user.did).shift()
-  if (!masterDID) throw new Error(`tried to issue initial master but ${testData.master.subject} doesn't exist`)
+  const masterDID = users.filter(user => user.rawName === testData.master.name).map(user => user.did).shift()
+  if (!masterDID) throw new Error(`tried to issue initial master but ${testData.master.name} doesn't exist`)
   await ontologyCreator.issueMaster(masterDID, testData.master.subject)
   console.log(`issued initial master`)
   await asyncTimout(60 * 1000)
