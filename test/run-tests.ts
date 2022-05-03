@@ -8,11 +8,31 @@ import {OntologyCreator} from "./ontology-creator";
 import {testData} from './ijaza-data'
 import {ApplicationWrapper} from "./application-wrapper";
 import {ProofResultLogger} from "./proof-result-logger";
+import {SubjectProposalType} from "../src/types/schemas";
 
 
 const verifierRuns = [1]
 const numOfRepeats = 1
 
+function processTestData() {
+  testData.users = testData.users.map(txt => txt.replace(/ /gi, '_'))
+  testData.ontologyCommands = testData.ontologyCommands.map(command => ({
+    proposalType: command.proposalType,
+    subject: command.subject.replace(/ /gi, '_'),
+    change: command.change.type === SubjectProposalType.CHILD
+      ? {...command.change, child: command.change.child.replace(/ /gi, '_')}
+      : {...command.change, componentSet: command.change.componentSet.map(txt => txt.replace(/ /gi, '_'))}
+  }))
+  testData.master.name = testData.master.name.replace(/ /gi, '_')
+  testData.master.subject = testData.master.subject.replace(/ /gi, '_')
+  testData.issueCreds = testData.issueCreds.map(issue => ({
+    subject: issue.subject.replace(/ /gi, '_'),
+    issuer: issue.issuer.replace(/ /gi, '_'),
+    receiver: issue.receiver.replace(/ /gi, '_')
+  }))
+  testData.test.user = testData.test.user.replace(/ /gi, '_')
+  testData.test.subject = testData.test.subject.replace(/ /gi, '_')
+}
 
 function createAgents() {
   const controller = new Controller()
@@ -27,28 +47,28 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
   console.log(`starting applications`);
   [controller, ontologyCreator, ...users, ...verifiers].forEach(wrapper => wrapper.startApplication())
   console.log('started applications')
-  await asyncTimout(60 * 1000)
+  await asyncTimout(2 * 60 * 1000)
 
   console.log(`initialising controller`)
   await controller.initialise()
   console.log('initialised controller')
-  await asyncTimout(10 * 1000)
+  await asyncTimout(60 * 1000)
 
   console.log(`initialising ontology creator agent`)
   await ontologyCreator.initialise(controller.did)
   console.log('initialised ontology creator agent')
-  await asyncTimout(10 * 1000)
+  await asyncTimout(60 * 1000)
 
   console.log('issue master cred to ontology creator')
   await controller.issueFirstMasterCred(ontologyCreator.did)
   console.log('issued master cred')
-  await asyncTimout(60 * 1000)
+  await asyncTimout(30 * 1000)
 
   console.log(`acting on ontology commands`)
   for (const proposal of testData.ontologyCommands) {
     await ontologyCreator.makeProposal(proposal)
     console.log(`acted on ontology command`)
-    await asyncTimout(10 * 1000)
+    await asyncTimout(20 * 1000)
   }
   console.log('acted on all ontology commands')
   await asyncTimout(60 * 1000)
@@ -59,7 +79,7 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
       .map(appWrapper => appWrapper.initialise(controller.did))
   )
   console.log(`initialised all applications`)
-  await asyncTimout(60 * 1000)
+  await asyncTimout(2 * 60 * 1000)
 
   console.log(`create initial master`)
   const masterDID = users.filter(user => user.rawName === testData.master.name).map(user => user.did).shift()
@@ -75,9 +95,10 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
     if (!issuer || !receiver) throw new Error(`issuing cred ${cred.issuer}->${cred.receiver} but the issuer or receiver doesn't exist`)
     await issuer.issueCred(receiver.did, cred.subject)
     console.log(`issued credential`)
-    await asyncTimout(60 * 1000)
+    await asyncTimout(20 * 1000)
   }
   console.log(`issued all credentials`)
+  await asyncTimout(60 * 1000)
 
   console.log(`making credentials public`)
   await Promise.all(users.map(user => user.makeCredsPublic()))
@@ -91,13 +112,12 @@ async function runVerifiers(verifiers: Verifier[], users: User[]) {
   if (!user) throw new Error(`can't run test as user doesn't exist`)
   await Promise.all(verifiers.map(verifier => verifier.runProof(user.did, testData.test.subject)))
   console.log(`ran all proofs`)
-  await asyncTimout(60 * 1000)
 }
 
 async function cleanup(applications: ApplicationWrapper[]) {
   console.log(`stopping applications`)
   applications.map(app => app.stopApplication())
-  await asyncTimout(60 * 1000)
+  await asyncTimout(3 * 60 * 1000)
   console.log('removing applications');
   applications.map(app => app.removeApplication())
   await asyncTimout(60 * 1000)
@@ -105,6 +125,7 @@ async function cleanup(applications: ApplicationWrapper[]) {
 }
 
 async function runTests() {
+  processTestData()
   const {controller, ontologyCreator, verifiers, users} = createAgents()
   await setup(controller, ontologyCreator, verifiers, users)
   ProofResultLogger.instance.instantiate([controller, ...users])
