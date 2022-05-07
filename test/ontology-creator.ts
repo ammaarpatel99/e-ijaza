@@ -105,24 +105,25 @@ export class OntologyCreator extends ApplicationWrapper {
     })
     const vote: MasterProposalVote = {...proposal, vote: true}
     await axios.post(`${this.apiURL}/master/vote`, vote)
-    await repeatWithBackoff({
-      initialTimeout: 10  * 1000,
-      exponential: false,
-      backoff: 5  * 1000,
-      maxRepeats: 200,
-      callback: async () => {
-        const {data} = await axios.get<Master[]>(
-          `${this.apiURL}/state/masters`
-        )
-        const _proposal = data.filter(master =>
-          master.did === did && master.subjects.includes(subject)
-        ).shift()
-        return {success: !!_proposal}
-      },
-      failCallback: () => {
-        throw new Error(`failed to issue starting master: ${did}`)
-      }
-    })
-    await asyncTimout(5000)
+    await asyncTimout(60 * 1000)
+    // await repeatWithBackoff({
+    //   initialTimeout: 10  * 1000,
+    //   exponential: false,
+    //   backoff: 5  * 1000,
+    //   maxRepeats: 200,
+    //   callback: async () => {
+    //     const {data} = await axios.get<Master[]>(
+    //       `${this.apiURL}/state/masters`
+    //     )
+    //     const _proposal = data.filter(master =>
+    //       master.did === did && master.subjects.includes(subject)
+    //     ).shift()
+    //     return {success: !!_proposal}
+    //   },
+    //   failCallback: () => {
+    //     throw new Error(`failed to issue starting master: ${did}`)
+    //   }
+    // })
+    // await asyncTimout(5000)
   }
 }
