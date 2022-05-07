@@ -11,8 +11,8 @@ import {ProofResultLogger} from "./proof-result-logger";
 import {SubjectProposalType} from "../src/types/schemas";
 
 
-const verifierRuns = [1]
-const numOfRepeats = 1
+const verifierRuns = [1,5,10,15,20]
+const numOfRepeats = 3
 
 function processTestData() {
   testData.users = testData.users.map(txt => txt.replace(/ /gi, '_'))
@@ -44,8 +44,10 @@ function createAgents() {
 }
 
 async function setup(controller: Controller, ontologyCreator: OntologyCreator, verifiers: Verifier[], users: User[]) {
-  console.log(`starting applications`);
-  [controller, ontologyCreator, ...users, ...verifiers].forEach(wrapper => wrapper.startApplication())
+  console.log(`starting applications`)
+  controller.startApplication()
+  ontologyCreator.startApplication();
+  [...users, ...verifiers].forEach(wrapper => wrapper.startApplication())
   console.log('started applications')
   await asyncTimout(2 * 60 * 1000)
 
