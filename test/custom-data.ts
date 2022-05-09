@@ -7,7 +7,7 @@ export const testData: TestData = {
     {subject: 'knowledge', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.CHILD, child: 'A'}},
     {subject: 'A', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.CHILD, child: 'B'}},
     {subject: 'A', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.CHILD, child: 'C'}},
-    {subject: 'A', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.COMPONENT_SET, componentSet: ['A', 'B']}}
+    {subject: 'A', proposalType: ProposalType.ADD, change: {type: SubjectProposalType.COMPONENT_SET, componentSet: ['B', 'C']}}
   ],
   master:{
     name: '1',
