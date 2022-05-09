@@ -159,11 +159,11 @@ async function runTests() {
 
 
 
-//runTests()
+runTests()
 
-processTestData()
-const agents = createAgents()
-cleanup([agents.controller, agents.ontologyCreator, ...agents.users, ...agents.verifiers])
+// processTestData()
+// const agents = createAgents()
+// cleanup([agents.controller, agents.ontologyCreator, ...agents.users, ...agents.verifiers])
 
 // async function demo() {
 //   console.log('here1')
