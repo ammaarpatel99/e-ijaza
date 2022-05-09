@@ -1,0 +1,12 @@
+Error: Can't establish connection with Aries agent.
+    at /home/indy/app/server/main.js:1:4677963
+    at /home/indy/app/server/main.js:1:1346499
+    at OperatorSubscriber2._this._next (/home/indy/app/server/main.js:1:1304748)
+    at OperatorSubscriber2.Subscriber2.next (/home/indy/app/server/main.js:1:1256873)
+    at /home/indy/app/server/main.js:1:1384168
+    at OperatorSubscriber2._this._next (/home/indy/app/server/main.js:1:1304748)
+    at OperatorSubscriber2.Subscriber2.next (/home/indy/app/server/main.js:1:1256873)
+    at /home/indy/app/server/main.js:1:1291634
+    at ZoneDelegate2.invoke (/home/indy/app/server/main.js:1:1584061)
+    at Zone3.run (/home/indy/app/server/main.js:1:1576419)
+Couldn't establish connection with aries at startup. This simply means initialisation needs to take place.

@@ -1,0 +1,140 @@
+{
+  "name": "Sheikh_Muhammad",
+  "subject": "ijaza_subject",
+  "result": true,
+  "proof": [
+    {
+      "name": "Sheikh_Issa_bin_Muhammed_bin_Muhammed_bin_Ahmed_al-Jaafari",
+      "subject": "ijaza_subject",
+      "result": true,
+      "proof": [
+        {
+          "name": "Sheikh_Ali_Al-Ayoubi_Al-Khatib",
+          "subject": "ijaza_subject",
+          "result": true,
+          "proof": [
+            {
+              "name": "Abu_Al-Naga_Salem_bin_Muhammad_Al-Sanhouri",
+              "subject": "ijaza_subject",
+              "result": true,
+              "proof": [
+                {
+                  "name": "Sheikh_of_Islam_Qadi_Zakaria",
+                  "subject": "ijaza_subject",
+                  "result": true,
+                  "proof": [
+                    {
+                      "name": "Sheikh_of_Shana_Abi_Al-Fadl_bin",
+                      "subject": "ijaza_subject",
+                      "result": true,
+                      "proof": [
+                        {
+                          "name": "Professor_Ibrahim_bin_Ahmed_Al-Tanukhi",
+                          "subject": "ijaza_subject",
+                          "result": true,
+                          "proof": [
+                            {
+                              "name": "Abi_Al-Abbas_Ahmed_bin_Abi_Talib_Al-Hajjar",
+                              "subject": "ijaza_subject",
+                              "result": true,
+                              "proof": [
+                                {
+                                  "name": "Siraj_Al-Hussein_bin_Al-Mubarak_Al-Zubaidi",
+                                  "subject": "ijaza_subject",
+                                  "result": true,
+                                  "proof": [
+                                    {
+                                      "name": "Fath_al-Zai_al-hanbali",
+                                      "subject": "ijaza_subject",
+                                      "result": true,
+                                      "proof": [
+                                        {
+                                          "name": "Abi_al-Waqat_Abdul_Awal_bin_Issa_bin_Shuaib_al-Sijzi_al-Harawi",
+                                          "subject": "ijaza_subject",
+                                          "result": true,
+                                          "proof": [
+                                            {
+                                              "name": "Abu_al-Hasan_Abd_al-Rahman_bin_Muhammad_al-Dawdi",
+                                              "subject": "ijaza_subject",
+                                              "result": true,
+                                              "proof": [
+                                                {
+                                                  "name": "Ahmad_al-Sharkhasi",
+                                                  "subject": "ijaza_subject",
+                                                  "result": true,
+                                                  "proof": [
+                                                    {
+                                                      "name": "Muhammad_ibn_Yusuf_ibn_Matar",
+                                                      "subject": "ijaza_subject",
+                                                      "result": true,
+                                                      "proof": [
+                                                        {
+                                                          "name": "Muhammad_ibn_Ismail_al-Bukhari_Allah_ibn_Abi_Muhammad_Abd_al-Farbari",
+                                                          "subject": "ijaza_subject",
+                                                          "result": true,
+                                                          "proof": [
+                                                            {
+                                                              "name": "Makki_bin_Ibrahim",
+                                                              "subject": "ijaza_subject",
+                                                              "result": true,
+                                                              "proof": [
+                                                                {
+                                                                  "name": "Yazid_bin_Abi_Obaid",
+                                                                  "subject": "ijaza_subject",
+                                                                  "result": true,
+                                                                  "proof": [
+                                                                    {
+                                                                      "name": "Salamah_bin_Al-Akwa",
+                                                                      "subject": "ijaza_subject",
+                                                                      "result": true,
+                                                                      "proof": [
+                                                                        {
+                                                                          "name": "The_prophet",
+                                                                          "subject": "ijaza_subject",
+                                                                          "result": true,
+                                                                          "proof": [
+                                                                            {
+                                                                              "name": "controller",
+                                                                              "subject": "ijaza_subject",
+                                                                              "result": true,
+                                                                              "proof": true
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  ]
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
