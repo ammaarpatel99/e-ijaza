@@ -13,7 +13,7 @@ function build_von_network {
   check_or_create_dir temp
   cd temp || exit 1
   if [ "$(check_or_create_dir von-network)" = 1 ]; then
-    git clone --depth 1 --branch v1.7.2 https://github.com/bcgov/von-network.git ./von-network
+    git clone https://github.com/bcgov/von-network.git
   fi
   ./von-network/manage build
   cd ..
@@ -23,7 +23,7 @@ function build_indy_tails_server {
   check_or_create_dir temp
   cd temp || exit 1
   if [ "$(check_or_create_dir indy-tails-server)" = 1 ]; then
-    git clone --depth 1 --branch v1.0.0 https://github.com/bcgov/indy-tails-server.git ./indy-tails-server
+    git clone https://github.com/bcgov/indy-tails-server.git
   fi
   ./indy-tails-server/docker/manage build
   cd ..
@@ -32,8 +32,8 @@ function build_indy_tails_server {
 function build_application {
   check_or_create_dir temp
   cd temp || exit 1
-  if [ "$(check_or_create_dir aries-agent)" = 1 ]; then
-    git clone --depth 1 --branch 0.7.3 https://github.com/hyperledger/aries-cloudagent-python.git ./aries-agent
+  if [ "$(check_or_create_dir aries-cloudagent-python)" = 1 ]; then
+    git clone https://github.com/hyperledger/aries-cloudagent-python.git
   fi
   cd ..
   ./scripts/app build
