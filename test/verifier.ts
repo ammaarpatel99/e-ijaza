@@ -29,7 +29,7 @@ export class Verifier extends ApplicationWrapper {
           req.did === did && req.subject === subject &&
           (req.result === null || typeof req.result === "boolean")
         ).shift()
-        if (!proofReq) return {success: false}
+        if (!proofReq?.result) return {success: false}
         return {success: true, value: proofReq}
       },
       failCallback: () => {

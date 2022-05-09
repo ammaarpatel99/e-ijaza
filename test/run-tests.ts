@@ -11,7 +11,7 @@ import {ProofResultLogger} from "./proof-result-logger";
 import {SubjectProposalType} from "../src/types/schemas";
 
 
-const verifierRuns = [1,5,10,15,20]
+const verifierRuns = [1,4,7,10]
 const numOfRepeats = 3
 
 function processTestData() {
@@ -44,18 +44,19 @@ function createAgents() {
 }
 
 async function setup(controller: Controller, ontologyCreator: OntologyCreator, verifiers: Verifier[], users: User[]) {
-  console.log(`starting applications`)
+  console.log('starting controller')
   controller.startApplication()
-  ontologyCreator.startApplication();
-  [...users, ...verifiers].forEach(wrapper => wrapper.startApplication())
-  console.log('started applications')
-  await asyncTimout(2 * 60 * 1000)
-
+  console.log('started controller')
+  await asyncTimout(60 * 1000)
   console.log(`initialising controller`)
   await controller.initialise()
   console.log('initialised controller')
   await asyncTimout(60 * 1000)
 
+  console.log('starting ontology creator')
+  ontologyCreator.startApplication()
+  console.log('started ontology creator')
+  await asyncTimout(60 * 1000)
   console.log(`initialising ontology creator agent`)
   await ontologyCreator.initialise(controller.did)
   console.log('initialised ontology creator agent')
@@ -75,20 +76,34 @@ async function setup(controller: Controller, ontologyCreator: OntologyCreator, v
   console.log('acted on all ontology commands')
   await asyncTimout(60 * 1000)
 
+  console.log(`create initial master`)
+  const firstMaster = users.filter(user => user.rawName === testData.master.name).shift()
+  if (!firstMaster) throw new Error(`tried to issue create initial master but ${testData.master.name} doesn't exist`)
+  console.log('starting initial master')
+  firstMaster.startApplication()
+  console.log('started initial master')
+  await asyncTimout(60 * 1000)
+  console.log(`initialising initial master`)
+  await firstMaster.initialise(controller.did)
+  console.log('initialised initial master')
+  await asyncTimout(60 * 1000)
+  console.log('issuing initial master credential')
+  await ontologyCreator.issueMaster(firstMaster.did, testData.master.subject)
+  console.log(`issued initial master credential`)
+  await asyncTimout(60 * 1000)
+
+  console.log(`starting all other applications`);
+  [...users.filter(user => user !== firstMaster), ...verifiers].forEach(wrapper => wrapper.startApplication())
+  console.log('started applications')
+  await asyncTimout(4 * 60 * 1000)
+
   console.log(`initialising all other applications`)
   await Promise.all(
-    [...users, ...verifiers]
+    [...users.filter(user => user !== firstMaster), ...verifiers]
       .map(appWrapper => appWrapper.initialise(controller.did))
   )
   console.log(`initialised all applications`)
-  await asyncTimout(2 * 60 * 1000)
-
-  console.log(`create initial master`)
-  const masterDID = users.filter(user => user.rawName === testData.master.name).map(user => user.did).shift()
-  if (!masterDID) throw new Error(`tried to issue initial master but ${testData.master.name} doesn't exist`)
-  await ontologyCreator.issueMaster(masterDID, testData.master.subject)
-  console.log(`issued initial master`)
-  await asyncTimout(60 * 1000)
+  await asyncTimout(3 * 60 * 1000)
 
   console.log(`issuing credentials`)
   for (const cred of testData.issueCreds) {
@@ -139,8 +154,38 @@ async function runTests() {
     await asyncTimout(5 * 60 * 1000)
   }
   await cleanup([controller, ontologyCreator, ...verifiers, ...users])
+  console.log(`completed all tests`)
 }
 
 
 
-runTests().then(() => console.log(`completed all tests`))
+//runTests()
+
+processTestData()
+const agents = createAgents()
+cleanup([agents.controller, agents.ontologyCreator, ...agents.users, ...agents.verifiers])
+
+// async function demo() {
+//   console.log('here1')
+//   processTestData()
+//   console.log('here2')
+//   const agents = createAgents()
+//   console.log('here3')
+//   agents.controller.startApplication()
+//   console.log('here3')
+//   agents.ontologyCreator.startApplication()
+//   console.log('here4')
+//   await asyncTimout(60 * 1000)
+//   console.log('here5')
+//   await agents.controller.initialise()
+//   console.log('here6')
+//   await asyncTimout(60 * 1000)
+//   console.log('here7')
+//   await agents.ontologyCreator.initialise(agents.controller.did)
+//   console.log('here8')
+//   await asyncTimout(60 * 1000)
+//   console.log('here9')
+// }
+// demo()
+
+

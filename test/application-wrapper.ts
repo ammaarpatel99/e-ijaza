@@ -16,9 +16,16 @@ export class ApplicationWrapper {
     this._AGENT_PORT++
     return port
   }
+  private static _ARIES_ADMIN_PORT = 7000
+  private static get ARIES_ADMIN_PORT() {
+    const port = this._ARIES_ADMIN_PORT
+    this._ARIES_ADMIN_PORT++
+    return port
+  }
 
   private readonly port
   private readonly agentPort
+  private readonly ariesAdminPort
   private _did: string | undefined
   get did() {
     if (!this._did) throw new Error(`Getting did for ${this.name} but doesn't exist`)
@@ -32,6 +39,7 @@ export class ApplicationWrapper {
   constructor(readonly name: string) {
     this.port = ApplicationWrapper.PORT
     this.agentPort = ApplicationWrapper.AGENT_PORT
+    this.ariesAdminPort = ApplicationWrapper.ARIES_ADMIN_PORT
   }
 
   startApplication() {
@@ -40,10 +48,10 @@ export class ApplicationWrapper {
       [
         'docker run -itd',
         `--name "${this.name}"`,
-        `-p "${this.port}:${this.port}" -p "${this.agentPort}:${this.agentPort}"`,
+        `-p "${this.port}:${this.port}" -p "${this.agentPort}:${this.agentPort}" -p "${this.ariesAdminPort}:${this.ariesAdminPort}"`,
         `-e PORT="${this.port}"`,
         `-e ARIES_PORT="${this.agentPort}"`,
-        `-e ARIES_ADMIN_PORT="10000"`,
+        `-e ARIES_ADMIN_PORT="${this.ariesAdminPort}"`,
         `-e WEBHOOK_URL="localhost:${this.port}/webhook"`,
         `-v "$(pwd)/logs/${this.name}:/home/indy/logs"`,
         `e_ijaza_app`

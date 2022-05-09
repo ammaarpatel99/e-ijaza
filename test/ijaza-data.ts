@@ -23,14 +23,10 @@ const users: TestData['users'] = [
   'Sheikh Muhammad'
 ]
 
-const issueCreds: TestData['issueCreds'] = users
-  .map((value, index, array) => {
-    if (index + 1 < array.length) {
-      return {issuer: value, subject: 'ijaza_subject', receiver: array[index + 1]}
-    }
-  })
-  .filter(item => item !== undefined)
-  .map(item => item as Exclude<typeof item, undefined>)
+const issueCreds: TestData['issueCreds'] = []
+for (let i = 0; i < users.length - 1; i++) {
+  issueCreds.push({issuer: users[i], receiver: users[i+1], subject: 'ijaza_subject'})
+}
 
 export const testData: TestData = {
   users,

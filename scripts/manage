@@ -23,7 +23,7 @@ function build_indy_tails_server {
   check_or_create_dir temp
   cd temp || exit 1
   if [ "$(check_or_create_dir indy-tails-server)" = 1 ]; then
-    git clone https://github.com/bcgov/indy-tails-server.git
+    git clone --depth 1 --branch v1.0.0 https://github.com/bcgov/indy-tails-server.git
   fi
   ./indy-tails-server/docker/manage build
   cd ..
@@ -33,7 +33,7 @@ function build_application {
   check_or_create_dir temp
   cd temp || exit 1
   if [ "$(check_or_create_dir aries-cloudagent-python)" = 1 ]; then
-    git clone https://github.com/hyperledger/aries-cloudagent-python.git
+    git clone --depth 1 --branch 0.7.3 https://github.com/hyperledger/aries-cloudagent-python.git
   fi
   cd ..
   ./scripts/app build
