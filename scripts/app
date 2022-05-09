@@ -40,7 +40,7 @@ elif [ "$1" = "start" ]; then
     fi
     docker run -itd \
     --name "$2" \
-    -p "${3}:${3}" -p "${4}:${4}" -p "${ARIES_ADMIN_PORT}:${ARIES_ADMIN_PORT}" \
+    -p "${3}:${3}" -p "${4}:${4}" \
     -e PORT="${3}" \
     -e ARIES_PORT="${4}" \
     -e ARIES_ADMIN_PORT="${ARIES_ADMIN_PORT}" \
