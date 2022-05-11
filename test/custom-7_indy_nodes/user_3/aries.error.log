@@ -1,0 +1,16 @@
+2022-05-11 16:11:15,273 aries_cloudagent.core.event_bus ERROR Error occurred while processing event
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/revocation/routes.py", line 1090, in on_revocation_registry_event
+    max_cred_num=rev_reg_size,
+  File "/home/indy/aries_cloudagent/revocation/indy.py", line 45, in init_issuer_registry
+    raise RevocationNotSupportedError("Credential definition not found")
+aries_cloudagent.revocation.error.RevocationNotSupportedError: Credential definition not found
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/event_bus.py", line 120, in notify
+    await processor()
+  File "/home/indy/aries_cloudagent/revocation/routes.py", line 1106, in on_revocation_registry_event
+    raise RevocationError(e.message) from e
+aries_cloudagent.revocation.error.RevocationError: Credential definition not found

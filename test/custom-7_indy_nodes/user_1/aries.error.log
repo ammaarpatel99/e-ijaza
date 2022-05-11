@@ -1,0 +1,1495 @@
+2022-05-11 16:21:35,158 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange af7d56ea-5617-4de3-8fba-a264ae02aece in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange af7d56ea-5617-4de3-8fba-a264ae02aece in presentation_sent state (must be request_received)
+2022-05-11 16:21:36,259 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 76ed785e-1daa-49d2-aaf9-14420dd7475f in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 76ed785e-1daa-49d2-aaf9-14420dd7475f in presentation_acked state (must be request_received)
+2022-05-11 16:24:46,305 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange b6d59b9b-c49a-4924-a614-9290f82dbde3 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange b6d59b9b-c49a-4924-a614-9290f82dbde3 in presentation_sent state (must be request_received)
+2022-05-11 16:24:47,709 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange bc1f1c37-2ae5-44bd-bcb0-3f492a1775ab in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange bc1f1c37-2ae5-44bd-bcb0-3f492a1775ab in presentation_acked state (must be request_received)
+2022-05-11 16:24:48,263 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 454d9945-16dd-4fd8-a461-30bee1379b17 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 454d9945-16dd-4fd8-a461-30bee1379b17 in presentation_sent state (must be request_received)
+2022-05-11 16:24:48,573 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_sent state (must be request_received)
+2022-05-11 16:24:49,451 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_acked state (must be request_received)
+2022-05-11 16:24:49,815 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c9dbfb6f-f41e-415d-b067-2cdd8f6e251e in presentation_acked state (must be request_received)
+2022-05-11 16:24:50,094 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 0440c209-2548-42ba-95ae-00b6927b2a05 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 0440c209-2548-42ba-95ae-00b6927b2a05 in presentation_sent state (must be request_received)
+2022-05-11 16:24:51,122 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 85857678-8a3f-4d45-a205-426a1f621c12 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 85857678-8a3f-4d45-a205-426a1f621c12 in presentation_sent state (must be request_received)
+2022-05-11 16:28:27,849 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 6305d578-b246-4213-84ef-722e4bb0813a in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 6305d578-b246-4213-84ef-722e4bb0813a in presentation_sent state (must be request_received)
+2022-05-11 16:28:29,888 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 785c226b-5b01-457d-b2ae-86cde1baee1a in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 785c226b-5b01-457d-b2ae-86cde1baee1a in presentation_acked state (must be request_received)
+2022-05-11 16:28:32,227 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 5ee64642-4dc8-40fe-8705-e92f23f0f0f9 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 5ee64642-4dc8-40fe-8705-e92f23f0f0f9 in presentation_sent state (must be request_received)
+2022-05-11 16:28:33,553 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9b26d4f4-dd74-45a8-9729-c97ff788023e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9b26d4f4-dd74-45a8-9729-c97ff788023e in presentation_acked state (must be request_received)
+2022-05-11 16:28:35,523 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 7282b891-b0e6-4eb7-b356-5fac3b09cb5d in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 7282b891-b0e6-4eb7-b356-5fac3b09cb5d in presentation_sent state (must be request_received)
+2022-05-11 16:28:35,768 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 43dd0450-3bfe-42e9-bf72-0a654c507538 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 43dd0450-3bfe-42e9-bf72-0a654c507538 in presentation_sent state (must be request_received)
+2022-05-11 16:28:38,542 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 43dd0450-3bfe-42e9-bf72-0a654c507538 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 43dd0450-3bfe-42e9-bf72-0a654c507538 in presentation_acked state (must be request_received)
+2022-05-11 16:28:39,210 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange a6cb32a5-c740-4e56-828f-64aa03272fca in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange a6cb32a5-c740-4e56-828f-64aa03272fca in presentation_acked state (must be request_received)
+2022-05-11 16:28:39,456 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 14b19342-9cf4-4bfb-8cac-303d424f1478 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 14b19342-9cf4-4bfb-8cac-303d424f1478 in presentation_sent state (must be request_received)
+2022-05-11 16:28:39,576 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 14b19342-9cf4-4bfb-8cac-303d424f1478 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 14b19342-9cf4-4bfb-8cac-303d424f1478 in presentation_sent state (must be request_received)
+2022-05-11 16:28:41,005 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 56dc7702-d345-44e8-8bc9-b85725d18b7f in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 56dc7702-d345-44e8-8bc9-b85725d18b7f in presentation_acked state (must be request_received)
+2022-05-11 16:32:10,731 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 25ce79bd-8fd9-42ac-b2fb-227d95693624 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 25ce79bd-8fd9-42ac-b2fb-227d95693624 in presentation_acked state (must be request_received)
+2022-05-11 16:32:14,036 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange e46cbef7-bebf-4a10-91f1-0c3d79ff6a07 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange e46cbef7-bebf-4a10-91f1-0c3d79ff6a07 in presentation_sent state (must be request_received)
+2022-05-11 16:32:15,455 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange fb380227-1d50-466f-861d-3c65ef87ae4e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange fb380227-1d50-466f-861d-3c65ef87ae4e in presentation_acked state (must be request_received)
+2022-05-11 16:32:16,326 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_sent state (must be request_received)
+2022-05-11 16:32:17,923 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_acked state (must be request_received)
+2022-05-11 16:32:18,840 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f2a543e8-1c47-499c-aaf7-7975fa6ee70c in presentation_acked state (must be request_received)
+2022-05-11 16:32:19,432 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange d26314f2-09e4-4a79-abf7-01f6026fb72e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange d26314f2-09e4-4a79-abf7-01f6026fb72e in presentation_acked state (must be request_received)
+2022-05-11 16:32:19,532 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange d26314f2-09e4-4a79-abf7-01f6026fb72e in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange d26314f2-09e4-4a79-abf7-01f6026fb72e in presentation_acked state (must be request_received)
+2022-05-11 16:32:22,712 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 1bdc6a6b-51f2-4689-9f8d-b0130ee0c676 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 1bdc6a6b-51f2-4689-9f8d-b0130ee0c676 in presentation_sent state (must be request_received)
+2022-05-11 16:32:22,950 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange a1b32aa3-66bb-4e30-89ed-1a0210bd1f66 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange a1b32aa3-66bb-4e30-89ed-1a0210bd1f66 in presentation_sent state (must be request_received)
+2022-05-11 16:32:25,652 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 18918477-df14-459c-a881-c875628b3840 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 18918477-df14-459c-a881-c875628b3840 in presentation_acked state (must be request_received)
+2022-05-11 16:32:27,078 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange fb7e96d2-1052-4d88-837f-9751e1efe410 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange fb7e96d2-1052-4d88-837f-9751e1efe410 in presentation_sent state (must be request_received)
+2022-05-11 16:32:27,157 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange fb7e96d2-1052-4d88-837f-9751e1efe410 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange fb7e96d2-1052-4d88-837f-9751e1efe410 in presentation_sent state (must be request_received)
+2022-05-11 16:32:27,716 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 68bd6f4a-abe7-4840-bb90-f277f7b9c2cc in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 68bd6f4a-abe7-4840-bb90-f277f7b9c2cc in presentation_sent state (must be request_received)
+2022-05-11 16:32:28,102 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 52168412-58ef-40e3-9e7d-f080f189bb3f in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 52168412-58ef-40e3-9e7d-f080f189bb3f in presentation_sent state (must be request_received)
+2022-05-11 16:32:30,979 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange b8ce5d7a-2dd1-4021-9bf5-5b5a43bc25c8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange b8ce5d7a-2dd1-4021-9bf5-5b5a43bc25c8 in presentation_acked state (must be request_received)
+2022-05-11 16:40:45,013 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange d8a1e090-de93-4708-8db5-b1de409dbf7a in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange d8a1e090-de93-4708-8db5-b1de409dbf7a in presentation_sent state (must be request_received)
+2022-05-11 16:40:45,876 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c8456d2c-9c40-4d39-89bb-1af72573a3d7 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c8456d2c-9c40-4d39-89bb-1af72573a3d7 in presentation_acked state (must be request_received)
+2022-05-11 16:43:57,521 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 45d8529e-45bc-4d04-b96b-8278afc8ed5a in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 45d8529e-45bc-4d04-b96b-8278afc8ed5a in presentation_sent state (must be request_received)
+2022-05-11 16:43:59,328 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 66cb2574-515a-4fb7-aa9d-e533e1b956c8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 66cb2574-515a-4fb7-aa9d-e533e1b956c8 in presentation_acked state (must be request_received)
+2022-05-11 16:44:00,798 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange deae6bb2-6d5b-410a-8104-5fac3d37a74d in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange deae6bb2-6d5b-410a-8104-5fac3d37a74d in presentation_acked state (must be request_received)
+2022-05-11 16:44:02,066 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 362d4931-060c-4a41-8f83-7cf97ffe2f7f in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 362d4931-060c-4a41-8f83-7cf97ffe2f7f in presentation_acked state (must be request_received)
+2022-05-11 16:44:02,911 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 072cf42b-aa91-49bc-82c6-1a76259a84a7 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 072cf42b-aa91-49bc-82c6-1a76259a84a7 in presentation_sent state (must be request_received)
+2022-05-11 16:44:04,163 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 0df13495-d734-40b2-bebf-418cd8733ee6 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 0df13495-d734-40b2-bebf-418cd8733ee6 in presentation_acked state (must be request_received)
+2022-05-11 16:47:39,048 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange dfd85ae3-8b63-4221-8730-0699457a5ff0 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange dfd85ae3-8b63-4221-8730-0699457a5ff0 in presentation_sent state (must be request_received)
+2022-05-11 16:47:40,316 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 05106316-5ff4-4f29-afba-ae3792fc1143 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 05106316-5ff4-4f29-afba-ae3792fc1143 in presentation_acked state (must be request_received)
+2022-05-11 16:47:44,794 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 6c25d7c9-2f69-4aa4-a053-cfc1eed7dc34 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 6c25d7c9-2f69-4aa4-a053-cfc1eed7dc34 in presentation_acked state (must be request_received)
+2022-05-11 16:47:46,193 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 6c25d7c9-2f69-4aa4-a053-cfc1eed7dc34 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 6c25d7c9-2f69-4aa4-a053-cfc1eed7dc34 in presentation_acked state (must be request_received)
+2022-05-11 16:47:47,034 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange bd4327bc-b78b-4b51-921a-d2a860e00815 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange bd4327bc-b78b-4b51-921a-d2a860e00815 in presentation_sent state (must be request_received)
+2022-05-11 16:47:50,156 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 813ba564-82c1-4af8-881f-8ba8007211a8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 813ba564-82c1-4af8-881f-8ba8007211a8 in presentation_acked state (must be request_received)
+2022-05-11 16:47:50,348 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 813ba564-82c1-4af8-881f-8ba8007211a8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 813ba564-82c1-4af8-881f-8ba8007211a8 in presentation_acked state (must be request_received)
+2022-05-11 16:47:50,656 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 201b3ad1-0761-4fca-8784-de19c7e00c01 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 201b3ad1-0761-4fca-8784-de19c7e00c01 in presentation_sent state (must be request_received)
+2022-05-11 16:47:52,330 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 5e84e428-706d-429f-be04-e1139c714772 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 5e84e428-706d-429f-be04-e1139c714772 in presentation_sent state (must be request_received)
+2022-05-11 16:47:52,806 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange cbf3b4b3-cced-463e-833b-9e12195b0a97 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange cbf3b4b3-cced-463e-833b-9e12195b0a97 in presentation_sent state (must be request_received)
+2022-05-11 16:51:22,318 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 726d9ffb-9f60-46bd-ae66-4760b5358b48 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 726d9ffb-9f60-46bd-ae66-4760b5358b48 in presentation_acked state (must be request_received)
+2022-05-11 16:51:23,466 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 23c80a35-96ed-44cf-8c19-23e58b32ba3a in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 23c80a35-96ed-44cf-8c19-23e58b32ba3a in presentation_acked state (must be request_received)
+2022-05-11 16:51:27,693 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9553b003-ef04-4158-a2a9-1c78128f7bbd in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9553b003-ef04-4158-a2a9-1c78128f7bbd in presentation_acked state (must be request_received)
+2022-05-11 16:51:28,225 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9553b003-ef04-4158-a2a9-1c78128f7bbd in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9553b003-ef04-4158-a2a9-1c78128f7bbd in presentation_acked state (must be request_received)
+2022-05-11 16:51:28,557 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9e3a7700-0c4f-4fa4-8415-dbb8341cfb25 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9e3a7700-0c4f-4fa4-8415-dbb8341cfb25 in presentation_sent state (must be request_received)
+2022-05-11 16:51:28,852 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9e3a7700-0c4f-4fa4-8415-dbb8341cfb25 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9e3a7700-0c4f-4fa4-8415-dbb8341cfb25 in presentation_acked state (must be request_received)
+2022-05-11 16:51:32,275 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 622c5a2f-869c-4f9a-8977-99fd8c9fe503 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 622c5a2f-869c-4f9a-8977-99fd8c9fe503 in presentation_sent state (must be request_received)
+2022-05-11 16:51:35,249 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 7b9b44e2-137b-4127-9fa3-5185d9e06978 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 7b9b44e2-137b-4127-9fa3-5185d9e06978 in presentation_acked state (must be request_received)
+2022-05-11 16:51:37,526 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange d63b65f7-7ae2-431f-bfa9-5d37ad5709b6 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange d63b65f7-7ae2-431f-bfa9-5d37ad5709b6 in presentation_sent state (must be request_received)
+2022-05-11 16:51:39,204 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 9ad69cf7-16f6-4192-9452-1b037c652a28 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 9ad69cf7-16f6-4192-9452-1b037c652a28 in presentation_acked state (must be request_received)
+2022-05-11 16:51:39,491 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 346a228a-8f5e-48e2-86e7-491192d8f9b9 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 346a228a-8f5e-48e2-86e7-491192d8f9b9 in presentation_sent state (must be request_received)
+2022-05-11 16:51:40,217 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f4a96b4a-068d-4865-ac15-5fa25d9b248a in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f4a96b4a-068d-4865-ac15-5fa25d9b248a in presentation_sent state (must be request_received)
+2022-05-11 16:51:40,739 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f4a96b4a-068d-4865-ac15-5fa25d9b248a in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f4a96b4a-068d-4865-ac15-5fa25d9b248a in presentation_acked state (must be request_received)
+2022-05-11 16:51:41,133 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange e84b773b-c2ab-4222-9bce-594572f4eff0 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange e84b773b-c2ab-4222-9bce-594572f4eff0 in presentation_sent state (must be request_received)
+2022-05-11 16:51:44,754 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f1cddc7e-fb1c-4746-a68f-324544dcb8fa in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f1cddc7e-fb1c-4746-a68f-324544dcb8fa in presentation_sent state (must be request_received)
+2022-05-11 16:51:45,203 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange cec7a990-3868-41fd-8d43-9a01e4bfb827 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange cec7a990-3868-41fd-8d43-9a01e4bfb827 in presentation_sent state (must be request_received)
+2022-05-11 16:51:47,768 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 2dbb5472-8b90-477a-b195-eac943ad1c87 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 2dbb5472-8b90-477a-b195-eac943ad1c87 in presentation_acked state (must be request_received)
+2022-05-11 16:51:48,730 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 2dbb5472-8b90-477a-b195-eac943ad1c87 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 2dbb5472-8b90-477a-b195-eac943ad1c87 in presentation_acked state (must be request_received)
+2022-05-11 16:59:55,756 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 2b5ed0a2-dbda-4a07-8454-fdc411feb685 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 2b5ed0a2-dbda-4a07-8454-fdc411feb685 in presentation_sent state (must be request_received)
+2022-05-11 16:59:56,745 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 6997f7af-bfec-40f6-9f30-0a4bdaa66ce6 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 6997f7af-bfec-40f6-9f30-0a4bdaa66ce6 in presentation_acked state (must be request_received)
+2022-05-11 17:03:08,480 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 74845d87-5727-4749-82e4-153cad29602a in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 74845d87-5727-4749-82e4-153cad29602a in presentation_sent state (must be request_received)
+2022-05-11 17:03:10,521 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 8873fd38-b847-40cd-8541-4da528a241f8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 8873fd38-b847-40cd-8541-4da528a241f8 in presentation_acked state (must be request_received)
+2022-05-11 17:03:11,416 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 8873fd38-b847-40cd-8541-4da528a241f8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 8873fd38-b847-40cd-8541-4da528a241f8 in presentation_acked state (must be request_received)
+2022-05-11 17:03:11,798 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 99aa3944-1582-4642-b1bb-26e51ff151f8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 99aa3944-1582-4642-b1bb-26e51ff151f8 in presentation_acked state (must be request_received)
+2022-05-11 17:03:12,777 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 99aa3944-1582-4642-b1bb-26e51ff151f8 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 99aa3944-1582-4642-b1bb-26e51ff151f8 in presentation_acked state (must be request_received)
+2022-05-11 17:03:13,758 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c4c85bfc-a39d-4534-aac2-6697a885a006 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c4c85bfc-a39d-4534-aac2-6697a885a006 in presentation_acked state (must be request_received)
+2022-05-11 17:03:14,177 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c4c85bfc-a39d-4534-aac2-6697a885a006 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c4c85bfc-a39d-4534-aac2-6697a885a006 in presentation_acked state (must be request_received)
+2022-05-11 17:03:14,527 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+2022-05-11 17:03:14,847 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+2022-05-11 17:03:15,131 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 96024ae7-c074-44fa-9d8a-7c189cbc35fe in presentation_acked state (must be request_received)
+2022-05-11 17:03:16,378 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 09cbd327-de45-4d5c-be55-f65a6b934532 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 09cbd327-de45-4d5c-be55-f65a6b934532 in presentation_acked state (must be request_received)
+2022-05-11 17:06:50,083 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c51cfbeb-826a-4909-a698-2f6fc71d0851 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c51cfbeb-826a-4909-a698-2f6fc71d0851 in presentation_sent state (must be request_received)
+2022-05-11 17:06:51,880 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 210e6e0f-ff91-4362-a64a-caf52ba53466 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 210e6e0f-ff91-4362-a64a-caf52ba53466 in presentation_acked state (must be request_received)
+2022-05-11 17:06:54,789 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange a0439895-6723-451d-a111-0c030ce78c8c in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange a0439895-6723-451d-a111-0c030ce78c8c in presentation_acked state (must be request_received)
+2022-05-11 17:06:56,889 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 673da766-6cd4-4d16-aee4-db62eedbf3af in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 673da766-6cd4-4d16-aee4-db62eedbf3af in presentation_acked state (must be request_received)
+2022-05-11 17:06:58,027 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 2203a113-4bc5-4fa8-8e64-871442f56fc9 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 2203a113-4bc5-4fa8-8e64-871442f56fc9 in presentation_sent state (must be request_received)
+2022-05-11 17:06:59,938 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 2e5c6987-38fd-45bb-9919-18562373c688 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 2e5c6987-38fd-45bb-9919-18562373c688 in presentation_acked state (must be request_received)
+2022-05-11 17:07:00,038 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange dce12afd-efb9-467b-8250-5328fcf49d49 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange dce12afd-efb9-467b-8250-5328fcf49d49 in presentation_sent state (must be request_received)
+2022-05-11 17:07:00,613 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 12bfa778-db44-458a-8305-b997581c1bda in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 12bfa778-db44-458a-8305-b997581c1bda in presentation_acked state (must be request_received)
+2022-05-11 17:07:00,765 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 12bfa778-db44-458a-8305-b997581c1bda in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 12bfa778-db44-458a-8305-b997581c1bda in presentation_acked state (must be request_received)
+2022-05-11 17:07:01,292 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 91aa90b1-d2f0-4fad-85cb-15ded9942108 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 91aa90b1-d2f0-4fad-85cb-15ded9942108 in presentation_acked state (must be request_received)
+2022-05-11 17:07:02,370 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 84328c5b-d5b6-4403-9d64-b024504be90d in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 84328c5b-d5b6-4403-9d64-b024504be90d in presentation_acked state (must be request_received)
+2022-05-11 17:07:04,194 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange ed446121-3484-48f7-a9d2-fd392af61bfe in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange ed446121-3484-48f7-a9d2-fd392af61bfe in presentation_sent state (must be request_received)
+2022-05-11 17:07:04,539 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c090c5ff-5ec2-4031-8778-473ee1174663 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c090c5ff-5ec2-4031-8778-473ee1174663 in presentation_sent state (must be request_received)
+2022-05-11 17:10:32,226 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange b30b956b-081d-4479-a26e-769a42971853 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange b30b956b-081d-4479-a26e-769a42971853 in presentation_acked state (must be request_received)
+2022-05-11 17:10:34,229 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 7a4fb05d-7903-4515-b0fd-d41e03b1c443 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 7a4fb05d-7903-4515-b0fd-d41e03b1c443 in presentation_acked state (must be request_received)
+2022-05-11 17:10:36,588 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange af63faeb-83a6-4138-a254-6c7273ff68c9 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange af63faeb-83a6-4138-a254-6c7273ff68c9 in presentation_sent state (must be request_received)
+2022-05-11 17:10:38,547 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 60c8ff28-d5a3-4981-9e38-e1f394514a37 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 60c8ff28-d5a3-4981-9e38-e1f394514a37 in presentation_acked state (must be request_received)
+2022-05-11 17:10:39,339 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 60c8ff28-d5a3-4981-9e38-e1f394514a37 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 60c8ff28-d5a3-4981-9e38-e1f394514a37 in presentation_acked state (must be request_received)
+2022-05-11 17:10:39,564 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c9f00468-aafc-463a-bbce-d3f4e5e04b62 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c9f00468-aafc-463a-bbce-d3f4e5e04b62 in presentation_sent state (must be request_received)
+2022-05-11 17:10:39,668 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange c9f00468-aafc-463a-bbce-d3f4e5e04b62 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange c9f00468-aafc-463a-bbce-d3f4e5e04b62 in presentation_sent state (must be request_received)
+2022-05-11 17:10:41,765 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 1135e03e-0813-4871-8601-fbed006f83f3 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 1135e03e-0813-4871-8601-fbed006f83f3 in presentation_acked state (must be request_received)
+2022-05-11 17:10:42,718 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange d0d1128e-2474-4920-9628-153169f0e764 in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange d0d1128e-2474-4920-9628-153169f0e764 in presentation_sent state (must be request_received)
+2022-05-11 17:10:45,646 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f6c73fc8-31f7-4002-af86-1123059f526a in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f6c73fc8-31f7-4002-af86-1123059f526a in presentation_acked state (must be request_received)
+2022-05-11 17:10:45,773 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange f6c73fc8-31f7-4002-af86-1123059f526a in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange f6c73fc8-31f7-4002-af86-1123059f526a in presentation_acked state (must be request_received)
+2022-05-11 17:10:50,254 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 0cfd8551-f027-4793-ad92-dc567b355d82 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 0cfd8551-f027-4793-ad92-dc567b355d82 in presentation_acked state (must be request_received)
+2022-05-11 17:10:52,492 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 20d83453-0b3d-4eeb-92b4-5fb0a4178b62 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 20d83453-0b3d-4eeb-92b4-5fb0a4178b62 in presentation_acked state (must be request_received)
+2022-05-11 17:10:55,151 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 048c0229-8909-43e3-bde4-5685f7c25bc7 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 048c0229-8909-43e3-bde4-5685f7c25bc7 in presentation_acked state (must be request_received)
+2022-05-11 17:10:55,684 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 627e6e0b-cfdf-4796-a1ed-1c4c2e9f2faa in presentation_sent state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 627e6e0b-cfdf-4796-a1ed-1c4c2e9f2faa in presentation_sent state (must be request_received)
+2022-05-11 17:10:56,691 aries_cloudagent.admin.server ERROR Handler error with exception: Presentation exchange 0a8a48b9-7fc0-466a-8f87-7268afd66454 in presentation_acked state (must be request_received)
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/admin/server.py", line 163, in ready_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 200, in debug_middleware
+    return await handler(request)
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/aiohttp_apispec/middlewares.py", line 45, in validation_middleware
+    return await handler(request)
+  File "/home/indy/aries_cloudagent/admin/server.py", line 391, in setup_context
+    return await task
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/routes.py", line 719, in presentation_exchange_send_presentation
+    f"Presentation exchange {presentation_exchange_id} "
+aiohttp.web_exceptions.HTTPBadRequest: Presentation exchange 0a8a48b9-7fc0-466a-8f87-7268afd66454 in presentation_acked state (must be request_received)
