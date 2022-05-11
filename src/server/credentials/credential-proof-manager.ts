@@ -147,6 +147,10 @@ export class CredentialProofManager {
         return this.autoRespondToRequest$(data.subject, data.pres_ex_id, heldCredentials).pipe(
           tap(success => {
             if (success) this.incomingProofs.delete(id)
+          }),
+          catchError(e => {
+            console.error(e)
+            return voidObs$
           })
         )
       })
