@@ -1,0 +1,55 @@
+{
+  "name": "5",
+  "subject": "A",
+  "result": true,
+  "proof": [
+    {
+      "name": "4",
+      "subject": "A",
+      "result": true,
+      "proof": [
+        {
+          "name": "2",
+          "subject": "B",
+          "result": true,
+          "proof": [
+            {
+              "name": "1",
+              "subject": "B",
+              "result": true,
+              "proof": [
+                {
+                  "name": "controller",
+                  "subject": "A",
+                  "result": true,
+                  "proof": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "3",
+          "subject": "C",
+          "result": true,
+          "proof": [
+            {
+              "name": "1",
+              "subject": "C",
+              "result": true,
+              "proof": [
+                {
+                  "name": "controller",
+                  "subject": "A",
+                  "result": true,
+                  "proof": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
