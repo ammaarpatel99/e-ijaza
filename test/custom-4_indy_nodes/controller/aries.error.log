@@ -1,0 +1,645 @@
+2022-05-11 18:44:31,064 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 0cb080f8-b3cd-432b-8b05-5b40130cc5d9
+2022-05-11 18:44:31,069 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 0cb080f8-b3cd-432b-8b05-5b40130cc5d9
+2022-05-11 18:44:31,070 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 0cb080f8-b3cd-432b-8b05-5b40130cc5d9
+2022-05-11 18:46:35,698 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 485af8d6-3d29-4d7b-b067-410a2d78a1e6
+2022-05-11 18:46:35,701 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 485af8d6-3d29-4d7b-b067-410a2d78a1e6
+2022-05-11 18:46:35,702 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 485af8d6-3d29-4d7b-b067-410a2d78a1e6
+2022-05-11 18:47:22,519 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: e362a4a8-39ce-41b8-8902-c47c0f10eba5
+2022-05-11 18:47:22,521 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: e362a4a8-39ce-41b8-8902-c47c0f10eba5
+2022-05-11 18:47:22,522 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: e362a4a8-39ce-41b8-8902-c47c0f10eba5
+2022-05-11 18:48:09,081 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 983782f7-dc74-4481-ae4e-c6f88ff70879
+2022-05-11 18:48:09,084 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 983782f7-dc74-4481-ae4e-c6f88ff70879
+2022-05-11 18:48:09,085 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 983782f7-dc74-4481-ae4e-c6f88ff70879
+2022-05-11 18:48:55,920 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: fb0e2282-3b4c-447c-b816-63c8b709c8d7
+2022-05-11 18:48:55,923 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: fb0e2282-3b4c-447c-b816-63c8b709c8d7
+2022-05-11 18:48:55,924 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: fb0e2282-3b4c-447c-b816-63c8b709c8d7
+2022-05-11 18:51:50,106 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 1af5d8be-6123-479e-83c2-1b7d6838da43
+2022-05-11 18:51:50,109 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 1af5d8be-6123-479e-83c2-1b7d6838da43
+2022-05-11 18:51:50,111 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 1af5d8be-6123-479e-83c2-1b7d6838da43
+2022-05-11 18:53:14,834 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: a88da6d7-67c0-4b0b-b206-7af3ef89b309
+2022-05-11 18:53:14,837 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: a88da6d7-67c0-4b0b-b206-7af3ef89b309
+2022-05-11 18:53:14,838 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: a88da6d7-67c0-4b0b-b206-7af3ef89b309
+2022-05-11 18:59:04,889 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 19b9c9b0-4641-4d0a-ae4d-1709c5dd23be
+2022-05-11 18:59:04,892 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 19b9c9b0-4641-4d0a-ae4d-1709c5dd23be
+2022-05-11 18:59:04,892 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 19b9c9b0-4641-4d0a-ae4d-1709c5dd23be
+2022-05-11 18:59:09,694 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '25542797-3979-47e9-90b5-8a3d59a31771'}, {'connection_id': '3fa5b894-a841-43af-a235-5e137a1c2f87'}
+2022-05-11 18:59:09,697 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': '25542797-3979-47e9-90b5-8a3d59a31771'}, {'connection_id': '3fa5b894-a841-43af-a235-5e137a1c2f87'}
+2022-05-11 18:59:09,697 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '25542797-3979-47e9-90b5-8a3d59a31771'}, {'connection_id': '3fa5b894-a841-43af-a235-5e137a1c2f87'}
+2022-05-11 18:59:09,761 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'a6a673e1-e0dd-486b-b4bc-79b9472e11d5'}, {'connection_id': 'd21e58c1-d7b1-4fba-b44c-fc6e2bd6ea8f'}
+2022-05-11 18:59:09,763 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'a6a673e1-e0dd-486b-b4bc-79b9472e11d5'}, {'connection_id': 'd21e58c1-d7b1-4fba-b44c-fc6e2bd6ea8f'}
+2022-05-11 18:59:09,764 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'a6a673e1-e0dd-486b-b4bc-79b9472e11d5'}, {'connection_id': 'd21e58c1-d7b1-4fba-b44c-fc6e2bd6ea8f'}
+2022-05-11 18:59:10,413 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '2198b320-66d8-474a-9003-3058dd204362'}, {'connection_id': '3dbcfd37-248c-48e9-8f49-388879fcc74c'}
+2022-05-11 18:59:10,416 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': '2198b320-66d8-474a-9003-3058dd204362'}, {'connection_id': '3dbcfd37-248c-48e9-8f49-388879fcc74c'}
+2022-05-11 18:59:10,417 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '2198b320-66d8-474a-9003-3058dd204362'}, {'connection_id': '3dbcfd37-248c-48e9-8f49-388879fcc74c'}
+2022-05-11 18:59:10,436 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '9e3eb938-f394-451a-a08e-34994e60490f'}, {'connection_id': 'cc319f5c-6fe6-4eaa-94a5-e14bda5522ef'}
+2022-05-11 18:59:10,445 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': '9e3eb938-f394-451a-a08e-34994e60490f'}, {'connection_id': 'cc319f5c-6fe6-4eaa-94a5-e14bda5522ef'}
+2022-05-11 18:59:10,447 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '9e3eb938-f394-451a-a08e-34994e60490f'}, {'connection_id': 'cc319f5c-6fe6-4eaa-94a5-e14bda5522ef'}
+2022-05-11 18:59:10,449 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'c624a99a-7db6-4db4-af03-768797b0f01c'}, {'connection_id': '1c256610-c594-4499-9a30-e28a60b361d7'}
+2022-05-11 18:59:10,450 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'c624a99a-7db6-4db4-af03-768797b0f01c'}, {'connection_id': '1c256610-c594-4499-9a30-e28a60b361d7'}
+2022-05-11 18:59:10,451 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'c624a99a-7db6-4db4-af03-768797b0f01c'}, {'connection_id': '1c256610-c594-4499-9a30-e28a60b361d7'}
+2022-05-11 18:59:10,475 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '56f9f73c-5bd0-411e-9086-46bb86033f01'}, {'connection_id': 'c9013c92-f14e-4daa-a97e-b1e610c31877'}
+2022-05-11 18:59:10,478 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': '56f9f73c-5bd0-411e-9086-46bb86033f01'}, {'connection_id': 'c9013c92-f14e-4daa-a97e-b1e610c31877'}
+2022-05-11 18:59:10,479 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '56f9f73c-5bd0-411e-9086-46bb86033f01'}, {'connection_id': 'c9013c92-f14e-4daa-a97e-b1e610c31877'}
+2022-05-11 18:59:10,553 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'b4bf5e8f-4dc6-401c-bc26-3cd5bb5f0088'}, {'connection_id': '58b84e31-5aac-4bd0-89ee-2a5b54628869'}
+2022-05-11 18:59:10,555 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'b4bf5e8f-4dc6-401c-bc26-3cd5bb5f0088'}, {'connection_id': '58b84e31-5aac-4bd0-89ee-2a5b54628869'}
+2022-05-11 18:59:10,556 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'b4bf5e8f-4dc6-401c-bc26-3cd5bb5f0088'}, {'connection_id': '58b84e31-5aac-4bd0-89ee-2a5b54628869'}
+2022-05-11 18:59:10,592 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'e7261328-e23c-4ad2-88a7-7734874b31c7'}, {'connection_id': 'd4f44f0a-af74-4a2d-a16d-3af38c4c6e03'}
+2022-05-11 18:59:10,594 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'e7261328-e23c-4ad2-88a7-7734874b31c7'}, {'connection_id': 'd4f44f0a-af74-4a2d-a16d-3af38c4c6e03'}
+2022-05-11 18:59:10,596 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'e7261328-e23c-4ad2-88a7-7734874b31c7'}, {'connection_id': 'd4f44f0a-af74-4a2d-a16d-3af38c4c6e03'}
+2022-05-11 18:59:10,597 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'a6499cdc-2fd3-435b-af30-1027e9ccbdd0'}, {'connection_id': '5aef0e4d-6636-4905-8b6b-22bcfb05e2ba'}
+2022-05-11 18:59:10,598 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'a6499cdc-2fd3-435b-af30-1027e9ccbdd0'}, {'connection_id': '5aef0e4d-6636-4905-8b6b-22bcfb05e2ba'}
+2022-05-11 18:59:10,599 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'a6499cdc-2fd3-435b-af30-1027e9ccbdd0'}, {'connection_id': '5aef0e4d-6636-4905-8b6b-22bcfb05e2ba'}
+2022-05-11 18:59:10,600 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '023bddcf-92ed-4900-a0af-8c44fa5b3ea2'}, {'connection_id': 'df6bd4c2-7082-4d24-bc49-cced29b17ef8'}
+2022-05-11 18:59:10,603 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': '023bddcf-92ed-4900-a0af-8c44fa5b3ea2'}, {'connection_id': 'df6bd4c2-7082-4d24-bc49-cced29b17ef8'}
+2022-05-11 18:59:10,604 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': '023bddcf-92ed-4900-a0af-8c44fa5b3ea2'}, {'connection_id': 'df6bd4c2-7082-4d24-bc49-cced29b17ef8'}
+2022-05-11 18:59:10,605 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'c86bbbaf-1ce4-4dbd-847d-ab2884655953'}, {'connection_id': 'a4676d2b-86c2-4424-ab71-385a80df4d9c'}
+2022-05-11 18:59:10,606 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'c86bbbaf-1ce4-4dbd-847d-ab2884655953'}, {'connection_id': 'a4676d2b-86c2-4424-ab71-385a80df4d9c'}
+2022-05-11 18:59:10,607 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'c86bbbaf-1ce4-4dbd-847d-ab2884655953'}, {'connection_id': 'a4676d2b-86c2-4424-ab71-385a80df4d9c'}
+2022-05-11 18:59:10,638 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 3a53c9ab-04bb-4402-aa12-827067cc51aa
+2022-05-11 18:59:10,640 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError connection record not found: 3a53c9ab-04bb-4402-aa12-827067cc51aa
+2022-05-11 18:59:10,640 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 105, in get_record
+    self._wallet.handle, record_type, record_id, options_json
+  File "/home/indy/.pyenv/versions/3.6.13/lib/python3.6/site-packages/indy/non_secrets.py", line 319, in get_wallet_record
+    get_wallet_record.cb)
+indy.error.WalletItemNotFound
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 178, in handle_message
+    inbound_message.receipt
+  File "/home/indy/aries_cloudagent/protocols/connections/v1_0/manager.py", line 1061, in find_inbound_connection
+    session, cached["id"]
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 233, in retrieve_by_id
+    cls.RECORD_TYPE, record_id, {"retrieveTags": False}
+  File "/home/indy/aries_cloudagent/storage/indy.py", line 111, in get_record
+    ) from x_indy
+aries_cloudagent.storage.error.StorageNotFoundError: connection record not found: 3a53c9ab-04bb-4402-aa12-827067cc51aa
+2022-05-11 18:59:10,642 aries_cloudagent.core.conductor ERROR Exception in message handler:
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'e013ca9e-2d1c-4d91-be4b-060b0ca9ed6e'}, {'connection_id': '08ae2079-172f-493e-a407-51419f25c6e0'}
+2022-05-11 18:59:10,644 aries_cloudagent.core.conductor ERROR DON'T shutdown on StorageNotFoundError V10PresentationExchange record not found for {'thread_id': 'e013ca9e-2d1c-4d91-be4b-060b0ca9ed6e'}, {'connection_id': '08ae2079-172f-493e-a407-51419f25c6e0'}
+2022-05-11 18:59:10,644 aries_cloudagent.core.dispatcher ERROR Handler error: Dispatcher.handle_message
+Traceback (most recent call last):
+  File "/home/indy/aries_cloudagent/core/dispatcher.py", line 197, in handle_message
+    await handler(context, responder)
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/handlers/presentation_ack_handler.py", line 37, in handle
+    context.message, context.connection_record
+  File "/home/indy/aries_cloudagent/protocols/present_proof/v1_0/manager.py", line 467, in receive_presentation_ack
+    {"connection_id": connection_record.connection_id},
+  File "/home/indy/aries_cloudagent/messaging/models/base_record.py", line 277, in retrieve_by_tag_filter
+    cls.__name__, tag_filter, f", {post_filter}" if post_filter else ""
+aries_cloudagent.storage.error.StorageNotFoundError: V10PresentationExchange record not found for {'thread_id': 'e013ca9e-2d1c-4d91-be4b-060b0ca9ed6e'}, {'connection_id': '08ae2079-172f-493e-a407-51419f25c6e0'}
