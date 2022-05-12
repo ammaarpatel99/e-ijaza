@@ -2,31 +2,51 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 13.2.0.
 
-## Development server
+## Application
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Build: `./scripts/manage app build`
+Start: `./scripts/manage app start <web-port> <aries-port> <docker-container name>`
+Stop: `./scripts/manage app stop <docker-container-name>`
+Remove: `./scripts/manage app remove <docker-container-name>`
 
-## Code scaffolding
+Rebuild on change: `./scripts/manage app rebuild`
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Development Environment
 
-## Build
+Build:
+- `./scripts/manage net build`
+- `./scripts/manage tails build`
+Start:
+- `./scripts/manage net start`
+- `./scripts/manage tails start`
+Stop:
+- `./scripts/manage net stop`
+- `./scripts/manage tails stop`
+Remove:
+- `./scripts/manage net remove`
+- `./scripts/manage tails remove`
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+The VON Network runs on `http://localhost:9000` with the Genesis URL at `http://localhost:9000/genesis`.
+The Indy Tails Server runs on `http://localhost:6543`.
+In initialisation of Applications use `host.docker.internal` instead of `localhost` to allow the contains to access each other.
 
-## Running unit tests
+## Development Application
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Set up:
+- Install NodeJS version 16.
+- Run: `npm i`
+Build: `./scripts/manage app build`
+Start: `./scripts/manage app start <web-port> <aries-port> <docker-container name> --dev <aries-admin-page-port>`
 
-## Running end-to-end tests
+The Docker image does not need rebuilding when the source code changes, unless the Dockerfile changes.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Running Tests
 
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-
-## Types from Aries
-
-openapi-typescript
+Set up:
+- Install NodeJS version 16.
+- Run: `npm i`
+- Start Development Environment.
+Run:
+- `cd test`
+- `npx ts-node ./run-tests.ts`
+More information in `./test/README.md`
